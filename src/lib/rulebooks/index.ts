@@ -7,6 +7,9 @@ import type { DimensionId, RoomType, Trade } from "../types";
 
 export type Vector = Record<DimensionId, number>;
 
+/** Bump when any mapping below changes; stored on every brief and spec line. */
+export const RULEBOOK_VERSION = "rulebook-2026.10.28";
+
 export interface RuleLine {
   id: string;
   category: string;
@@ -15,6 +18,8 @@ export interface RuleLine {
   drivers: DimensionId[];
   /** Gap between the winning option and the runner-up, 0..~2. Small = contestable. */
   margin: number;
+  /** Hard rules that bound this line's value. */
+  constraints?: string[];
 }
 
 interface Option {
@@ -82,6 +87,11 @@ function lighting(v: Vector, room: RoomType, opts: RuleOptions): RuleLine[] {
       .sort((a, b) => Math.abs(v[b]) - Math.abs(v[a]))
       .slice(0, 2),
     margin: Math.abs(net),
+    constraints: [
+      ...(opts.warmFloor ? ["warm-floor: client used a word that can mean warm light, so never cooler than 3000K ambient"] : []),
+      ...(TASK_ROOMS.includes(room) ? ["task-room: cooler task lighting allowed on work surfaces"] : []),
+      ...(floored ? ["warm-floor applied: evidence pointed cooler"] : []),
+    ],
   });
 
   // 2. Layering / distribution
@@ -143,6 +153,7 @@ function lighting(v: Vector, room: RoomType, opts: RuleOptions): RuleLine[] {
     id: "level",
     category: "Light level",
     value: `${level} (Typical ${lo}–${hi} lux for this room; confirm with a lighting calculation.)`,
+    constraints: [`room-range: ${lo}–${hi} lux for ${room.replace("_", " ")}`],
     why: "Starting target, not a calculation.",
     drivers: brightLean >= 0 ? ["bright_airy"] : ["low_glow"],
     margin: Math.abs(brightLean),

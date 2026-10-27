@@ -187,3 +187,12 @@ details summary { cursor: pointer; }
 .err { background: var(--bad-bg); color: var(--bad); border-radius: 8px; padding: 10px 12px; font-size: 14px; }
 .grid2 > .card, .grid3 > .card, .compare-cols > .card { margin-top: 0; }
 .scroll-x > .table { min-width: 620px; }
+code { overflow-wrap: anywhere; }
+li, p, td { overflow-wrap: break-word; }
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 50; background: var(--surface); color: var(--ink); padding: 8px 12px; border-radius: 8px; }
+.skip:focus { left: 16px; }
+@media print {
+  .nav, footer, .banner, .btn, button, .skip { display: none !important; }
+  body { background: #fff; color: #000; }
+  .card { box-shadow: none; border-color: #ccc; break-inside: avoid; }
+}

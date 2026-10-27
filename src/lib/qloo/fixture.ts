@@ -5,7 +5,7 @@
 // hand-written style table. The UI shows a "simulated data" banner whenever a
 // brief was produced from this transport. Never use it for a public demo.
 
-import type { Params, Transport } from "./client";
+import type { Params, RawResponse, Transport } from "./client";
 import type { DimensionId } from "../types";
 
 interface FixtureLove {
@@ -108,7 +108,7 @@ export class FixtureTransport implements Transport {
   readonly mode = "fixture" as const;
   readonly log: { path: string; params: Params }[] = [];
 
-  async get(path: string, params: Params) {
+  async get(path: string, params: Params): Promise<RawResponse> {
     this.log.push({ path, params });
     if (path === "/search") {
       const q = String(params.query ?? "").toLowerCase();
@@ -144,10 +144,12 @@ export class FixtureTransport implements Transport {
       // Real Qloo returns the top `take` of thousands of places; this world has
       // ~36, so cap at half of it to keep the taste-matched and popularity-ordered
       // sets meaningfully different, as they are in live data.
-      const cap = Math.min(take, Math.ceil(VENUE_STYLES.length / 2));
+      const cap = Math.ceil(VENUE_STYLES.length / 2);
+      const page = Math.max(1, Number(params.page ?? 1));
+      const pool = ranked.slice(0, cap);
       return {
         status: 200,
-        body: { success: true, results: { entities: ranked.slice(0, cap).map(({ v, a }) => venueEntity(v, signals.length ? a : undefined)) } },
+        body: { success: true, results: { entities: pool.slice((page - 1) * take, page * take).map(({ v, a }) => venueEntity(v, signals.length ? a : undefined)) } },
       };
     }
     return { status: 404, body: { message: `unsupported path ${path}` } };

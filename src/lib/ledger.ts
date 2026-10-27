@@ -85,15 +85,26 @@ export interface VerifyResult {
   head: string;
 }
 
-export async function verifyLedger(entries: LedgerEntry[]): Promise<VerifyResult> {
+/**
+ * Re-hash the chain. A chain on its own can't reveal that entries were cut
+ * off the end (the shorter chain is still internally valid), so pass the head
+ * hash you recorded earlier as `expectedHead` to detect truncation or
+ * extension. Without it, `ok` means "internally consistent", nothing more.
+ */
+export async function verifyLedger(entries: LedgerEntry[], expectedHead?: string): Promise<VerifyResult> {
+  if (!Array.isArray(entries)) return { ok: false, checked: 0, firstBadSeq: 0, reason: "not a ledger", head: GENESIS };
   let prev = GENESIS;
   for (let i = 0; i < entries.length; i++) {
     const e = entries[i];
+    if (!e || typeof e !== "object") return { ok: false, checked: i, firstBadSeq: i, reason: "malformed entry", head: prev };
     if (e.seq !== i) return { ok: false, checked: i, firstBadSeq: i, reason: "sequence gap or reorder", head: prev };
     if (e.prevHash !== prev) return { ok: false, checked: i, firstBadSeq: i, reason: "broken link to previous entry", head: prev };
     const expected = await sha256Hex(hashInput(e));
     if (expected !== e.hash) return { ok: false, checked: i, firstBadSeq: i, reason: "entry content was modified", head: prev };
     prev = e.hash;
+  }
+  if (expectedHead && expectedHead !== prev) {
+    return { ok: false, checked: entries.length, firstBadSeq: entries.length, reason: "head differs from the committed head: entries were removed or added at the end", head: prev };
   }
   return { ok: true, checked: entries.length, head: prev };
 }

@@ -8,15 +8,17 @@ export default function Verify() {
   const [result, setResult] = useState<VerifyResult & { label?: string }>();
   const [error, setError] = useState<string>();
   const [id, setId] = useState("");
+  const [head, setHead] = useState("");
 
   const check = async (brief: Brief, label: string) => {
     setError(undefined);
     if (!Array.isArray(brief?.ledger)) throw new Error("No ledger found in that file.");
-    setResult({ ...(await verifyLedger(brief.ledger)), label });
+    setResult({ ...(await verifyLedger(brief.ledger, head.trim() || undefined)), label });
   };
 
   const onFile = async (f: File) => {
     try {
+      if (f.size > 20 * 1024 * 1024) throw new Error("File too large.");
       const j = JSON.parse(await f.text()) as { brief?: Brief } & Brief;
       await check(j.brief ?? j, f.name);
     } catch (e) {
@@ -57,17 +59,27 @@ export default function Verify() {
           </div>
         </div>
       </div>
-      {error ? <div className="err section">{error}</div> : null}
+      <div className="card section">
+        <label className="field" style={{ margin: 0 }}>
+          <span>Optional: the head hash you recorded when the brief was shared (detects entries cut off the end)</span>
+          <input type="text" className="mono" placeholder="64 hex characters" value={head} onChange={(e) => setHead(e.target.value)} />
+        </label>
+      </div>
+      {error ? <div className="err section" role="alert">{error}</div> : null}
       {result ? (
-        <div className="card section" style={{ borderColor: result.ok ? "var(--good)" : "var(--bad)" }}>
+        <div className="card section" role="status" style={{ borderColor: result.ok ? "var(--good)" : "var(--bad)" }}>
           <h2 style={{ color: result.ok ? "var(--good)" : "var(--bad)" }}>{result.ok ? "Chain intact" : "Chain broken"}</h2>
           <p>
             {result.label}:{" "}
             {result.ok
-              ? `all ${result.checked} entries hash correctly and each links to the one before.`
+              ? `all ${result.checked} entries hash correctly and each links to the one before${head.trim() ? ", and the head matches the one you recorded" : ""}.`
               : `entry #${result.firstBadSeq} fails (${result.reason}). Everything from there on can't be trusted.`}
           </p>
           <div className="hash">head {result.head}</div>
+          <p className="small muted" style={{ marginTop: 8 }}>
+            What this proves: the record is unchanged{head.trim() ? " relative to the head you supplied" : " internally (supply a recorded head to rule out truncation)"}.
+            What it doesn&apos;t prove: that Qloo&apos;s data was accurate. Each Qloo entry carries a response hash and Qloo request id for that.
+          </p>
         </div>
       ) : null}
     </div>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getStore, type BriefSummary } from "@/lib/store";
+import { currentOwnerHash } from "@/lib/owner";
 import { ROOM_LABEL, TRADE_LABEL } from "@/lib/rulebooks";
 
 export const dynamic = "force-dynamic";
@@ -10,9 +11,12 @@ function rate(n: number, d: number) {
 
 export default async function Projects() {
   const store = getStore();
-  const briefs: BriefSummary[] = await store.list(200);
-  const live = briefs.filter((b) => b.dataMode === "live");
-  const pool = live.length ? live : briefs;
+  const owner = await currentOwnerHash();
+  // Only this browser's briefs: no visitor can list another's.
+  const briefs: BriefSummary[] = owner ? await store.list(owner, 200) : [];
+  // Metrics only count briefs with complete live evidence; fixture and fallback briefs are listed but excluded.
+  const live = briefs.filter((b) => b.dataMode === "live" && b.status !== "UPSTREAM_UNAVAILABLE" && b.status !== "INSUFFICIENT_EVIDENCE");
+  const pool = live.length ? live : briefs.filter((b) => b.status !== "UPSTREAM_UNAVAILABLE" && b.status !== "INSUFFICIENT_EVIDENCE");
   const decided = pool.reduce((a, b) => a + b.accepted + b.revised, 0);
   const accepted = pool.reduce((a, b) => a + b.accepted, 0);
   const lines = pool.reduce((a, b) => a + b.lines, 0);
@@ -27,7 +31,8 @@ export default async function Projects() {
       <p className="lede">
         Every brief, and what happened to it. The numbers that matter: how often the evidence changed the spec, how often the client accepted
         a line without revision, and how an LLM-only answer compared.
-        {store.kind === "file" ? " (Stored on this server's disk; configure KV for durable storage.)" : ""}
+        {" "}Only briefs created in this browser are listed.
+        {!store.durable ? " Storage on this deployment is not durable; configure KV (see docs/DEPLOYMENT.md)." : ""}
       </p>
       <div className="grid3 section">
         <div className="card">
@@ -48,7 +53,8 @@ export default async function Projects() {
       </div>
       <p className="small muted">
         {rated.length ? `Average outcome rating ${(rated.reduce((a, b) => a + (b.rating ?? 0), 0) / rated.length).toFixed(1)}/5 over ${rated.length} briefs.` : "No outcome ratings yet."}
-        {live.length && live.length < briefs.length ? ` Figures use the ${live.length} live-data briefs only.` : ""}
+        {live.length ? ` Figures use the ${live.length} briefs with complete live Qloo evidence.` : briefs.length ? " No live-evidence briefs yet: figures shown are from fixture (synthetic) runs." : ""}
+        {" "}Briefs that fell back to the literal reading are listed but excluded from the figures.
       </p>
       <section className="card section scroll-x">
         <table className="table">
@@ -69,7 +75,12 @@ export default async function Projects() {
               <tr key={b.id}>
                 <td>
                   <Link href={`/brief/${b.id}`}>{b.clientLabel}</Link>
-                  <div className="small muted">{new Date(b.createdAt).toLocaleString()}{b.dataMode === "fixture" ? " · simulated" : ""}</div>
+                  <div className="small muted">
+                    {new Date(b.createdAt).toLocaleString()}
+                    {b.dataMode === "fixture" ? " · FIXTURE" : " · LIVE"}
+                    {b.evidenceMode === "degraded" ? " · DEGRADED" : ""}
+                    {b.status && b.status !== "COMPLETE" ? ` · ${b.status.replace(/_/g, " ").toLowerCase()}` : ""}
+                  </div>
                 </td>
                 <td className="small">{TRADE_LABEL[b.trade]} · {ROOM_LABEL[b.room]} · {b.city}</td>
                 <td className="small"><em>{b.words.join(", ")}</em></td>

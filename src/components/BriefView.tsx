@@ -4,8 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Fingerprint } from "./Fingerprint";
+import { BasisPill, ModeBadges } from "./Badges";
+import { TracePanel } from "./TracePanel";
 import { DIMENSION_BY_ID } from "@/lib/dimensions";
 import { verifyLedger, type VerifyResult } from "@/lib/ledger";
+import { evidenceReport } from "@/lib/evidence";
 import { ROOM_LABEL, TRADE_LABEL } from "@/lib/rulebooks";
 import type { Brief, SpecLine } from "@/lib/types";
 
@@ -20,7 +23,7 @@ function pct(x: number) {
   return `${Math.round(x * 100)}%`;
 }
 
-export function BriefView({ initial, compact = false }: { initial: Brief; compact?: boolean }) {
+export function BriefView({ initial, compact = false, canEdit = false }: { initial: Brief; compact?: boolean; canEdit?: boolean }) {
   const [brief, setBrief] = useState(initial);
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -44,14 +47,23 @@ export function BriefView({ initial, compact = false }: { initial: Brief; compac
   const literalDiffs = brief.spec.filter((l) => l.value !== l.literalValue).length;
   const audit = brief.llmBaseline.audit;
   const agree = audit?.filter((a) => a.agrees).length ?? 0;
+  const fallback = brief.status === "UPSTREAM_UNAVAILABLE" || brief.status === "INSUFFICIENT_EVIDENCE";
+  const report = evidenceReport(brief);
 
   return (
     <div>
       <header>
-        <div className="eyebrow">
-          {TRADE_LABEL[brief.input.trade]} · {ROOM_LABEL[brief.input.room]} · {city}
-          {brief.dataMode === "fixture" ? " · SIMULATED DATA" : ""}
+        <div className="row" style={{ justifyContent: "space-between", marginBottom: 6 }}>
+          <div className="eyebrow" style={{ margin: 0 }}>
+            {TRADE_LABEL[brief.input.trade]} · {ROOM_LABEL[brief.input.room]} · {city}
+          </div>
+          <ModeBadges brief={brief} />
         </div>
+        {!canEdit ? (
+          <div className="banner warn" style={{ borderRadius: 8, padding: "8px 12px", marginBottom: 10 }}>
+            Read-only view. Only the designer who created this brief can record decisions or answers.
+          </div>
+        ) : null}
         <h1 style={{ fontSize: compact ? 30 : undefined }}>
           {brief.input.clientLabel} said{" "}
           {brief.input.words.map((w, i) => (
@@ -62,11 +74,21 @@ export function BriefView({ initial, compact = false }: { initial: Brief; compac
           ))}
           .
         </h1>
-        <p className="lede">
-          Taken literally, that&apos;s one room. Read through what {brief.input.clientLabel} loves, {literalDiffs} of {brief.spec.length} spec
-          lines come out differently.
-          {audit ? ` An LLM given the same words and loves, without Qloo, agreed with the evidence on ${agree} of ${audit.length}.` : ""}
-        </p>
+        {fallback ? (
+          <p className="lede">
+            {brief.status === "UPSTREAM_UNAVAILABLE"
+              ? "Qloo couldn't be reached, so this brief is the literal reading of the client's words. Nothing below is personalised."
+              : "There wasn't enough taste evidence to personalise, so the agent abstained: this brief is the literal reading of the client's words."}
+          </p>
+        ) : (
+          <p className="lede">
+            Taken literally, that&apos;s one room. Read through what {brief.input.clientLabel} loves, {literalDiffs} of {brief.spec.length} spec
+            lines come out differently: {report.counts.evidence_supported} backed by Qloo evidence, {report.counts.derived} by the client&apos;s answer
+            or a hard constraint, {report.counts.client_stated} by the client&apos;s own words
+            {report.counts.unsupported ? `, ${report.counts.unsupported} unsupported` : ""}.
+            {audit ? ` An LLM given the same words and loves, without Qloo, agreed with the evidence on ${agree} of ${audit.length}.` : ""}
+          </p>
+        )}
         {brief.warnings.map((w) => (
           <div key={w} className="err" style={{ background: "var(--warn-bg)", color: "var(--warn)", marginTop: 8 }}>
             {w}
@@ -77,18 +99,22 @@ export function BriefView({ initial, compact = false }: { initial: Brief; compac
 
       {brief.question && !brief.question.answer ? (
         <section className="card section" style={{ borderColor: "var(--accent)" }}>
-          <div className="eyebrow">One question, because the answer changes {brief.question.expectedImpact} lines</div>
+          <div className="eyebrow">
+            One question: the answer is expected to change {(brief.question.expectedChange ?? brief.question.expectedImpact).toFixed?.(1) ?? brief.question.expectedImpact} lines
+          </div>
           <h2>{brief.question.prompt}</h2>
           <p className="muted small">
-            Both are real places that people with {brief.input.clientLabel}&apos;s taste rate highly in Qloo. One reads as{" "}
+            Both are {brief.dataMode === "fixture" ? "fictional places from the synthetic fixture" : "places that Qloo ranks highly for people with this taste"}. One reads as{" "}
             {DIMENSION_BY_ID[brief.question.optionA.carries].label.toLowerCase()}, the other as{" "}
-            {DIMENSION_BY_ID[brief.question.optionB.carries].label.toLowerCase()}. The agent simulated both answers before asking.
+            {DIMENSION_BY_ID[brief.question.optionB.carries].label.toLowerCase()}. The agent simulated both answers first: they lead to{" "}
+            {brief.question.expectedImpact} different lines, and the evidence alone can&apos;t call it
+            {brief.question.entropyBits !== undefined ? ` (answer uncertainty ${brief.question.entropyBits.toFixed(2)} bits)` : ""}.
           </p>
           <div className="choice">
             {(["A", "B"] as const).map((k) => {
               const o = k === "A" ? brief.question!.optionA : brief.question!.optionB;
               return (
-                <button key={k} disabled={busy} onClick={() => act(() => post(`/api/briefs/${brief.id}/answer`, { answer: k }))}>
+                <button key={k} disabled={busy || !canEdit} onClick={() => act(() => post(`/api/briefs/${brief.id}/answer`, { answer: k }))}>
                   <b>{o.name}</b>
                   <span className="muted small">{DIMENSION_BY_ID[o.carries].label}</span>
                 </button>
@@ -96,7 +122,7 @@ export function BriefView({ initial, compact = false }: { initial: Brief; compac
             })}
           </div>
           <div style={{ marginTop: 10 }}>
-            <button className="btn sm" disabled={busy} onClick={() => act(() => post(`/api/briefs/${brief.id}/answer`, { answer: "neither" }))}>
+            <button className="btn sm" disabled={busy || !canEdit} onClick={() => act(() => post(`/api/briefs/${brief.id}/answer`, { answer: "neither" }))}>
               Neither / don&apos;t know them
             </button>
           </div>
@@ -133,7 +159,7 @@ export function BriefView({ initial, compact = false }: { initial: Brief; compac
             </thead>
             <tbody>
               {brief.spec.map((l) => (
-                <SpecRow key={l.id} line={l} briefId={brief.id} city={city} changed={changedIds.includes(l.id)} busy={busy} act={act} />
+                <SpecRow key={l.id} line={l} briefId={brief.id} city={city} changed={changedIds.includes(l.id)} busy={busy || !canEdit} act={act} />
               ))}
             </tbody>
           </table>
@@ -228,12 +254,17 @@ export function BriefView({ initial, compact = false }: { initial: Brief; compac
 
       <Resolutions brief={brief} />
       <VenueEvidence brief={brief} />
-      <Outcome brief={brief} busy={busy} act={act} />
+      {brief.trace?.length ? <TracePanel brief={brief} /> : null}
+      <Outcome brief={brief} busy={busy || !canEdit} act={act} />
       <LedgerPanel brief={brief} />
       {!compact ? (
-        <p className="small muted section">
-          Brief <code>{brief.id}</code> · <Link href="/projects">all projects</Link> · <Link href="/method">how this works</Link>
-        </p>
+        <div className="row small muted section">
+          <span>
+            Brief <code>{brief.id}</code> · rulebook <code>{brief.rulebookVersion ?? "—"}</code> · <Link href="/projects">all projects</Link> ·{" "}
+            <Link href="/method">how this works</Link> · <button className="btn sm" onClick={() => window.print()}>Print / save as PDF</button>
+          </span>
+          {canEdit ? <DeleteButton id={brief.id} /> : null}
+        </div>
       ) : null}
     </div>
   );
@@ -261,15 +292,30 @@ function SpecRow({
     <tr className={changed ? "changed" : undefined}>
       <td>
         <b>{line.category}</b>
-        <div style={{ marginTop: 4 }}>
-          <span className={`pill ${line.confidence}`}>{line.confidence}</span>
+        <div className="row" style={{ marginTop: 4, gap: 4 }}>
+          <span className={`pill ${line.confidence}`} title="How firmly the evidence pins this line down. Zero evidence is always low.">
+            {line.confidence}
+          </span>
+          {line.basis ? <BasisPill basis={line.basis} /> : null}
         </div>
       </td>
       <td>
         <div>{line.value}</div>
         <div className="muted small" style={{ marginTop: 4 }}>{line.why}</div>
+        {line.constraints?.length ? <div className="small muted" style={{ marginTop: 4 }}>Constraints: {line.constraints.join("; ")}</div> : null}
         <details style={{ marginTop: 6 }}>
-          <summary className="small">Evidence</summary>
+          <summary className="small">Evidence{line.evidenceLedger?.length ? ` · ${line.evidenceLedger.length} Qloo requests` : ""}</summary>
+          {!line.evidence.length ? <div className="small muted" style={{ marginTop: 6 }}>No Qloo evidence: this line comes from the client&apos;s words or a rule.</div> : null}
+          {line.evidenceLedger?.length ? (
+            <div className="small muted" style={{ marginTop: 6 }}>
+              From ledger entries {line.evidenceLedger.map((s) => `#${s}`).join(", ")}; signals {line.signalEntityIds.length} resolved references.
+            </div>
+          ) : null}
+          {line.history?.length ? (
+            <div className="small" style={{ marginTop: 6 }}>
+              Review history: {line.history.map((h) => `${h.status}${h.status === "revised" ? ` → ${h.value}` : ""} (${new Date(h.at).toLocaleString()})`).join(" · ")}
+            </div>
+          ) : null}
           {line.evidence.map((e) => (
             <div key={e.dimension} className="small" style={{ marginTop: 6 }}>
               <b>{DIMENSION_BY_ID[e.dimension].label}</b>: {e.crowdHits} of {e.crowdN} taste-matched places vs {e.baseHits} of {e.baseN} typical{" "}
@@ -377,8 +423,9 @@ function Resolutions({ brief }: { brief: Brief }) {
                 </td>
                 <td>
                   <span className={`pill ${r.status === "resolved" ? "high" : r.status === "ambiguous" ? "low" : "bad"}`}>
-                    {r.status === "not_found" ? "not used" : r.status}
+                    {r.status === "not_found" ? "not found" : r.status === "abstained" ? "abstained" : r.status}
                   </span>
+                  {r.confidence !== undefined ? <span className="small muted"> · confidence {Math.round(r.confidence * 100)}%</span> : null}
                   {r.note ? <div className="small muted" style={{ marginTop: 4 }}>{r.note}</div> : null}
                 </td>
                 <td>
@@ -468,6 +515,35 @@ function Outcome({ brief, busy, act }: { brief: Brief; busy: boolean; act: (fn: 
   );
 }
 
+function DeleteButton({ id }: { id: string }) {
+  const router = useRouter();
+  const [confirm, setConfirm] = useState(false);
+  const [err, setErr] = useState<string>();
+  return (
+    <span className="row">
+      {confirm ? (
+        <>
+          <span className="small">Delete this brief and its evidence for good?</span>
+          <button
+            className="btn sm"
+            onClick={async () => {
+              const res = await fetch(`/api/briefs/${id}`, { method: "DELETE" });
+              if (res.ok) router.push("/projects");
+              else setErr(((await res.json()) as { error?: string }).error ?? "Delete failed");
+            }}
+          >
+            Yes, delete
+          </button>
+          <button className="btn sm" onClick={() => setConfirm(false)}>Keep</button>
+        </>
+      ) : (
+        <button className="btn sm" onClick={() => setConfirm(true)}>Delete brief</button>
+      )}
+      {err ? <span className="small" style={{ color: "var(--bad)" }}>{err}</span> : null}
+    </span>
+  );
+}
+
 function LedgerPanel({ brief }: { brief: Brief }) {
   const [result, setResult] = useState<VerifyResult>();
   const counts = brief.ledger.reduce<Record<string, number>>((acc, e) => ({ ...acc, [e.kind]: (acc[e.kind] ?? 0) + 1 }), {});
@@ -490,10 +566,14 @@ function LedgerPanel({ brief }: { brief: Brief }) {
       {result ? (
         <div className={`err`} style={{ marginTop: 10, background: result.ok ? "var(--good-bg)" : "var(--bad-bg)", color: result.ok ? "var(--good)" : "var(--bad)" }}>
           {result.ok
-            ? `Verified: all ${result.checked} entries hash correctly and link to the one before. Head ${result.head.slice(0, 16)}…`
+            ? `Intact: all ${result.checked} entries hash correctly and link to the one before. Head ${result.head.slice(0, 16)}…`
             : `Broken at entry ${result.firstBadSeq}: ${result.reason}.`}
         </div>
       ) : null}
+      <p className="small muted" style={{ marginTop: 8 }}>
+        An intact chain proves the record hasn&apos;t been edited, reordered or truncated since the head hash was issued. It doesn&apos;t prove the
+        data is true: Qloo results are aggregate affinities, and the head hash should be compared with one recorded when the brief was shared.
+      </p>
       <details style={{ marginTop: 12 }}>
         <summary className="small">Show entries</summary>
         <div style={{ marginTop: 8 }}>

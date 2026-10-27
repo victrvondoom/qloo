@@ -181,7 +181,7 @@ describe("agent on SYNTHETIC fixture data", () => {
     const a = await runBrief(maya, (e) => events.push(e));
     const b = await runBrief(jordan, () => {});
     expect(a.dataMode).toBe("fixture");
-    expect(events.some((e) => e.type === "step" && e.id === "fingerprint" && e.status === "done")).toBe(true);
+    expect(events.some((e) => e.type === "step" && e.id === "INTERPRET" && e.status === "done")).toBe(true);
     const differing = a.spec.filter((l) => b.spec.find((m) => m.id === l.id)?.value !== l.value);
     expect(differing.length).toBeGreaterThanOrEqual(3);
     // Both share the same literal column: the words are identical.

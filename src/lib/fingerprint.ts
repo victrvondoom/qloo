@@ -85,7 +85,11 @@ export function computeDimensions(
   crowd: VenueEvidence[],
   base: VenueEvidence[],
   tasteTags: { name: string; affinity?: number }[],
+  opts: { evidenceUsable?: boolean } = {},
 ): DimensionScore[] {
+  // Invariant: without usable place evidence there is no evidence-driven
+  // personalisation at all, so scores are zero and taste tags can't nudge.
+  const usable = opts.evidenceUsable ?? true;
   return DIMENSIONS.map((d) => {
     const crowdHits = crowd.filter((v) => v.dimensions.includes(d.id)).length;
     const baseHits = base.filter((v) => v.dimensions.includes(d.id)).length;
@@ -106,28 +110,38 @@ export function computeDimensions(
       lift: stats.lift,
       pGreater: stats.pGreater,
       tasteTags: tags,
-      score: scoreFrom(stats, tags.length),
+      score: usable ? scoreFrom(stats, tags.length) : 0,
       exemplars,
     };
   });
 }
 
-/** Apply a client's answer to a clarifying question: a strong, explicit signal. */
-export function applyClientAnswer(
-  dims: DimensionScore[],
-  chosen: DimensionId,
-  rejected: DimensionId,
-): DimensionScore[] {
+/** Margin by which the chosen atmosphere must lead the rejected one after an answer. */
+export const ANSWER_MARGIN = 0.4;
+
+/**
+ * Apply a client's answer ("I'd rather be at the place that reads as X than
+ * the one that reads as Y") as the minimum change consistent with it: the
+ * ordering constraint score(X) >= score(Y) + margin. If the evidence already
+ * satisfies it, nothing moves; otherwise both scores move symmetrically about
+ * their midpoint until it holds. Other atmospheres are untouched.
+ *
+ * (An earlier version added +0.5 / −0.4 unconditionally. The benchmark showed
+ * that overshoot made answered briefs slightly *worse*: see reports/.)
+ */
+export function applyClientAnswer(dims: DimensionScore[], chosen: DimensionId, rejected: DimensionId, margin = ANSWER_MARGIN): DimensionScore[] {
+  const a = dims.find((d) => d.id === chosen);
+  const b = dims.find((d) => d.id === rejected);
+  if (!a || !b) return dims;
+  const confirmed = (d: DimensionScore) => ({ ...d, clientAdjusted: d.clientAdjusted || 1e-9 });
+  if (a.score - b.score >= margin) return dims.map((d) => (d.id === chosen || d.id === rejected ? confirmed(d) : d));
+  const mid = (a.score + b.score) / 2;
+  // Keep the target reachable inside [-1, 1] so the constraint always holds afterwards (and re-applying is a no-op).
+  const nextA = clamp(Math.max(a.score, mid + margin / 2, -1 + margin));
+  const nextB = clamp(Math.min(b.score, nextA - margin));
   return dims.map((d) => {
-    if (d.id === chosen) {
-      const target = Math.max(d.score, 0) + 0.5;
-      const next = clamp(target);
-      return { ...d, score: next, clientAdjusted: (d.clientAdjusted ?? 0) + (next - d.score) };
-    }
-    if (d.id === rejected) {
-      const next = clamp(Math.min(d.score, 0) - 0.4);
-      return { ...d, score: next, clientAdjusted: (d.clientAdjusted ?? 0) + (next - d.score) };
-    }
+    if (d.id === chosen) return { ...d, score: nextA, clientAdjusted: (d.clientAdjusted ?? 0) + (nextA - d.score) || 1e-9 };
+    if (d.id === rejected) return { ...d, score: nextB, clientAdjusted: (d.clientAdjusted ?? 0) + (nextB - d.score) || 1e-9 };
     return d;
   });
 }

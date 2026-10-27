@@ -1,20 +1,23 @@
 import { NextResponse } from "next/server";
 import { recordDecision } from "@/lib/agent";
-import { getStore } from "@/lib/store";
-import { jsonError, loadBrief } from "@/lib/http";
+import { getStore, publicView } from "@/lib/store";
+import { jsonError, loadOwnedBrief, rateLimited, readJson, WRITE_LIMIT } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const brief = await loadBrief((await params).id);
-  if (!brief) return jsonError("Brief not found.", 404);
-  const body = (await req.json().catch(() => ({}))) as { lineId?: string; status?: string; revisedTo?: string; note?: string };
-  if (!body.lineId || !["accepted", "revised", "proposed"].includes(body.status ?? "")) return jsonError("lineId and a valid status are required.");
-  if (body.status === "revised" && !body.revisedTo?.trim()) return jsonError("Say what the line was revised to.");
+  if (rateLimited(req, "write", WRITE_LIMIT)) return jsonError("Too many changes; slow down.", 429);
+  const r = await loadOwnedBrief((await params).id);
+  if (!r.ok) return r.res;
+  const body = await readJson<{ lineId?: string; status?: string; revisedTo?: string; note?: string }>(req, 4096);
+  if (!body.ok) return body.res;
+  const b = body.value;
+  if (typeof b.lineId !== "string" || !["accepted", "revised", "proposed"].includes(b.status ?? "")) return jsonError("lineId and a valid status are required.");
+  if (b.status === "revised" && !(typeof b.revisedTo === "string" && b.revisedTo.trim())) return jsonError("Say what the line was revised to.");
   try {
-    const next = await recordDecision(brief, body.lineId, body.status as "accepted" | "revised" | "proposed", body.revisedTo, body.note);
+    const next = await recordDecision(r.brief, b.lineId, b.status as "accepted" | "revised" | "proposed", b.revisedTo, typeof b.note === "string" ? b.note : undefined);
     await getStore().put(next);
-    return NextResponse.json({ brief: next });
+    return NextResponse.json({ brief: publicView(next) });
   } catch (err) {
     return jsonError(err instanceof Error ? err.message : String(err));
   }

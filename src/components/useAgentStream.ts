@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { AgentEvent, Brief, BriefInput } from "@/lib/types";
 
 export interface StepState {
@@ -10,21 +10,27 @@ export interface StepState {
   detail?: string;
 }
 
-/** POST /api/run and fold the NDJSON event stream into timeline state. */
+/** POST /api/run and fold the NDJSON event stream into timeline state. cancel() aborts the request (and the server-side run). */
 export function useAgentStream() {
   const [steps, setSteps] = useState<StepState[]>([]);
   const [brief, setBrief] = useState<Brief | undefined>();
   const [error, setError] = useState<string | undefined>();
   const [running, setRunning] = useState(false);
+  const controller = useRef<AbortController | null>(null);
+
+  const cancel = useCallback(() => controller.current?.abort(), []);
 
   const run = useCallback(async (input: BriefInput): Promise<Brief | undefined> => {
+    controller.current?.abort();
+    const ac = new AbortController();
+    controller.current = ac;
     setSteps([]);
     setBrief(undefined);
     setError(undefined);
     setRunning(true);
     let result: Brief | undefined;
     try {
-      const res = await fetch("/api/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+      const res = await fetch("/api/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input), signal: ac.signal });
       if (!res.ok || !res.body) {
         const j = await res.json().catch(() => ({}));
         throw new Error((j as { error?: string }).error ?? `Request failed (${res.status})`);
@@ -56,18 +62,21 @@ export function useAgentStream() {
             result = e.brief;
             setBrief(e.brief);
           } else if (e.type === "error") {
-            throw new Error(e.message);
+            throw new Error(e.state && e.state !== "FAILED" ? `${e.state}: ${e.message}` : e.message);
           }
         }
       }
+      if (!result) throw new Error("The run ended without a brief.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const aborted = ac.signal.aborted;
+      setError(aborted ? "Cancelled." : err instanceof Error ? err.message : String(err));
       setSteps((prev) => prev.map((s) => (s.status === "running" ? { ...s, status: "error" } : s)));
     } finally {
+      if (controller.current === ac) controller.current = null;
       setRunning(false);
     }
     return result;
   }, []);
 
-  return { steps, brief, error, running, run };
+  return { steps, brief, error, running, run, cancel };
 }

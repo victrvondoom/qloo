@@ -63,82 +63,100 @@ function compact(e: QlooEntity) {
   return { entity_id: e.entity_id, name: e.name, type: typeOf(e), popularity: e.popularity };
 }
 
-/** Similarity below this is too weak to use as a taste signal at all. */
-export const MIN_USABLE_SIMILARITY = 0.5;
+/** Non-exact matches below this similarity are not used as signals (abstain). */
+export const MIN_USABLE_SIMILARITY = 0.75;
+/** Below this, the closest match isn't even offered as "probably". */
+const MIN_PLAUSIBLE = 0.5;
+
+function base(input: string, evidence: number[]) {
+  return { input, evidence };
+}
 
 export function chooseCandidate(
   input: string,
   candidates: QlooEntity[],
-  opts: { typeHint?: string; pinnedId?: string } = {},
+  opts: { typeHint?: string; pinnedId?: string; evidence?: number[] } = {},
 ): Resolution {
   const { query } = parseLove(input);
+  const ev = opts.evidence ?? [];
   if (opts.pinnedId) {
     const pinned = candidates.find((c) => c.entity_id === opts.pinnedId);
     if (pinned) {
       return {
-        input,
+        ...base(input, ev),
         status: "resolved",
         chosen: compact(pinned),
         alternatives: candidates.filter((c) => c !== pinned).slice(0, 4).map(compact),
         similarity: similarity(query, pinned.name),
+        confidence: 1,
         method: "pinned",
+        usedAsSignal: true,
         note: "Chosen by the pro.",
       };
     }
   }
   if (candidates.length === 0) {
-    return { input, status: "not_found", alternatives: [], similarity: 0, method: "top_result", note: "Qloo has no match; not used." };
+    return { ...base(input, ev), status: "not_found", alternatives: [], similarity: 0, confidence: 0, method: "top_result", usedAsSignal: false, note: "Qloo returned no candidates; not used." };
   }
   const exact = candidates.filter((c) => normaliseName(c.name) === normaliseName(query));
   if (exact.length >= 1) {
     const ranked = [...exact].sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0));
     const chosen = ranked[0];
-    const otherTypes = new Set(ranked.slice(1).map(typeOf).filter((t) => t !== typeOf(chosen)));
+    const otherTypes = [...new Set(ranked.slice(1).map(typeOf).filter((t) => t !== typeOf(chosen)))];
+    const collision = otherTypes.length > 0;
     return {
-      input,
-      status: otherTypes.size > 0 ? "ambiguous" : "resolved",
+      ...base(input, ev),
+      status: collision ? "ambiguous" : "resolved",
       chosen: compact(chosen),
       alternatives: candidates.filter((c) => c !== chosen).slice(0, 4).map(compact),
       similarity: 1,
+      confidence: collision ? 0.6 : opts.typeHint ? 0.98 : 0.92,
       method: opts.typeHint ? "type_hint" : "exact",
-      note:
-        otherTypes.size > 0
-          ? `Same name exists as ${[...otherTypes].map((t) => t.replace("urn:entity:", "")).join(", ")}; picked the most popular. Add a hint like "(show)" or pin another.`
-          : undefined,
+      usedAsSignal: true,
+      note: collision
+        ? `Same name also exists as ${otherTypes.map((t) => t.replace("urn:entity:", "")).join(", ")}; used the most popular. Add a hint like "(show)" or pin another.`
+        : undefined,
     };
   }
   const scored = candidates
     .map((c) => ({ c, s: similarity(query, c.name) }))
     .sort((a, b) => b.s - a.s || (b.c.popularity ?? 0) - (a.c.popularity ?? 0));
   const best = scored[0];
-  if (best.s < MIN_USABLE_SIMILARITY) {
+  if (best.s >= MIN_USABLE_SIMILARITY) {
     return {
-      input,
-      status: "not_found",
-      alternatives: scored.slice(0, 4).map((x) => compact(x.c)),
+      ...base(input, ev),
+      status: best.s >= 0.9 ? "resolved" : "ambiguous",
+      chosen: compact(best.c),
+      alternatives: scored.slice(1, 5).map((x) => compact(x.c)),
       similarity: best.s,
-      method: "top_result",
-      note: `Closest match "${best.c.name}" is too different to trust; not used. Pin a candidate if it is right.`,
+      confidence: Math.min(0.9, best.s),
+      method: opts.typeHint ? "type_hint" : "top_result",
+      usedAsSignal: true,
+      note: best.s < 0.9 ? `Close but not exact match "${best.c.name}"; check it is right.` : undefined,
     };
   }
   return {
-    input,
-    status: best.s >= 0.8 ? "resolved" : "ambiguous",
-    chosen: compact(best.c),
-    alternatives: scored.slice(1, 5).map((x) => compact(x.c)),
+    ...base(input, ev),
+    status: best.s >= MIN_PLAUSIBLE ? "abstained" : "not_found",
+    alternatives: scored.slice(0, 4).map((x) => compact(x.c)),
     similarity: best.s,
-    method: opts.typeHint ? "type_hint" : "top_result",
-    note: best.s < 0.8 ? `Closest match only; check it is the right "${query}".` : undefined,
+    confidence: 0,
+    method: "top_result",
+    usedAsSignal: false,
+    note:
+      best.s >= MIN_PLAUSIBLE
+        ? `Closest match "${best.c.name}" (similarity ${best.s.toFixed(2)}) is not certain enough; not used. Pin it if it is right.`
+        : `No candidate resembles "${query}"; not used.`,
   };
 }
 
-export async function resolveLove(
-  qloo: QlooClient,
-  input: string,
-  pinnedId?: string,
-): Promise<Resolution> {
+export async function resolveLove(qloo: QlooClient, input: string, pinnedId?: string): Promise<Resolution> {
   const { query, typeHint } = parseLove(input);
-  let candidates = await qloo.search(query, { types: typeHint, take: 6 });
-  if (typeHint && candidates.length === 0) candidates = await qloo.search(query, { take: 6 });
-  return chooseCandidate(input, candidates, { typeHint, pinnedId });
+  let r = await qloo.search(query, { types: typeHint, take: 6 });
+  const evidence = [...r.evidence];
+  if (typeHint && r.value.length === 0) {
+    r = await qloo.search(query, { take: 6 });
+    evidence.push(...r.evidence);
+  }
+  return chooseCandidate(input, r.value, { typeHint, pinnedId, evidence });
 }
