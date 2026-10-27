@@ -21,7 +21,7 @@ process.env.VITEST = "1"; // keep adapter logs quiet; we print our own
 const city = process.argv.slice(2).find((a) => !a.startsWith("-")) ?? "Chicago";
 const env = envReport();
 if (env.qlooMode !== "live") {
-  console.error(`Not running: ${env.issues.join(" ") || "QLOO_MODE is fixture"}. Nothing written.`);
+  console.error(`Not running: ${env.issues.join(" ") || "QLOO_MODE is fixture."} Nothing written.`);
   process.exit(2);
 }
 

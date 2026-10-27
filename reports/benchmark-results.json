@@ -1,15 +1,15 @@
 {
   "kind": "SYNTHETIC benchmark (seeded world, not Qloo data, no human labels)",
-  "generatedAt": "2026-10-27T09:14:52.586Z",
+  "generatedAt": "2026-10-27T09:21:48.483Z",
   "environment": {
     "node": "v22.22.0",
     "platform": "linux",
-    "gitSha": "1cff3bc",
+    "gitSha": "04e5a8b",
     "seed": 20261028,
     "rulebookVersion": "rulebook-2026.10.28",
     "scenarios": 60,
     "llm": "not used",
-    "durationMs": 5721
+    "durationMs": 6298
   },
   "notMeasured": {
     "preferenceAlignmentWithHumans": "NOT MEASURED: no independent human preference labels have been collected. Protocol: docs/EVALUATION_METHODOLOGY.md.",
@@ -437,7 +437,7 @@
     "latencyMs": {
       "description": "End-to-end runBrief on the in-process synthetic transport: orchestration cost only, not network latency.",
       "p50": 25,
-      "p95": 30,
+      "p95": 39,
       "n": 56
     },
     "qlooCallsPerBrief": {
@@ -573,7 +573,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 56,
+      "ms": 46,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -657,7 +657,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 43,
+      "ms": 26,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -742,7 +742,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 28,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -826,7 +826,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 25,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -898,7 +898,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 37,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -970,7 +970,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 25,
+      "ms": 39,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1055,7 +1055,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 42,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1140,7 +1140,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 27,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1234,7 +1234,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 25,
+      "ms": 28,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1319,7 +1319,7 @@
         "natural_organic",
         "calm_quiet"
       ],
-      "ms": 25,
+      "ms": 26,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1391,7 +1391,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 23,
+      "ms": 22,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1463,7 +1463,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 24,
+      "ms": 30,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1547,7 +1547,7 @@
         "natural_organic",
         "calm_quiet"
       ],
-      "ms": 25,
+      "ms": 29,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1641,7 +1641,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 28,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1725,7 +1725,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 26,
+      "ms": 28,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1809,7 +1809,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 24,
+      "ms": 26,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1973,7 +1973,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 26,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2057,7 +2057,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 24,
+      "ms": 29,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2142,7 +2142,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 22,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2215,7 +2215,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 22,
+      "ms": 21,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2299,7 +2299,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 22,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2385,7 +2385,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 22,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2470,7 +2470,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 21,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2555,7 +2555,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 22,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2627,7 +2627,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 22,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2712,7 +2712,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 23,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2806,7 +2806,7 @@
         "natural_organic",
         "calm_quiet"
       ],
-      "ms": 23,
+      "ms": 28,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2878,7 +2878,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3046,7 +3046,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 20,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3118,7 +3118,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 20,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3203,7 +3203,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 25,
+      "ms": 26,
       "status": "COMPLETE",
       "qlooAttempts": 9,
       "qlooRetries": 0,
@@ -3287,7 +3287,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 24,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 9,
       "qlooRetries": 0,
@@ -3373,7 +3373,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 23,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 9,
       "qlooRetries": 0,
@@ -3459,7 +3459,7 @@
         "calm_quiet",
         "low_glow"
       ],
-      "ms": 22,
+      "ms": 35,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3564,7 +3564,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 28,
+      "ms": 34,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3669,7 +3669,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 30,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3773,7 +3773,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 22,
+      "ms": 30,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3879,7 +3879,7 @@
         "industrial_raw",
         "low_glow"
       ],
-      "ms": 23,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3971,7 +3971,7 @@
           "cri": "CRI 90+."
         }
       },
-      "ms": 2,
+      "ms": 3,
       "status": "INSUFFICIENT_EVIDENCE",
       "qlooAttempts": 2,
       "qlooRetries": 0,
@@ -4233,7 +4233,7 @@
         "low_glow",
         "bright_airy"
       ],
-      "ms": 24,
+      "ms": 23,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4327,7 +4327,7 @@
         "natural_organic",
         "industrial_raw"
       ],
-      "ms": 24,
+      "ms": 25,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4420,7 +4420,7 @@
         "low_glow",
         "energetic_social"
       ],
-      "ms": 24,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4505,7 +4505,7 @@
         "low_glow",
         "bright_airy"
       ],
-      "ms": 26,
+      "ms": 28,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4590,7 +4590,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 25,
+      "ms": 29,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4676,7 +4676,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 26,
+      "ms": 33,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4761,7 +4761,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 24,
+      "ms": 39,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4847,7 +4847,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 26,
+      "ms": 36,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -4932,7 +4932,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 27,
+      "ms": 35,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -5027,7 +5027,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 24,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -5112,7 +5112,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 23,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -5208,7 +5208,7 @@
         "low_glow",
         "vintage_character"
       ],
-      "ms": 25,
+      "ms": 22,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -5292,7 +5292,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 25,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -5363,7 +5363,7 @@
           "cri": "CRI 90+."
         }
       },
-      "ms": 856,
+      "ms": 830,
       "status": "UPSTREAM_UNAVAILABLE",
       "qlooAttempts": 6,
       "qlooRetries": 2,
@@ -5430,7 +5430,7 @@
           "cri": "CRI 90+."
         }
       },
-      "ms": 1578,
+      "ms": 1605,
       "status": "UPSTREAM_UNAVAILABLE",
       "qlooAttempts": 9,
       "qlooRetries": 6,
@@ -5510,7 +5510,7 @@
         "natural_organic",
         "calm_quiet"
       ],
-      "ms": 74,
+      "ms": 78,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 9,
       "qlooRetries": 1,
@@ -5604,7 +5604,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 1690,
+      "ms": 2136,
       "status": "COMPLETE",
       "qlooAttempts": 12,
       "qlooRetries": 4,

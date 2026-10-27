@@ -1,43 +1,45 @@
 # Submission kit
 
-## Devpost text (paste and adjust after you've run it live)
+## Devpost description (edit the status lines once the live probe and deployment are done)
 
 **Tastespec: "warm and modern" isn't a spec.**
 
-Electricians, lighting designers and decorators get briefs like "warm, modern, cozy". Each of those words has several professional meanings: "warm" can mean 2700K light, oak and linen, a lived-in room, or a sociable one. Pros guess, build, and find out at the walkthrough. A chatbot that only hears the words gives everyone who says them the same answer.
+Interior designers and lighting pros get briefs like "warm, modern, cozy". Each word has several professional meanings ("warm" can mean 2700K light, oak and linen, a lived-in room, or a sociable one), and pros find out which one the client meant at the walkthrough. A chatbot that only hears the words gives everyone who says them the same room.
 
-Tastespec asks the client something they *can* answer: what they love. Bands, shows, hotels, brands. Then it uses Qloo to find the places people with that taste choose to spend their evenings in, in the client's own city, and compares those rooms with what's typical there. Over-represented atmospheres (low and intimate, clean and minimal, natural, vintage…) say what the client's words actually mean. A deterministic rulebook turns that into a buildable spec: colour temperature, layering, fixture character, dimming, light level, optics, colour rendering (or palette, materials, metals and textiles for finishes).
+Tastespec asks clients what they can answer: what they love. Bands, shows, hotels, brands. It resolves them in Qloo, pulls the places people with that taste choose in the client's city, and compares them with the city's typical places. The atmospheres that are over-represented (low glow, clean and minimal, vintage character…) say what the client's words mean. A versioned rulebook turns that into a buildable lighting or finishes spec, with hard constraints the evidence can't override.
 
-What makes it agentic: it decides which Qloo entity each love means and drops weak matches; it widens the search when a city has too little evidence; it decides how to read each word; and it decides whether to ask the client one question by simulating both possible answers and asking only if two or more spec lines depend on it. The question names two real places from the client's own taste neighbourhood.
+It's an agent with real decisions, all recorded: it abstains on references it can't identify, widens the search when a city is thin, falls back to the literal reading when evidence is insufficient or Qloo is down (and says so), and asks one question only when the answer is uncertain and would change the spec. Every Qloo call, decision and answer goes into a hash-chained ledger, and every spec line is classified as evidence-supported, derived, client-stated or unsupported.
 
-What makes it Qloo-powered: `/search` for entity resolution, `/v2/insights` on places with taste signals and a location filter, the same query without signals as a city baseline, and `urn:tag` insights for cross-domain mood. Without Qloo, there's no taste neighbourhood and no baseline, so nothing to measure against.
+We tested it against baselines on a seeded synthetic world (60 scenarios, 4 seeds): literal reading, Qloo evidence alone, Tastespec, and ablations. Tastespec matched the synthetic clients' known taste far better than the literal reading (0.76–0.88 vs 0.39). Evidence alone broke the client's stated constraint in 23–43% of warm briefs; Tastespec in none. We also report what didn't hold up: the clarifying question has no measurable accuracy gain yet.
 
-Evidence, not vibes: two clients with identical words get different specs, and the "if taken literally" column is identical for both. With no evidence the spec equals the literal reading (tested invariant), so every difference is attributable to Qloo data. An optional counter-test gives Claude the same words, loves and menu without Qloo and reports agreement line by line. Every Qloo call, decision, model call and client answer goes into a SHA-256 hash-chained ledger that anyone can verify in the browser.
+Try the Proof Lab: run two clients with identical words, then press "Without Qloo" and watch the difference vanish; change one favourite; or try to break the agent with ambiguous, conflicting, empty or failing inputs.
 
-Pros track what happens next: accept or revise each line, record an outcome rating, and see across projects how often evidence changed the spec and how often clients accepted it without revision.
+## 3-minute demo
 
-## 3-minute live demo script
-
-1. **0:00** Home. One sentence: "Clients say warm and modern. That's not a spec."
-2. **0:15** Same words test → Run both briefs. Narrate the timeline while it runs (resolving loves, taste-matched places in Chicago, city baseline, decoding words).
-3. **0:45** Point at the result line ("N of 7 lines differ") and the identical literal column at the bottom.
-4. **1:15** Open Maya's brief. Show "warm" decoded with its readings, then the fingerprint with counts on hover.
-5. **1:45** Answer the question. Show the highlighted lines that changed.
-6. **2:15** Counter-test card: what Claude alone picked, where it differs.
-7. **2:35** Verify chain → green. "Every Qloo call that produced this spec is in here."
-8. **2:50** Close: "The team that proved 'warm and modern' means two different rooms."
+1. **0:00** Proof Lab. "Clients say warm and modern. That's not a spec."
+2. **0:15** Run Maya vs Jordan. Narrate the timeline.
+3. **0:45** "6 of 7 lines differ." Press **Without Qloo**: "0 of 7". "Every difference was Qloo's."
+4. **1:15** Point at the basis labels: Qloo evidence vs hard constraint (Jordan's 3000K floor).
+5. **1:40** Challenges: simulated outage → degrade; unknown refs → abstain.
+6. **2:15** Open a brief: trace, ledger, verify. "Here's every request that produced this line."
+7. **2:40** Benchmark table: "And here's when it helps, and where it doesn't yet."
 
 ## Questions judges are likely to ask
 
-- **"Why not just give Claude the list of loves?"** We do, as the counter-test, and show where it agrees and disagrees. An LLM reasons from stereotypes about famous names; it doesn't know which rooms in Chicago that audience actually chooses or how that compares with the city. And it can't show counts.
-- **"Isn't the lexicon hand-written?"** Yes, deliberately: it's nine atmospheres with readable term lists on the Method page, so every count is auditable. The statistics (Beta lift, posterior probability) are what make it a measurement rather than a keyword match.
-- **"What if Qloo has little data for a city?"** The agent widens scope in two steps, records why, and warns that the evidence is thin.
-- **"Who pays?"** Pros who lose margin to revision rounds and change orders: lighting designers, electricians doing design-and-install, decorators, fit-out firms. Per-brief or per-seat.
-- **"What's measured?"** Per brief: lines changed by evidence vs. literal, LLM-only agreement, line acceptance without revision, outcome rating. Aggregated on Projects.
+- **"Why not give Claude the loves?"** We do (the B1 counter-test, same menu, no Qloo), line by line. An LLM reasons from stereotypes about famous names; it doesn't know which rooms in Chicago that audience chooses, or how that compares with the city, and can't show counts.
+- **"Isn't your benchmark circular?"** Partly, and we say so: the oracle uses our rulebook, so it measures taste recovery through the mapping, not design quality. Human preference is the missing piece; the protocol is in the methodology doc.
+- **"What if Qloo has nothing for a city?"** Widen with a warning; if still too little, abstain to the literal reading.
+- **"Does the question help?"** Not measurably yet. The benchmark found our first version made results worse; we fixed that and stopped over-asking, but the gain isn't significant.
+- **"Who pays?"** Independent designers and lighting pros who lose margin to revision rounds. We haven't measured time saved and don't claim to.
 
-## Before submitting
+## Release gates
 
-- [ ] Deploy with a live `QLOO_API_KEY` and KV storage; run `npm run probe` against the key first.
-- [ ] Run the Same words test on the live deployment. If the default presets resolve badly (check the resolution table), adjust the loves in `src/components/presets.ts`.
-- [ ] Make sure `QLOO_MODE` is **not** set to `fixture` on the public deployment.
-- [ ] Repo public, LICENSE visible in the About panel.
+| Gate | Requirement | Status |
+|---|---|---|
+| A Correctness | Invariants verified, no fabricated evidence, abstention | **Pass**: 64 unit/property/adversarial tests, 0 invariant violations in 240 benchmark runs |
+| B Qloo | Live integration tested, provenance intact | **Not verified**: needs a key and network; run `npm run probe` |
+| C Evaluation | Reproducible baselines, honest limits | **Pass (synthetic only)**: B1 needs a Claude key; no human study |
+| D Product | Brief → spec → review → export, persistent, accessible, deployed | **Partial**: workflow complete, 20/20 e2e; deployment and KV not verified |
+| E Submission | Public repo, license, live demo, setup, description | **Partial**: license + docs done; repo visibility and live URL are owner actions |
+
+Before submitting: set `QLOO_API_KEY`, run the probe and commit `reports/qloo-live-probe.json`; deploy with KV (`docs/DEPLOYMENT.md`); run the Proof Lab on the live URL; make the repo public.

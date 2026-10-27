@@ -75,6 +75,26 @@ Flow: intake → resolve loves (`/search`) → crowd places (`/v2/insights` plac
 - That `filter.location.query` accepts a plain city name for places.
 - That `/search` without `types` returns mixed entity types.
 
+## Resolution (commit `04e5a8b` and later)
+
+| # | Defect | Resolution | Verified by |
+|---|---|---|---|
+| 1 | Outage disguised as thin evidence | `UPSTREAM_UNAVAILABLE` / `INSUFFICIENT_EVIDENCE` terminal outcomes; literal fallback; DEGRADED badge | `tests/hardening.test.ts`, benchmark failure scenarios 4/4 |
+| 2 | Confidence not tied to evidence | Evidence-gated confidence; fallback lines always low | property test P1 |
+| 3 | `take=50` unverified | Pages of 20 with `page`; partial pages flagged | `hardening.test.ts` pagination |
+| 4 | No access control | Owner-scoped list/write/delete; 96-bit ids; owner hash never returned | `tamper.test.ts`, e2e 403 checks |
+| 5 | Non-durable storage | KV support; `durable` reported by health and Projects | `docs/DEPLOYMENT.md` (owner action) |
+| 6 | Weak retry policy | Mirrors Qloo's client: 3 attempts, Retry-After, jitter, deadline, abort, 5 MB cap, request ids | `hardening.test.ts` |
+| 7 | Tag-only personalisation | No scoring when evidence unusable | P1, `hardening.test.ts` sparse |
+| 8 | Lines not linked to sources | `evidenceLedger`, `signalEntityIds`, `constraints`, `basis`, `rulebookVersion`, evidence report | `tamper.test.ts` citation checks |
+| 9 | Question ignored answer likelihood | Expected-change + entropy criterion | `hardening.test.ts`, benchmark (22 → 9 questions) |
+| 10 | Model JSON trusted | Re-validated against the menu / dimension ids | code review (`llm.ts`) |
+| 11 | "Real places" copy in fixture mode | Mode-aware copy | e2e fixture checks |
+| 12 | Per-instance limits | Documented in `docs/SECURITY.md` | n/a |
+| 13 | No lint / e2e / benchmark | Added | `npm run lint`, `test:e2e`, `benchmark` |
+
+Found during this pass by the benchmark and property tests, and fixed: input order changed results (signals now sorted); the answer update overshot and made answered briefs worse (now a minimum-change ordering constraint); that update wasn't idempotent near the −1 bound; long code strings overflowed the Method page on mobile.
+
 ## Execution plan (ordered)
 
 1. Qloo adapter: pagination at ≤20 per page, Qloo-client retry policy with jitter and `Retry-After`, per-attempt timeout, run deadline, abort propagation, request-id capture, size cap, env validation, explicit `live` / `fixture` / `degraded` provenance. Probe script that writes a sanitised `reports/qloo-live-probe.json`.

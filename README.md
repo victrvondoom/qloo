@@ -2,111 +2,83 @@
 
 **Clients say "warm and modern". Tastespec finds out what they mean.**
 
-A Qloo-powered agent for the people who build rooms (electricians, lighting designers, decorators, restaurant fit-out teams). It reads what a client *loves* through Qloo's taste graph, looks at the real places people with that taste choose to spend their evenings in, and turns the client's vague words into a spec a pro can build. Every line is traced to evidence in a hash-chained ledger.
+A Qloo-powered agent for independent interior designers and lighting professionals. It reads what a client *loves* through Qloo's taste graph, measures which kinds of rooms people with that taste choose compared with what's typical in the client's city, and turns the client's vague words into a constraint-safe spec a pro can build. Every line says where it came from.
 
 > Built for the Qloo Agentic Hackathon ("Agents, but with taste"). MIT licensed.
 
----
+## Status, honestly
 
-## The hidden problem
+| | |
+|---|---|
+| Qloo integration | Adapter built to the documented contract and unit-tested. **Live calls not yet verified**: the build environment had no key and its proxy blocks Qloo. Run `npm run probe -- Chicago` with a key. |
+| Benchmark | Measured on a seeded **synthetic** world (60 scenarios, 4 seeds). Not real clients, not real Qloo data. See `reports/benchmark-summary.md`. |
+| Human preference study | Not run. Protocol in `docs/EVALUATION_METHODOLOGY.md`. |
+| Tests | 64 unit/property/adversarial tests, 20 end-to-end browser checks (fixture mode). |
+| Deployment | Not verified from this workspace. Steps: `docs/DEPLOYMENT.md`. |
 
-Every taste agent assumes the user's words carry their preferences. In design work they don't. *Warm*, *modern*, *cozy* and *clean* are the words clients use most and the ones that tell a pro least. "Warm" can mean 2700K light, oak and linen, a lived-in room, or a sociable one. The pro guesses, builds, and finds out at the walkthrough. A chatbot that only hears the words gives everyone who says them the same answer.
+## The problem inside the problem
 
-Clients can't describe rooms, but they can easily name the bands, shows, hotels and brands they love. **Qloo knows which places people with that taste choose. Places are rooms, and their tags say what those rooms are like.** That's the bridge from cultural taste to a physical spec.
+Taste agents assume the user's words carry their preferences. In design work they don't: *warm*, *modern*, *cozy* and *clean* each have several professional meanings ("warm" can mean 2700K light, oak and linen, a lived-in room, or a sociable one). The pro guesses and finds out at the walkthrough. Clients can't describe rooms, but they can name the bands, shows, hotels and brands they love, and **Qloo knows which places people with that taste choose. Places are rooms.**
 
-## The 60-second demo
+## What it does
 
-1. Open **Same words test** and press **Run both briefs**. Maya and Jordan both ask for a "warm, modern" living room.
-2. Watch each agent work: resolving their loves in Qloo, pulling taste-matched places in Chicago, comparing them with what's typical there, decoding the words.
-3. Result: most spec lines differ between them, while the "if you only listened to the words" column is identical for both. Every difference comes from Qloo data.
-4. Open a brief. Answer the one question the agent decided was worth asking (two real places from the client's own taste neighbourhood), and watch the spec lines it predicted would change, change.
-5. Press **Verify chain in your browser**, or download the evidence bundle, edit any number, and upload it at **/verify** to watch the chain break.
+1. **Resolves** each reference with `GET /search`. Weak matches are abstained on, never silently used; same-name collisions are flagged; the pro can pin a candidate.
+2. **Fetches evidence** with `GET /v2/insights`: places for the client's taste neighbourhood in their city, the city's places with no taste signal (the baseline), and cross-domain taste tags.
+3. **Measures** which atmospheres (low glow, clean & minimal, vintage character …) are over-represented, as a Beta-posterior lift with a probability attached.
+4. **Decodes the words**: picks the reading of each word that the evidence supports.
+5. **Builds the spec** from a versioned rulebook, with hard constraints the evidence can't override (a client who said "warm" never gets light cooler than 3000K).
+6. **Asks one question** only when the answer is uncertain and expected to change the spec.
+7. **Abstains or degrades** visibly: no usable evidence → literal reading, no personalisation; Qloo down → `UPSTREAM_UNAVAILABLE`.
+8. **Records everything** in a SHA-256 hash-chained ledger and a decision trace, and classifies every line as evidence-supported, derived, client-stated or unsupported.
 
-## What makes it Qloo-powered (and not an LLM wrapper)
+## What the synthetic benchmark shows
 
-| Step | Qloo call | Why it needs Qloo |
+Headline seed (`reports/benchmark-summary.md`), agreement with a synthetic oracle that applies the same rulebook to each client's known latent taste:
+
+| System | Agreement (95% CI) | Warm-light violations |
 |---|---|---|
-| Resolve loves | `GET /search` (typed when hinted) | Turns "The Bear (show)" into an entity. Same-name entities of different types are flagged. Weak matches are dropped, not used. |
-| Taste neighbourhood | `GET /v2/insights` `filter.type=urn:entity:place` + `signal.interests.entities` + `filter.location.query` | The places people with this taste actually choose, in the client's city. No LLM has this. |
-| City baseline | Same query, no taste signal | What's typical there, so the fingerprint measures *this client's* taste, not the city's. |
-| Cross-domain tags | `filter.type=urn:tag` + same signals | Mood descriptors from music, film and books that can nudge an atmosphere. |
+| B0 literal words only | 0.39 [0.32, 0.46] | 0% |
+| B2 Qloo evidence only | 0.78 [0.73, 0.83] | 26% |
+| **B3 Tastespec** | **0.88 [0.84, 0.91]** | **0%** |
+| B4b without the city baseline | 0.73 [0.68, 0.79] | 0% |
 
-The model never sets a spec value. Deterministic rulebooks do, so the same evidence always gives the same spec, and each line names what drove it.
+Across four seeds: B3 0.76–0.88 vs B0 0.39; evidence alone breaks the warm-light constraint in 23–43% of warm briefs, Tastespec in 0%. Entity accuracy 22/22, correct abstention 3/3, failure handling 4/4, evidence completeness 100%, invariant violations 0. **Not shown:** that the clarifying question improves accuracy (gain −0.07 to +0.04, CIs span zero), or anything about real clients. Details: `docs/EVALUATION_METHODOLOGY.md`.
 
-**Counter-test, built in:** when a Claude key is set, the agent also gives Claude the same words, the same loves and the same menu of options, with no Qloo data, and reports agreement line by line. **Invariant, tested:** with zero evidence the spec equals the literal reading, so every difference between those two columns is attributable to Qloo.
+## Try it (judges)
 
-## How it works
-
-```
-loves ──/search──▶ entities ──┐
-                              ├─/v2/insights place + signals + city──▶ crowd (top 50)
-city ─────────────────────────┤─/v2/insights place + city──────────▶ baseline (top 50)
-                              └─/v2/insights urn:tag + signals──────▶ taste tags
-crowd, baseline ──lexicon──▶ per-place atmospheres (9)
-                 ──Beta(1,1) lift + P(crowd > base)──▶ atmosphere fingerprint
-words ──lexicon readings × exp(2·score)──▶ what each word means for this client
-fingerprint + decoded words ──rulebook──▶ spec lines (+ literal column, + evidence)
-spec ──simulate both answers per contrast──▶ ask one question only if ≥2 lines depend on it
-every step ──SHA-256 chain──▶ evidence ledger
-```
-
-Agent decisions the user can see in the timeline and the ledger:
-
-- **Entity safety:** which candidate a love means; drop matches under 0.5 similarity rather than poison the signal; flag same-name collisions.
-- **Evidence sufficiency:** if fewer than 12 tagged places come back for the city, widen to a location signal, then to no location limit, and warn.
-- **Word meaning:** pick the reading of each vague word that the evidence supports. Guard: a client who said a word that can mean warm light never gets light cooler than 3000K. Evidence chooses between a word's meanings; it doesn't overrule the word.
-- **Whether to ask:** simulate both answers to every contrast pair, rebuild the spec under each, and ask only about the pair that moves the most lines, using two real places the client might know.
-
-Full detail, formulas and the lexicons are on the in-app **Method** page.
+1. **Proof Lab** (`/lab`): run Maya vs Jordan (same words, different loves); press **Without Qloo** to recompute from words alone; change one favourite; run the five challenges (ambiguous, conflicting, no evidence, hard constraint, simulated outage); inspect any brief.
+2. Open a brief: basis and confidence on every line, the execution trace, the ledger. Press **Verify chain**, or download the bundle, edit it and upload it at `/verify`.
+3. `/method` explains the pipeline and prints the lexicons.
 
 ## Run it
 
 ```bash
-npm install
-cp .env.example .env.local        # add QLOO_API_KEY (and optionally ANTHROPIC_API_KEY)
-npm run probe -- Chicago          # smoke-test the key against the hackathon API
-npm run dev                       # http://localhost:3000
-npm test                          # engine tests (synthetic fixture, no network)
+npm ci
+cp .env.example .env.local           # QLOO_API_KEY (required), ANTHROPIC_API_KEY (optional)
+npm run probe -- Chicago             # live check → reports/qloo-live-probe.json
+npm run dev
 ```
 
-| Variable | Required | Purpose |
-|---|---|---|
-| `QLOO_API_KEY` | yes | Qloo hackathon key, sent as `X-Api-Key` from the server only, never logged. |
-| `QLOO_BASE_URL` | no | Defaults to `https://hackathon.api.qloo.com` (hackathon keys only work there). |
-| `ANTHROPIC_API_KEY` | no | Enables the LLM-only counter-test, the client note and unfamiliar-word mapping. |
-| `ANTHROPIC_MODEL` | no | Defaults to `claude-opus-5-5`. |
-| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | no | Upstash Redis / Vercel KV for durable briefs and project tracking. Without them, briefs go to `.data/` (ephemeral on serverless). |
-| `QLOO_MODE=fixture` | no | Synthetic data for tests and UI work. The UI shows a "Simulated data" banner. Never use for a public demo. |
-| `TASTESPEC_RUNS_PER_10_MIN` | no | Per-IP limit on new briefs (default 12) to protect the Qloo quota. |
+Offline, synthetic: `QLOO_MODE=fixture npm run dev` (every page is labelled FIXTURE).
 
-### Deploy (Vercel)
+| Command | What it runs |
+|---|---|
+| `npm run typecheck` | TypeScript |
+| `npm run lint` | ESLint (Next config) |
+| `npm test` | Unit, property, adversarial and tamper tests (Vitest) |
+| `npm run build` | Production build |
+| `npm run test:e2e` | Browser tests against the build in fixture mode (Playwright + Chromium) |
+| `npm run benchmark` | Synthetic benchmark → `reports/` (`-- --seed=N`, `-- --with-llm`) |
+| `npm run probe -- City` | Live Qloo probe (needs a key) |
+| `npm run verify` | All of the above except the probe |
 
-1. Import the repo in Vercel (framework: Next.js, no build settings needed).
-2. Add `QLOO_API_KEY` (and optionally `ANTHROPIC_API_KEY`).
-3. Add an Upstash Redis integration from the Vercel marketplace so `KV_REST_API_URL` / `KV_REST_API_TOKEN` are set; without it, saved briefs don't survive between serverless instances.
-4. Deploy, then run the Same words test once to check it end to end.
+## Documentation
 
-## Project layout
+`docs/ARCHITECTURE.md` · `docs/QLOO_INTEGRATION.md` · `docs/EVIDENCE_MODEL.md` · `docs/EVALUATION_METHODOLOGY.md` · `docs/SECURITY.md` · `docs/DEPLOYMENT.md` · `docs/ENGINEERING_AUDIT.md` · `docs/SUBMISSION.md`
 
-```
-src/lib/agent.ts          the agent: steps, decisions, streaming, re-scoring
-src/lib/qloo/client.ts    Qloo client: GET + X-Api-Key, tolerant parsing, retry, ledgering
-src/lib/resolve.ts        entity resolution with type hints, similarity floor, pinning
-src/lib/fingerprint.ts    venue classification, Beta lift, scoring, client-answer update
-src/lib/dimensions.ts     the nine atmospheres and their lexicons
-src/lib/words.ts          client-word lexicon and evidence-weighted decoding
-src/lib/rulebooks/        lighting and finishes rulebooks
-src/lib/spec.ts           spec assembly, literal counterfactual, question planner
-src/lib/ledger.ts         SHA-256 hash chain (WebCrypto: same code verifies in the browser)
-src/lib/llm.ts            optional Claude calls, all JSON-schema constrained
-src/app/                  pages and API routes
-tests/engine.test.ts      engine tests incl. the zero-evidence invariant
-scripts/probe-qloo.mjs    live key smoke test
-```
+## Limits
 
-## Limits, plainly
-
-- Qloo affinities describe aggregate tastes of people who like the same things. They are not facts about the client.
-- The fingerprint depends on the tags and keywords Qloo returns for places; thin cities get a warning and a wider search.
+- Qloo affinities describe aggregate tastes of people who like the same things, not facts about the client.
+- The fingerprint depends on the tags and keywords Qloo returns for places, which only a live probe can confirm.
 - Light levels are typical starting ranges, not a lighting calculation.
-- Only the names of public things a client loves and a city are sent to Qloo. No personal data.
+- Only public names of things a client loves and a city are sent to Qloo.
