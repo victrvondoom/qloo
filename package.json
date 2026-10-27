@@ -1,0 +1,31 @@
+{
+  "name": "tastespec",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Clients say 'warm and modern'. Tastespec finds out what they mean, using Qloo's taste graph, and turns it into a spec a pro can build, with every line traced to evidence.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "probe": "node scripts/probe-qloo.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
+    "next": "^16.4.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
+  }
+}
