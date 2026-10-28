@@ -1,6 +1,6 @@
 # Benchmark summary
 
-> **SYNTHETIC benchmark (seeded world, not Qloo data, no human labels).** Generated 2026-10-27T09:21:48.483Z · commit `04e5a8b` · seed 20261028 · 60 scenarios · rulebook-2026.10.28 · LLM: not used.
+> **SYNTHETIC benchmark (seeded world, not Qloo data, no human labels).** Generated 2026-10-28T15:08:09.788Z · commit `3facf09` · seed 20261028 · 60 scenarios · rulebook-2026.10.28 · LLM: not used.
 > These numbers test the pipeline's inference, abstention, constraints and reliability on synthetic data. They are **not** evidence that real clients prefer Tastespec's output: that needs human labels and live Qloo data, which have not been collected (see `docs/EVALUATION_METHODOLOGY.md`).
 
 ## Spec agreement with the synthetic oracle
@@ -35,7 +35,7 @@ The oracle applies the same rulebook to the synthetic client's latent taste, so 
 | Normal scenarios completed without error | 1.00 [0.94, 1.00] (n=56) |
 | Evidence completeness (lines with full provenance) | 1.00 [0.99, 1.00] (n=400) |
 | Invariant violations | 0 |
-| Orchestration latency p50 / p95 (synthetic transport) | 25 / 39 ms |
+| Orchestration latency p50 / p95 (synthetic transport) | 27 / 41 ms |
 | Qloo calls per brief p50 / p95 / max | 8 / 9 / 12 |
 
 ## Personalisation sensitivity (same words, different taste)

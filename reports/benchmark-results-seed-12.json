@@ -1,15 +1,15 @@
 {
   "kind": "SYNTHETIC benchmark (seeded world, not Qloo data, no human labels)",
-  "generatedAt": "2026-10-27T09:22:52.515Z",
+  "generatedAt": "2026-10-28T15:09:15.052Z",
   "environment": {
     "node": "v22.22.0",
     "platform": "linux",
-    "gitSha": "04e5a8b",
+    "gitSha": "3facf09",
     "seed": 12,
     "rulebookVersion": "rulebook-2026.10.28",
     "scenarios": 60,
     "llm": "not used",
-    "durationMs": 6577
+    "durationMs": 6913
   },
   "notMeasured": {
     "preferenceAlignmentWithHumans": "NOT MEASURED: no independent human preference labels have been collected. Protocol: docs/EVALUATION_METHODOLOGY.md.",
@@ -436,7 +436,7 @@
     },
     "latencyMs": {
       "description": "End-to-end runBrief on the in-process synthetic transport: orchestration cost only, not network latency.",
-      "p50": 25,
+      "p50": 30,
       "p95": 39,
       "n": 56
     },
@@ -573,7 +573,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 48,
+      "ms": 57,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -658,7 +658,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 28,
+      "ms": 30,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -743,7 +743,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 31,
+      "ms": 29,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -828,7 +828,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 26,
+      "ms": 34,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -900,7 +900,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 24,
+      "ms": 33,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -972,7 +972,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 23,
+      "ms": 30,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1057,7 +1057,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 23,
+      "ms": 30,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1142,7 +1142,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 34,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1236,7 +1236,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 25,
+      "ms": 38,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1321,7 +1321,7 @@
         "natural_organic",
         "calm_quiet"
       ],
-      "ms": 33,
+      "ms": 37,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1393,7 +1393,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 24,
+      "ms": 36,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1465,7 +1465,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1549,7 +1549,7 @@
         "natural_organic",
         "calm_quiet"
       ],
-      "ms": 21,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1633,7 +1633,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 23,
+      "ms": 34,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1717,7 +1717,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 26,
+      "ms": 39,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1801,7 +1801,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 23,
+      "ms": 34,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1875,7 +1875,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 23,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1947,7 +1947,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2031,7 +2031,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 22,
+      "ms": 29,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2116,7 +2116,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 23,
+      "ms": 28,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2189,7 +2189,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 26,
+      "ms": 30,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2273,7 +2273,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 40,
+      "ms": 42,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2359,7 +2359,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 24,
+      "ms": 38,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2444,7 +2444,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 24,
+      "ms": 34,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2529,7 +2529,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 26,
+      "ms": 28,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2601,7 +2601,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 26,
+      "ms": 37,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2686,7 +2686,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 24,
+      "ms": 33,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2780,7 +2780,7 @@
         "natural_organic",
         "calm_quiet"
       ],
-      "ms": 23,
+      "ms": 32,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2852,7 +2852,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 29,
+      "ms": 35,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2936,7 +2936,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 24,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3020,7 +3020,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 27,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3092,7 +3092,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 33,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3176,7 +3176,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 19,
+      "ms": 15,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 6,
       "qlooRetries": 0,
@@ -3271,7 +3271,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 13,
+      "ms": 14,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 6,
       "qlooRetries": 0,
@@ -3461,7 +3461,7 @@
         "calm_quiet",
         "low_glow"
       ],
-      "ms": 31,
+      "ms": 33,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3566,7 +3566,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 28,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3671,7 +3671,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 30,
+      "ms": 32,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3776,7 +3776,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 33,
+      "ms": 26,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3882,7 +3882,7 @@
         "industrial_raw",
         "low_glow"
       ],
-      "ms": 24,
+      "ms": 29,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -4057,7 +4057,7 @@
           "cri": "CRI 90+."
         }
       },
-      "ms": 3,
+      "ms": 2,
       "status": "INSUFFICIENT_EVIDENCE",
       "qlooAttempts": 2,
       "qlooRetries": 0,
@@ -4140,7 +4140,7 @@
           "cri": "CRI 90+."
         }
       },
-      "ms": 2,
+      "ms": 4,
       "status": "INSUFFICIENT_EVIDENCE",
       "qlooAttempts": 2,
       "qlooRetries": 0,
@@ -4236,7 +4236,7 @@
         "low_glow",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 29,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4322,7 +4322,7 @@
         "natural_organic",
         "industrial_raw"
       ],
-      "ms": 32,
+      "ms": 36,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4406,7 +4406,7 @@
         "low_glow",
         "energetic_social"
       ],
-      "ms": 29,
+      "ms": 37,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4491,7 +4491,7 @@
         "low_glow",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 37,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4586,7 +4586,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 22,
+      "ms": 37,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4672,7 +4672,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 22,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4757,7 +4757,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 21,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4843,7 +4843,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 23,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -4929,7 +4929,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 33,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -5015,7 +5015,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 33,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -5100,7 +5100,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 23,
+      "ms": 33,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -5196,7 +5196,7 @@
         "low_glow",
         "vintage_character"
       ],
-      "ms": 35,
+      "ms": 30,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -5280,7 +5280,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 39,
+      "ms": 37,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -5351,7 +5351,7 @@
           "cri": "CRI 90+."
         }
       },
-      "ms": 1546,
+      "ms": 1389,
       "status": "UPSTREAM_UNAVAILABLE",
       "qlooAttempts": 6,
       "qlooRetries": 2,
@@ -5418,7 +5418,7 @@
           "cri": "CRI 90+."
         }
       },
-      "ms": 1702,
+      "ms": 1374,
       "status": "UPSTREAM_UNAVAILABLE",
       "qlooAttempts": 9,
       "qlooRetries": 6,
@@ -5498,7 +5498,7 @@
         "natural_organic",
         "calm_quiet"
       ],
-      "ms": 75,
+      "ms": 87,
       "status": "COMPLETE",
       "qlooAttempts": 9,
       "qlooRetries": 1,
@@ -5582,7 +5582,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 1678,
+      "ms": 2210,
       "status": "COMPLETE",
       "qlooAttempts": 12,
       "qlooRetries": 4,
