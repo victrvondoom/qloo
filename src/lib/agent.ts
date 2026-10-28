@@ -14,7 +14,10 @@
 // call, decision and model call also goes into the hash-chained ledger.
 
 import { Ledger } from "./ledger";
-import { computeDimensions, classifyVenue, hasText, applyClientAnswer } from "./fingerprint";
+import { computeDimensions, classifyVenue, hasText, unmatchedTerms } from "./fingerprint";
+import { buildTasteGraph, type GraphSource } from "./graph";
+import { mainDepthLayer } from "./depth";
+import { auditBaseline, rebuild } from "./refine";
 import { DIMENSION_BY_ID } from "./dimensions";
 import { envReport, log } from "./env";
 import { HttpTransport, QlooClient, QlooError, SimulatedOutageTransport, type Params, type Transport } from "./qloo/client";
@@ -30,6 +33,7 @@ import type {
   Brief,
   BriefInput,
   DecodedWord,
+  DimensionId,
   DimensionScore,
   LlmBaseline,
   QlooEntity,
@@ -69,7 +73,14 @@ export interface RunOptions {
   /** Skip the clarifying question (B4 ablation). */
   noQuestion?: boolean;
   ownerHash?: string;
+  /**
+   * Maps place tags/keywords the lexicon missed onto atmospheres (a model when a
+   * key is set). Returns only terms it could map. Undefined = lexicon only.
+   */
+  tagMapper?: TagMapper;
 }
+
+export type TagMapper = (terms: string[], signal?: AbortSignal) => Promise<{ model: string; mapped: Record<string, DimensionId[]> }>;
 
 export function makeTransport(challenge?: BriefInput["challenge"]): Transport {
   const env = envReport();
@@ -78,6 +89,14 @@ export function makeTransport(challenge?: BriefInput["challenge"]): Transport {
   else if (env.qlooMode === "live") t = new HttpTransport(process.env.QLOO_API_KEY!, env.qlooBaseUrl);
   else throw new AgentError("FAILED", `Qloo is not configured: ${env.issues.join(" ")} (Set QLOO_MODE=fixture for synthetic test data.)`);
   return challenge === "upstream_down" ? new SimulatedOutageTransport(t) : t;
+}
+
+/** Follow-up Qloo calls on an existing brief use the data source it was made with. */
+export function transportForBrief(brief: Pick<Brief, "dataMode">): Transport {
+  if (brief.dataMode === "fixture") return new FixtureTransport();
+  const env = envReport();
+  if (env.qlooMode !== "live") throw new AgentError("FAILED", "This brief was made with live Qloo data, but this server isn't configured for live Qloo.");
+  return new HttpTransport(process.env.QLOO_API_KEY!, env.qlooBaseUrl);
 }
 
 export function newId(): string {
@@ -119,6 +138,8 @@ export function cleanInput(raw: Partial<BriefInput>): BriefInput {
     loves: [...new Set(loves)],
     pinned: Object.keys(pinned).length ? pinned : undefined,
     challenge: raw.challenge === "upstream_down" ? "upstream_down" : "none",
+    project: text(raw.project, 60) || undefined,
+    sourceText: typeof raw.sourceText === "string" && raw.sourceText.trim() ? raw.sourceText.replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, " ").trim().slice(0, 4000) : undefined,
   };
 }
 
@@ -198,17 +219,6 @@ class Run {
 
 function isUpstream(err: unknown): err is QlooError {
   return err instanceof QlooError && UPSTREAM_KINDS.has(err.kind);
-}
-
-function auditBaseline(baseline: LlmBaseline, spec: Brief["spec"]): LlmBaseline {
-  if (!baseline.lines) return baseline;
-  return {
-    ...baseline,
-    audit: baseline.lines.map((l) => {
-      const line = spec.find((s) => s.category === l.category);
-      return { category: l.category, llmValue: l.value, evidenceValue: line?.value ?? "", agrees: line?.value === l.value };
-    }),
-  };
 }
 
 function rescorer(words: string[], cache: Map<string, DecodedWord["readings"]>) {
@@ -299,6 +309,10 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
 
   let status: RunStatus = "COMPLETE";
   let upstreamReason = "";
+  let tagMap: Brief["tagMap"];
+  // The agent's only working state is this graph; it's streamed as it grows.
+  const gs: GraphSource = { input };
+  const emitGraph = () => emit({ type: "graph", graph: buildTasteGraph(gs) });
 
   // RESOLVE_ENTITIES
   const resolutions = await run.step(
@@ -349,11 +363,14 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
   );
   // Canonical order (sorted, de-duplicated) so the order a client lists things in can't change the evidence.
   const signalIds = [...new Set(resolutions.filter((r) => r.usedAsSignal).map((r) => r.chosen!.entity_id))].sort();
+  gs.resolutions = resolutions;
+  emitGraph();
 
   // FETCH_QLOO
   let crowd: VenueEvidence[] = [];
   let base: VenueEvidence[] = [];
   let tasteTags: { name: string; affinity?: number }[] = [];
+  let evidenceScope: Brief["scope"];
   const evidenceLedger: number[] = [];
   if (status === "COMPLETE") {
     await run.step(
@@ -362,10 +379,10 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
       `Finding the rooms people with this taste choose in ${input.city}`,
       { signals: signalIds, city: input.city },
       async () => {
-        const scopes: { label: string; crowd: Params; base: Params }[] = [
-          { label: `within ${input.city}`, crowd: { "filter.type": PLACE, "signal.interests.entities": signalIds, "filter.location.query": input.city }, base: { "filter.type": PLACE, "filter.location.query": input.city } },
-          { label: `weighted toward ${input.city}`, crowd: { "filter.type": PLACE, "signal.interests.entities": signalIds, "signal.location.query": input.city }, base: { "filter.type": PLACE, "signal.location.query": input.city } },
-          { label: "with no location limit", crowd: { "filter.type": PLACE, "signal.interests.entities": signalIds }, base: { "filter.type": PLACE, "signal.location.query": input.city } },
+        const scopes: { id: NonNullable<Brief["scope"]>; label: string; crowd: Params; base: Params }[] = [
+          { id: "city", label: `within ${input.city}`, crowd: { "filter.type": PLACE, "signal.interests.entities": signalIds, "filter.location.query": input.city }, base: { "filter.type": PLACE, "filter.location.query": input.city } },
+          { id: "weighted", label: `weighted toward ${input.city}`, crowd: { "filter.type": PLACE, "signal.interests.entities": signalIds, "signal.location.query": input.city }, base: { "filter.type": PLACE, "signal.location.query": input.city } },
+          { id: "global", label: "with no location limit", crowd: { "filter.type": PLACE, "signal.interests.entities": signalIds }, base: { "filter.type": PLACE, "signal.location.query": input.city } },
         ];
         let crowdRaw: QlooEntity[] = [];
         let scope = scopes[0];
@@ -401,7 +418,9 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
           }
         }
         // A loved place can't be evidence for itself.
-        crowd = crowdRaw.filter((e) => hasText(e) && !signalIds.includes(e.entity_id)).map(classifyVenue);
+        const crowdEntities = crowdRaw.filter((e) => hasText(e) && !signalIds.includes(e.entity_id));
+        let baseEntities: QlooEntity[] = [];
+        evidenceScope = scope.id;
         if (scope !== scopes[0]) warnings.push(`${input.city} had too few matching places, so the evidence comes from places ${scope.label}. Local taste may differ.`);
 
         const [baseR, tagsR] = await Promise.allSettled([
@@ -410,7 +429,7 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
         ]);
         if (baseR.status === "fulfilled") {
           evidenceLedger.push(...baseR.value.evidence);
-          base = baseR.value.value.filter(hasText).map(classifyVenue);
+          baseEntities = baseR.value.value.filter(hasText);
           if (baseR.value.partial) degraded = true;
         } else {
           if (baseR.reason instanceof QlooError && baseR.reason.kind === "cancelled") throw baseR.reason;
@@ -427,6 +446,27 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
           notes.push("taste tags unavailable");
           warnings.push("Qloo taste tags were unavailable; the fingerprint uses places only.");
         }
+
+        // Terms the lexicon can't read: optionally ask a model to map them (cached, labelled "mapped").
+        let mapped: Record<string, DimensionId[]> | undefined;
+        if (opts.tagMapper && status === "COMPLETE") {
+          const terms = unmatchedTerms([...crowdEntities, ...baseEntities]);
+          if (terms.length) {
+            try {
+              const r = await opts.tagMapper(terms, opts.signal);
+              mapped = r.mapped;
+              tagMap = r;
+              const e = await ledger.append("llm_call", `Mapped ${Object.keys(r.mapped).length} of ${terms.length} unread place terms onto atmospheres`, { model: r.model, asked: terms.length, mapped: r.mapped });
+              evidenceLedger.push(e.seq);
+            } catch (err) {
+              await ledger.append("llm_call", "Place-term mapping failed; lexicon only", { error: String(err).slice(0, 200) });
+            }
+          }
+        }
+        crowd = crowdEntities.map((e) => classifyVenue(e, mapped));
+        base = baseEntities.map((e) => classifyVenue(e, mapped));
+        gs.crowdVenues = crowd;
+        emitGraph();
         return {
           value: undefined,
           decision: status === "UPSTREAM_UNAVAILABLE" ? "upstream unavailable" : `crowd ${crowd.length}, baseline ${base.length}, tags ${tasteTags.length} (${scope.label})`,
@@ -506,6 +546,9 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
       detail: evidenceUsable ? top.map((d) => `${DIMENSION_BY_ID[d.id].short} ×${d.lift.toFixed(1)}`).join(", ") : "Literal reading only",
     };
   });
+  gs.dimensions = dims;
+  gs.words = words;
+  emitGraph();
 
   // CHECK_CONSTRAINTS
   await run.step("CHECK_CONSTRAINTS", "constraints", "Applying hard constraints", {}, async () => {
@@ -558,6 +601,9 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
     status = "NEEDS_CLARIFICATION";
     run.state = "CLARIFY_IF_NEEDED";
   }
+  gs.spec = spec;
+  gs.question = question;
+  emitGraph();
 
   // COUNTER_TEST (+ optional client note)
   const { baseline, narrative } = await run.step("COUNTER_TEST", useLlm ? `llm:${llmModel()}` : "none", "Auditing an LLM-only answer against the evidence", {}, async () => {
@@ -623,6 +669,11 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
       totalMs: 0,
     },
     ledger: [],
+    tasteTags,
+    ...(evidenceScope ? { scope: evidenceScope } : {}),
+    ...(tagMap ? { tagMap } : {}),
+    depth: evidenceUsable ? [mainDepthLayer(crowd, base, dims, evidenceLedger)] : [],
+    appliedDepth: 0,
   };
 
   // VALIDATE
@@ -644,32 +695,21 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
   return brief;
 }
 
-/** Apply the client's answer: no new Qloo calls, just an explicit signal. */
-export async function answerQuestion(brief: Brief, answer: "A" | "B" | "neither"): Promise<Brief> {
+/**
+ * Apply the client's answer: no new Qloo calls, just an explicit signal. The
+ * answer is applied on top of the raw evidence for the depth the spec uses.
+ */
+export async function answerQuestion(brief: Brief, answer: "A" | "B" | "neither", via: "designer" | "client" = "designer"): Promise<Brief> {
   if (!brief.question) throw new Error("This brief has no question.");
   if (brief.question.answer) throw new Error("The question was already answered.");
   const ledger = new Ledger(brief.ledger);
   const q = brief.question;
-  let dims = brief.dimensions;
-  if (answer !== "neither") {
-    const chosen = answer === "A" ? q.optionA : q.optionB;
-    const rejected = answer === "A" ? q.optionB : q.optionA;
-    dims = applyClientAnswer(dims, chosen.carries, rejected.carries);
-  }
-  const a = await ledger.append("client_input", `Client answered: ${answer === "neither" ? "neither" : answer === "A" ? q.optionA.name : q.optionB.name}`, { answer, contrast: [q.dimension, q.versus] });
-  const cache = new Map<string, DecodedWord["readings"]>();
-  for (const w of brief.words) if (w.source === "llm") cache.set(normaliseWord(w.word), w.readings);
-  const words = rescorer(brief.input.words, cache)(dims);
-  const evidenceLedger = brief.spec.find((l) => l.evidenceLedger.length)?.evidenceLedger ?? [];
-  const spec = buildSpec(brief.input.trade, brief.input.room, dims, words, brief.input.words, brief.spec, {
-    evidenceUsable: true,
-    evidenceLedger: [...evidenceLedger, a.seq],
-    signalEntityIds: brief.resolutions.filter((r) => r.usedAsSignal).map((r) => r.chosen!.entity_id),
-  });
-  const changed = spec.filter((l) => brief.spec.find((p) => p.id === l.id)?.value !== l.value).map((l) => l.category);
+  const picked = answer === "neither" ? "neither" : answer === "A" ? q.optionA.name : q.optionB.name;
+  const a = await ledger.append("client_input", `Client answered${via === "client" ? " on their link" : ""}: ${picked}`, { answer, contrast: [q.dimension, q.versus], via });
+  const { dims, words, spec, changed } = rebuild(brief, brief.appliedDepth ?? 0, answer, [a.seq]);
   await ledger.append("computation", "Re-scored after client answer", {
     dimensions: dims.filter((d) => d.clientAdjusted).map((d) => ({ id: d.id, score: +d.score.toFixed(3), adjusted: +(d.clientAdjusted ?? 0).toFixed(3) })),
-    changedLines: changed,
+    changedLines: changed.map((l) => l.category),
   });
   return {
     ...brief,

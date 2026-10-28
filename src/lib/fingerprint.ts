@@ -13,15 +13,26 @@
 import { DIMENSIONS, DIMENSION_BY_ID, matchMoodText, matchVenueText } from "./dimensions";
 import type { DimensionId, DimensionScore, QlooEntity, VenueEvidence } from "./types";
 
-export function classifyVenue(e: QlooEntity): VenueEvidence {
+/** Every tag name and keyword a place carries, lower-cased (the terms a mapper may be asked about). */
+export function venueTerms(e: QlooEntity): string[] {
+  return [...e.tags.map((t) => t.name), ...e.keywords].map((t) => t.toLowerCase().trim()).filter(Boolean);
+}
+
+/**
+ * Read a place against the lexicon. `mapped` adds model-mapped terms the
+ * lexicon missed; those matches are labelled source "mapped" so they stay
+ * distinguishable from direct lexicon hits.
+ */
+export function classifyVenue(e: QlooEntity, mapped?: Record<string, DimensionId[]>): VenueEvidence {
   const matches: VenueEvidence["matches"] = [];
   const seen = new Set<DimensionId>();
-  const sources: { text: string; source: "tag" | "keyword" | "category" }[] = [
+  const sources: { text: string; raw: string; source: "tag" | "keyword" | "category" }[] = [
     ...e.tags.map((t) => ({
       text: `${t.name} ${t.tag_id.split(":").at(-1) ?? ""}`,
+      raw: t.name,
       source: (t.tag_id.includes(":category:") || t.tag_id.includes(":genre:") ? "category" : "tag") as "tag" | "category",
     })),
-    ...e.keywords.map((k) => ({ text: k, source: "keyword" as const })),
+    ...e.keywords.map((k) => ({ text: k, raw: k, source: "keyword" as const })),
   ];
   for (const s of sources) {
     for (const hit of matchVenueText(s.text)) {
@@ -30,14 +41,37 @@ export function classifyVenue(e: QlooEntity): VenueEvidence {
       matches.push({ dimension: hit.dimension, term: hit.term, source: s.source });
     }
   }
+  if (mapped) {
+    for (const s of sources) {
+      for (const dim of mapped[s.raw.toLowerCase().trim()] ?? []) {
+        if (seen.has(dim)) continue;
+        seen.add(dim);
+        matches.push({ dimension: dim, term: s.raw, source: "mapped" });
+      }
+    }
+  }
+  const city = typeof e.properties.city === "string" ? e.properties.city : undefined;
   return {
     entity_id: e.entity_id,
     name: e.name,
     affinity: e.affinity,
     popularity: e.popularity,
+    ...(city ? { city } : {}),
     dimensions: [...seen],
     matches,
   };
+}
+
+/** Terms on these places that the lexicon couldn't read, most frequent first. */
+export function unmatchedTerms(entities: QlooEntity[], limit = 120): string[] {
+  const counts = new Map<string, number>();
+  for (const e of entities) {
+    for (const t of venueTerms(e)) {
+      if (t.length < 3 || t.length > 60 || matchVenueText(t).length) continue;
+      counts.set(t, (counts.get(t) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit).map(([t]) => t);
 }
 
 export function hasText(e: QlooEntity): boolean {

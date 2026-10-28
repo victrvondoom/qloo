@@ -1,11 +1,18 @@
 // SYNTHETIC fixture transport — NOT Qloo data.
 //
-// Used by the test suite and for UI work without a key (QLOO_MODE=fixture).
-// Venues are fictional, ids start with "FIX-", affinities are computed from a
-// hand-written style table. The UI shows a "simulated data" banner whenever a
-// brief was produced from this transport. Never use it for a public demo.
+// Used by the test suite and for offline demos (QLOO_MODE=fixture). Places are
+// fictional, ids start with "FIX-", and every taste association below is
+// invented for testing. The UI labels any brief produced from this transport
+// FIXTURE · synthetic. Never present it as Qloo data.
+//
+// The world: 36 hand-written places in Chicago plus ~160 generated ones across
+// five cities, each with 0–2 atmospheres expressed through tags and keywords,
+// and a popularity in 0..1. Like the real API, a query returns only the top
+// slice of a much larger pool, honours filter.location.query (hard) and
+// signal.location.query (soft), and filter.popularity.max.
 
 import type { Params, RawResponse, Transport } from "./client";
+import { DIMENSIONS } from "../dimensions";
 import type { DimensionId } from "../types";
 
 interface FixtureLove {
@@ -16,21 +23,52 @@ interface FixtureLove {
   prefers: DimensionId[];
 }
 
+const love = (key: string, name: string, type: string, popularity: number, prefers: DimensionId[]): FixtureLove => ({ id: `FIX-L-${key}`, name, type: `urn:entity:${type}`, popularity, prefers });
+
 const LOVES: FixtureLove[] = [
-  { id: "FIX-L-khruangbin", name: "Khruangbin", type: "urn:entity:artist", popularity: 0.93, prefers: ["vintage_character", "low_glow", "natural_organic"] },
-  { id: "FIX-L-thebear", name: "The Bear", type: "urn:entity:tv_show", popularity: 0.95, prefers: ["vintage_character", "energetic_social", "industrial_raw"] },
-  { id: "FIX-L-thebear-film", name: "The Bear", type: "urn:entity:movie", popularity: 0.41, prefers: ["natural_organic"] },
-  { id: "FIX-L-wesanderson", name: "Wes Anderson", type: "urn:entity:person", popularity: 0.94, prefers: ["vintage_character", "refined_luxe"] },
-  { id: "FIX-L-acehotel", name: "Ace Hotel", type: "urn:entity:place", popularity: 0.82, prefers: ["vintage_character", "low_glow", "energetic_social"] },
-  { id: "FIX-L-aesop", name: "Aesop", type: "urn:entity:brand", popularity: 0.86, prefers: ["natural_organic", "clean_minimal", "low_glow"] },
-  { id: "FIX-L-fredagain", name: "Fred again..", type: "urn:entity:artist", popularity: 0.92, prefers: ["clean_minimal", "energetic_social", "bright_airy"] },
-  { id: "FIX-L-severance", name: "Severance", type: "urn:entity:tv_show", popularity: 0.94, prefers: ["clean_minimal", "calm_quiet"] },
-  { id: "FIX-L-muji", name: "MUJI", type: "urn:entity:brand", popularity: 0.88, prefers: ["clean_minimal", "natural_organic", "bright_airy", "calm_quiet"] },
-  { id: "FIX-L-kinfolk", name: "Kinfolk", type: "urn:entity:brand", popularity: 0.7, prefers: ["natural_organic", "bright_airy", "calm_quiet"] },
-  { id: "FIX-L-norah", name: "Norah Jones", type: "urn:entity:artist", popularity: 0.9, prefers: ["low_glow", "calm_quiet", "vintage_character"] },
+  love("khruangbin", "Khruangbin", "artist", 0.93, ["vintage_character", "low_glow", "natural_organic"]),
+  love("thebear", "The Bear", "tv_show", 0.95, ["vintage_character", "energetic_social", "industrial_raw"]),
+  love("thebear-film", "The Bear", "movie", 0.41, ["natural_organic"]),
+  love("wesanderson", "Wes Anderson", "person", 0.94, ["vintage_character", "refined_luxe"]),
+  love("acehotel", "Ace Hotel", "place", 0.82, ["vintage_character", "low_glow", "energetic_social"]),
+  love("aesop", "Aesop", "brand", 0.86, ["natural_organic", "clean_minimal", "low_glow"]),
+  love("fredagain", "Fred again..", "artist", 0.92, ["clean_minimal", "energetic_social", "bright_airy"]),
+  love("severance", "Severance", "tv_show", 0.94, ["clean_minimal", "calm_quiet"]),
+  love("muji", "MUJI", "brand", 0.88, ["clean_minimal", "natural_organic", "bright_airy", "calm_quiet"]),
+  love("kinfolk", "Kinfolk", "brand", 0.7, ["natural_organic", "bright_airy", "calm_quiet"]),
+  love("norah", "Norah Jones", "artist", 0.9, ["low_glow", "calm_quiet", "vintage_character"]),
+  love("bluebottle", "Blue Bottle Coffee", "brand", 0.84, ["clean_minimal", "bright_airy"]),
+  love("kendrick", "Kendrick Lamar", "artist", 0.97, ["energetic_social", "industrial_raw"]),
+  love("boniver", "Bon Iver", "artist", 0.88, ["natural_organic", "calm_quiet", "low_glow"]),
+  love("radiohead", "Radiohead", "artist", 0.93, ["low_glow", "clean_minimal"]),
+  love("fleetwoodmac", "Fleetwood Mac", "artist", 0.95, ["vintage_character", "bright_airy"]),
+  love("daftpunk", "Daft Punk", "artist", 0.94, ["energetic_social", "clean_minimal"]),
+  love("ghibli", "Studio Ghibli", "brand", 0.95, ["natural_organic", "vintage_character", "calm_quiet"]),
+  love("sofiacoppola", "Sofia Coppola", "person", 0.86, ["refined_luxe", "calm_quiet", "bright_airy"]),
+  love("wongkarwai", "Wong Kar-wai", "person", 0.84, ["low_glow", "vintage_character", "refined_luxe"]),
+  love("whitelotus", "The White Lotus", "tv_show", 0.93, ["refined_luxe", "bright_airy"]),
+  love("succession", "Succession", "tv_show", 0.95, ["refined_luxe", "clean_minimal"]),
+  love("chefstable", "Chef's Table", "tv_show", 0.85, ["refined_luxe", "natural_organic"]),
+  love("bourdain", "Anthony Bourdain", "person", 0.9, ["vintage_character", "industrial_raw", "energetic_social"]),
+  love("lelabo", "Le Labo", "brand", 0.8, ["industrial_raw", "natural_organic", "clean_minimal"]),
+  love("sohohouse", "Soho House", "place", 0.83, ["refined_luxe", "vintage_character", "low_glow"]),
+  love("ottolenghi", "Ottolenghi", "person", 0.82, ["natural_organic", "bright_airy", "energetic_social"]),
+  love("buenavista", "Buena Vista Social Club", "artist", 0.86, ["vintage_character", "energetic_social", "low_glow"]),
+  love("badbunny", "Bad Bunny", "artist", 0.97, ["energetic_social", "bright_airy"]),
+  love("fridakahlo", "Frida Kahlo", "person", 0.9, ["vintage_character", "natural_organic", "energetic_social"]),
+  love("patagonia", "Patagonia", "brand", 0.9, ["natural_organic", "industrial_raw"]),
 ];
 
-const VENUE_STYLES: { name: string; dims: DimensionId[]; tags: string[]; keywords: string[]; popularity: number }[] = [
+interface Venue {
+  name: string;
+  city: string;
+  dims: DimensionId[];
+  tags: string[];
+  keywords: string[];
+  popularity: number;
+}
+
+const HANDWRITTEN: Omit<Venue, "city">[] = [
   { name: "Ember Room", dims: ["low_glow", "vintage_character"], tags: ["Cocktail Bar"], keywords: ["dimly lit", "art deco", "intimate"], popularity: 0.62 },
   { name: "Velvet Ledger", dims: ["low_glow", "refined_luxe"], tags: ["Wine Bar"], keywords: ["candlelit", "elegant"], popularity: 0.55 },
   { name: "Saint Olive", dims: ["low_glow", "natural_organic"], tags: ["Wine Bar"], keywords: ["natural wine", "cozy"], popularity: 0.48 },
@@ -69,6 +107,70 @@ const VENUE_STYLES: { name: string; dims: DimensionId[]; tags: string[]; keyword
   { name: "Neon Arcade Bar", dims: ["energetic_social", "vintage_character"], tags: ["Bar"], keywords: ["retro", "lively"], popularity: 0.65 },
 ];
 
+const NAME_PARTS: Record<DimensionId, [string[], string[]]> = {
+  low_glow: [["Ember", "Lantern", "Amber", "Candle", "Dusk", "Midnight", "Sable", "Umber"], ["Room", "Lounge", "Parlour", "Den", "Bar"]],
+  bright_airy: [["Skylight", "Morning", "Linen", "Daylight", "Meadow", "Saltwater", "Clearwater", "Sunday"], ["Café", "Kitchen", "Bakery", "Deck", "House"]],
+  clean_minimal: [["Plane", "Line", "Arc", "Grid", "Form", "Field", "Mono", "Axis"], ["Studio", "Counter", "Gallery", "Bar", "Coffee"]],
+  vintage_character: [["Holloway", "Pembroke", "Winslow", "Hatch", "Crown", "Old Fox", "Marigold", "Bellwether"], ["Tavern", "Diner", "Records", "Hall", "Pub"]],
+  industrial_raw: [["Rivet", "Forge", "Mill", "Dock", "Gauge", "Anvil", "Boiler", "Freight"], ["Taproom", "Works", "Yard", "Brewing", "Hall"]],
+  natural_organic: [["Fern", "Juniper", "Clover", "Sorrel", "Moss", "Thyme", "Birch", "Sage"], ["Table", "Kitchen", "Garden", "Café", "House"]],
+  refined_luxe: [["Gilded", "Astor", "Belvedere", "Sterling", "Regent", "Ivory", "Laurent", "Marlowe"], ["Bar", "Room", "Club", "Salon", "Grill"]],
+  energetic_social: [["Neon", "Riot", "Disco", "Hi-Fi", "Boom", "Velour", "Lucky", "Fever"], ["Club", "Social", "Hall", "Karaoke", "Bar"]],
+  calm_quiet: [["Hush", "Haven", "Slow", "Pause", "Tide", "Still", "Lull", "Quietude"], ["Tea Room", "Books", "Spa", "Reading Room", "Café"]],
+};
+
+const CITIES: [string, number][] = [
+  ["Chicago", 24],
+  ["Austin", 34],
+  ["London", 34],
+  ["Brooklyn", 34],
+  ["Los Angeles", 34],
+];
+
+function rng(seed: number) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function generateWorld(): Venue[] {
+  const r = rng(20261028);
+  const pick = <T,>(xs: T[]) => xs[Math.floor(r() * xs.length)];
+  const venues: Venue[] = HANDWRITTEN.map((v) => ({ ...v, city: "Chicago" }));
+  const used = new Set(venues.map((v) => v.name));
+  for (const [city, n] of CITIES) {
+    for (let i = 0; i < n; i++) {
+      const first = pick(DIMENSIONS).id;
+      const dims: DimensionId[] = [first];
+      if (r() < 0.55) {
+        const second = pick(DIMENSIONS.filter((d) => d.id !== first && d.id !== DIMENSIONS.find((x) => x.id === first)!.opposite)).id;
+        dims.push(second);
+      }
+      const [adj, noun] = NAME_PARTS[first];
+      let name = `${pick(adj)} ${pick(noun)}`;
+      for (let k = 2; used.has(name); k++) name = `${pick(adj)} ${pick(noun)}${k > 4 ? ` ${k}` : ""}`;
+      used.add(name);
+      const terms = dims.map((d) => pick(DIMENSIONS.find((x) => x.id === d)!.venueTerms));
+      venues.push({
+        name,
+        city,
+        dims,
+        tags: [NAME_PARTS[first][1].includes(name.split(" ").at(-1)!) ? name.split(" ").at(-1)! : "Restaurant"],
+        keywords: [...terms, pick(["reservations", "good value", "walk-ins", "takeout"])],
+        popularity: Math.round((0.15 + r() * 0.8) * 100) / 100,
+      });
+    }
+  }
+  return venues;
+}
+
+const WORLD = generateWorld();
+
 const MOOD_TAGS: Record<DimensionId, string[]> = {
   low_glow: ["moody", "atmospheric"],
   bright_airy: ["upbeat", "sunny"],
@@ -85,15 +187,15 @@ function slug(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "_");
 }
 
-function venueEntity(v: (typeof VENUE_STYLES)[number], affinity?: number) {
+function venueEntity(v: Venue, affinity?: number) {
   return {
-    entity_id: `FIX-P-${slug(v.name)}`,
+    entity_id: `FIX-P-${slug(`${v.name}-${v.city}`)}`,
     name: v.name,
     type: "urn:entity:place",
     types: ["urn:entity:place"],
     popularity: v.popularity,
     tags: v.tags.map((t) => ({ tag_id: `urn:tag:genre:place:${slug(t)}`, name: t, type: "urn:tag:genre:place" })),
-    properties: { keywords: v.keywords.map((k, i) => ({ name: k, count: 20 - i })) },
+    properties: { keywords: v.keywords.map((k, i) => ({ name: k, count: 20 - i })), geocode: { city: v.city } },
     ...(affinity !== undefined ? { query: { affinity } } : {}),
   };
 }
@@ -111,9 +213,9 @@ export class FixtureTransport implements Transport {
   async get(path: string, params: Params): Promise<RawResponse> {
     this.log.push({ path, params });
     if (path === "/search") {
-      const q = String(params.query ?? "").toLowerCase();
+      const q = String(params.query ?? "").toLowerCase().trim();
       const types = listParam(params, "types");
-      const hits = LOVES.filter((l) => q && l.name.toLowerCase().includes(q) && (!types.length || types.includes(l.type)));
+      const hits = LOVES.filter((l) => q.length > 1 && (l.name.toLowerCase().includes(q) || q.includes(l.name.toLowerCase())) && (!types.length || types.includes(l.type)));
       return {
         status: 200,
         body: { results: hits.slice(0, Number(params.take ?? 5)).map((l) => ({ entity_id: l.id, name: l.name, types: [l.type], popularity: l.popularity, tags: [] })) },
@@ -125,7 +227,7 @@ export class FixtureTransport implements Transport {
       const signals = listParam(params, "signal.interests.entities")
         .map((id) => LOVES.find((l) => l.id === id))
         .filter((l): l is FixtureLove => Boolean(l));
-      const take = Number(params.take ?? 20);
+      const take = Math.min(20, Number(params.take ?? 20));
       if (type === "urn:tag") {
         const counts = new Map<string, number>();
         for (const s of signals) for (const d of s.prefers) for (const t of MOOD_TAGS[d]) counts.set(t, (counts.get(t) ?? 0) + 1);
@@ -136,20 +238,28 @@ export class FixtureTransport implements Transport {
         return { status: 200, body: { success: true, results: { tags } } };
       }
       if (type !== "urn:entity:place") return { status: 200, body: { success: true, results: { entities: [] } } };
-      const ranked = VENUE_STYLES.map((v) => {
-        if (!signals.length) return { v, a: v.popularity };
-        const fit = signals.reduce((acc, s) => acc + v.dims.filter((d) => s.prefers.includes(d)).length / Math.max(1, v.dims.length), 0) / signals.length;
-        return { v, a: Math.round((0.75 * fit + 0.25 * v.popularity) * 1000) / 1000 };
-      }).sort((x, y) => y.a - x.a);
-      // Real Qloo returns the top `take` of thousands of places; this world has
-      // ~36, so cap at half of it to keep the taste-matched and popularity-ordered
-      // sets meaningfully different, as they are in live data.
-      const cap = Math.ceil(VENUE_STYLES.length / 2);
+
+      const hardCity = String(params["filter.location.query"] ?? "").toLowerCase();
+      const softCity = String(params["signal.location.query"] ?? "").toLowerCase();
+      const maxPop = params["filter.popularity.max"] !== undefined ? Number(params["filter.popularity.max"]) : undefined;
+      const pool = WORLD.filter((v) => (!hardCity || v.city.toLowerCase() === hardCity) && (maxPop === undefined || v.popularity <= maxPop));
+      const ranked = pool
+        .map((v) => {
+          const local = softCity && v.city.toLowerCase() === softCity ? 0.12 : 0;
+          if (!signals.length) return { v, a: v.popularity + local };
+          const fit = signals.reduce((acc, s) => acc + v.dims.filter((d) => s.prefers.includes(d)).length / Math.max(1, v.dims.length), 0) / signals.length;
+          return { v, a: Math.round((0.75 * fit + 0.25 * v.popularity + local) * 1000) / 1000 };
+        })
+        .sort((x, y) => y.a - x.a || x.v.name.localeCompare(y.v.name));
+      // Real Qloo returns the top slice of thousands of places; this world is
+      // small, so return at most ~40% of the matching pool to keep taste-matched
+      // and popularity-ordered sets meaningfully different, as they are live.
+      const cap = Math.max(1, Math.min(40, Math.ceil(pool.length * 0.4)));
       const page = Math.max(1, Number(params.page ?? 1));
-      const pool = ranked.slice(0, cap);
+      const slice = ranked.slice(0, cap).slice((page - 1) * take, page * take);
       return {
         status: 200,
-        body: { success: true, results: { entities: pool.slice((page - 1) * take, page * take).map(({ v, a }) => venueEntity(v, signals.length ? a : undefined)) } },
+        body: { success: true, results: { entities: slice.map(({ v, a }) => venueEntity(v, signals.length ? a : undefined)) } },
       };
     }
     return { status: 404, body: { message: `unsupported path ${path}` } };

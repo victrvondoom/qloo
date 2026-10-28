@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { recordDecision } from "@/lib/agent";
-import { getStore, publicView } from "@/lib/store";
-import { jsonError, loadOwnedBrief, rateLimited, readJson, WRITE_LIMIT } from "@/lib/http";
+import { publicView } from "@/lib/store";
+import { jsonError, loadOwnedBrief, rateLimited, readJson, saveWithEvent, WRITE_LIMIT } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (b.status === "revised" && !(typeof b.revisedTo === "string" && b.revisedTo.trim())) return jsonError("Say what the line was revised to.");
   try {
     const next = await recordDecision(r.brief, b.lineId, b.status as "accepted" | "revised" | "proposed", b.revisedTo, typeof b.note === "string" ? b.note : undefined);
-    await getStore().put(next);
+    await saveWithEvent(next, "decision", "designer", { lineId: b.lineId, status: b.status });
     return NextResponse.json({ brief: publicView(next) });
   } catch (err) {
     return jsonError(err instanceof Error ? err.message : String(err));

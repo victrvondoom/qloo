@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { recordOutcome } from "@/lib/agent";
-import { getStore, publicView } from "@/lib/store";
-import { jsonError, loadOwnedBrief, rateLimited, readJson, WRITE_LIMIT } from "@/lib/http";
+import { publicView } from "@/lib/store";
+import { jsonError, loadOwnedBrief, rateLimited, readJson, saveWithEvent, WRITE_LIMIT } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +14,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { rating, note } = body.value;
   if (typeof rating !== "number" || rating < 1 || rating > 5) return jsonError("rating must be 1-5.");
   const next = await recordOutcome(r.brief, rating, typeof note === "string" ? note : undefined);
-  await getStore().put(next);
+  await saveWithEvent(next, "outcome", "designer", { rating: next.outcome?.rating });
   return NextResponse.json({ brief: publicView(next) });
 }

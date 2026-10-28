@@ -77,3 +77,15 @@ Each `qloo_call` entry stores the SHA-256 of the response body and Qloo's reques
 | 6 | Qloo failure is visible and safe | `UPSTREAM_UNAVAILABLE`, degraded badge, warning, literal spec | `hardening.test.ts` |
 | 7 | Affinity isn't presented as a fact about the person | copy in UI, bundle caveat, client note prompt | review |
 | 8 | Review history is kept | append-only `SpecLine.history` + ledger entries, carried across re-scores | `hardening.test.ts` review history |
+
+## Additions in this release
+
+| # | Invariant | Enforcement | Test |
+|---|---|---|---|
+| 9 | A stored spec can be rebuilt from its own evidence | `refine.ts` is the only path that changes a spec (answer, depth); `replay.ts` recomputes the fingerprint from stored places, re-applies answer and depth, runs the rulebook and compares every line | `depth-replay.test.ts` (untouched, answered + deeper, and an edited line that replay names) |
+| 10 | Depth layers compare like with like | the same popularity cap on crowd and baseline; same geography as the main run; local filtering is labelled | `depth-replay.test.ts` (every insights call in a layer carries the cap; fallback on a rejected parameter) |
+| 11 | Model-mapped place terms are visible and symmetric | `tagmap.ts` maps only terms the lexicon missed, ≤2 valid atmospheres each, cached 30 days; matches carry `source: "mapped"`; applied to taste-matched and baseline places alike; ledgered | `depth-replay.test.ts` tag-mapper tests |
+| 12 | Generated prose can't add facts | numbers and capitalised names must appear in the brief's fact sheet; otherwise the template text stays and the rejection is recorded | `deep.test.ts` grounding tests |
+| 13 | A client's link shows only the client view | no brief id, owner hash, pasted message, ledger or trace; revocation 404s | `depth-replay.test.ts`, e2e |
+
+Client actions (answer, reactions) are ledgered as `client_input` with `via: "client"`, so the provenance of a line changed by the client's answer is visible in the bundle.

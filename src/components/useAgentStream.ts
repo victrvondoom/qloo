@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import type { AgentEvent, Brief, BriefInput } from "@/lib/types";
+import type { AgentEvent, Brief, BriefInput, TasteGraph } from "@/lib/types";
 
 export interface StepState {
   id: string;
@@ -10,10 +10,11 @@ export interface StepState {
   detail?: string;
 }
 
-/** POST /api/run and fold the NDJSON event stream into timeline state. cancel() aborts the request (and the server-side run). */
+/** POST /api/run and fold the NDJSON event stream into timeline and graph state. cancel() aborts the request (and the server-side run). */
 export function useAgentStream() {
   const [steps, setSteps] = useState<StepState[]>([]);
   const [brief, setBrief] = useState<Brief | undefined>();
+  const [graph, setGraph] = useState<TasteGraph | undefined>();
   const [error, setError] = useState<string | undefined>();
   const [running, setRunning] = useState(false);
   const controller = useRef<AbortController | null>(null);
@@ -25,6 +26,7 @@ export function useAgentStream() {
     const ac = new AbortController();
     controller.current = ac;
     setSteps([]);
+    setGraph(undefined);
     setBrief(undefined);
     setError(undefined);
     setRunning(true);
@@ -58,6 +60,8 @@ export function useAgentStream() {
           } else if (e.type === "decision") {
             const id = `decision-${decisionN++}`;
             setSteps((prev) => [...prev, { id, label: e.label, status: "decision", detail: e.detail }]);
+          } else if (e.type === "graph") {
+            setGraph(e.graph);
           } else if (e.type === "brief") {
             result = e.brief;
             setBrief(e.brief);
@@ -78,5 +82,5 @@ export function useAgentStream() {
     return result;
   }, []);
 
-  return { steps, brief, error, running, run, cancel };
+  return { steps, graph, brief, error, running, run, cancel };
 }

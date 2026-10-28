@@ -77,7 +77,17 @@ There is no silent switch from live to fixture: if the key is missing, runs fail
 3. Baseline: the same scope with no taste signal, two pages of 20.
 4. Taste tags: `filter.type=urn:tag`, same signals, `take=20`.
 
-Typically 8–12 HTTP attempts per brief. Signals are sorted before querying so input order can't change results.
+Typically 8–12 HTTP attempts per brief. Signals are sorted before querying so input order can't change results. The brief records which geography the evidence came from (`scope`: city, weighted, global).
+
+## Queries when a designer goes deeper
+
+"Curated" and "Deep cut" each repeat the crowd and baseline queries in the same geography as the main run, adding `filter.popularity.max` set to the median (Curated) or 25th percentile (Deep cut) of the main run's place popularity, at most 12 attempts per level. The same cap is applied to both sides so the lift still compares like with like.
+
+- If Qloo answers `400` for the parameter, the layer re-fetches up to three unfiltered pages and keeps only places at or below the cap (`method: "client_filter"`), recording the decision in the ledger.
+- If the city has too few such places, the layer moves to `signal.location.query` and says the evidence is weighted toward the city rather than inside it.
+- Layers with fewer than 6 usable places per side are shown as unusable; under 12, as thin. Exploring never changes the spec until the designer applies the level.
+
+The probe's check Q8 (`places:popularity-filter`) reports whether the live API accepts the parameter and whether every returned place is at or under the cap.
 
 ## What is and isn't claimed
 

@@ -102,6 +102,12 @@ async function main() {
     const params: Params = { "filter.type": "urn:entity:place", "signal.interests.entities": firstIds, "signal.location.query": city };
     const fb = await attempt("places:location-signal-fallback", () => qloo.insightsEntities(params, "probe fallback", 20));
     if (fb) checks["places:location-signal-fallback"] = { ok: true, ...fieldInventory(fb.value) };
+
+    // Q8: is filter.popularity.max (the depth levels) accepted, and does it narrow? If not, the app filters locally.
+    const pops = (crowd.maya ?? crowd.jordan ?? []).map((e) => e.popularity).filter((p): p is number => typeof p === "number").sort((a, b) => a - b);
+    const cap = pops.length ? pops[Math.floor(pops.length / 2)] : 0.5;
+    const d = await attempt("places:popularity-filter", () => qloo.insightsEntities({ "filter.type": "urn:entity:place", "signal.interests.entities": firstIds, "filter.location.query": city, "filter.popularity.max": cap }, "probe popularity filter", 20));
+    if (d) checks["places:popularity-filter"] = { ok: true, cap, allAtOrUnderCap: d.value.every((e) => e.popularity === undefined || e.popularity <= cap + 1e-9), ...fieldInventory(d.value) };
   }
 
   // Q3: cross-domain taste tags.
@@ -113,10 +119,10 @@ async function main() {
 
   // Q2 (lexicon fit) and Q6: does Tastespec's lexicon read these places, and do the two clients differ?
   if (baseR) {
-    const base = baseR.value.filter(hasText).map(classifyVenue);
+    const base = baseR.value.filter(hasText).map((e) => classifyVenue(e));
     const fps: Record<string, unknown> = {};
     for (const [who, es] of Object.entries(crowd)) {
-      const c = es.filter(hasText).map(classifyVenue);
+      const c = es.filter(hasText).map((e) => classifyVenue(e));
       const dims = computeDimensions(c, base, []);
       fps[who] = {
         taggedCrowd: c.length,

@@ -1,12 +1,12 @@
 // Evidence tampering, provenance cross-checks and store isolation.
 import { beforeAll, describe, expect, it } from "vitest";
-import { mkdtempSync } from "node:fs";
-import { tmpdir } from "node:os";
-import path from "node:path";
 import { verifyLedger } from "@/lib/ledger";
 import { runBrief } from "@/lib/agent";
 import { evidenceReport } from "@/lib/evidence";
-import { getStore, resetStoreForTests, publicView } from "@/lib/store";
+import { briefs, publicView } from "@/lib/store";
+import { setDbForTests } from "@/lib/db";
+import { migrate } from "@/lib/db/schema";
+import { openSqlite } from "@/lib/db/sqlite";
 import type { Brief } from "@/lib/types";
 
 const maya = { clientLabel: "Maya", trade: "lighting" as const, room: "living_room" as const, city: "Chicago", words: ["warm", "modern"], loves: ["Khruangbin", "The Bear (show)", "Wes Anderson", "Ace Hotel", "Norah Jones"] };
@@ -91,21 +91,22 @@ describe("evidence report cross-checks citations", () => {
 
 describe("store isolation (no cross-visitor leakage)", () => {
   it("lists and deletes only the owner's briefs; public view hides the owner", async () => {
-    process.env.TASTESPEC_DATA_DIR = mkdtempSync(path.join(tmpdir(), "ts-store-"));
-    delete process.env.KV_REST_API_URL;
-    resetStoreForTests();
-    const store = getStore();
+    const db = openSqlite(":memory:");
+    await migrate(db);
+    setDbForTests(db);
     const ownerA = "a".repeat(64);
     const ownerB = "b".repeat(64);
-    await store.put({ ...brief, ownerHash: ownerA });
-    expect((await store.list(ownerA)).map((s) => s.id)).toContain(brief.id);
-    expect(await store.list(ownerB)).toEqual([]);
-    expect(await store.delete(brief.id, ownerB)).toBe(false);
-    expect(await store.get(brief.id)).toBeDefined();
-    expect("ownerHash" in publicView((await store.get(brief.id))!)).toBe(false);
-    expect(await store.delete(brief.id, ownerA)).toBe(true);
-    expect(await store.get(brief.id)).toBeUndefined();
-    expect(await store.get("../../etc/passwd")).toBeUndefined();
-    resetStoreForTests();
+    await briefs.put({ ...brief, ownerHash: ownerA });
+    expect((await briefs.list(ownerA)).map((s) => s.id)).toContain(brief.id);
+    expect(await briefs.list(ownerB)).toEqual([]);
+    expect(await briefs.delete(brief.id, ownerB)).toBe(false);
+    expect(await briefs.get(brief.id)).toBeDefined();
+    expect("ownerHash" in publicView((await briefs.get(brief.id))!)).toBe(false);
+    expect(await briefs.share(brief.id, ownerB)).toBeUndefined();
+    expect(await briefs.delete(brief.id, ownerA)).toBe(true);
+    expect(await briefs.get(brief.id)).toBeUndefined();
+    expect(await briefs.get("../../etc/passwd")).toBeUndefined();
+    setDbForTests();
+    await db.close();
   });
 });

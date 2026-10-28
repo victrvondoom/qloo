@@ -1,0 +1,19 @@
+# docker compose up             → http://localhost:3000 on synthetic demo data
+# QLOO_MODE=live QLOO_API_KEY=… docker compose up   → live Qloo evidence
+services:
+  tastespec:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      QLOO_MODE: ${QLOO_MODE:-fixture}
+      QLOO_API_KEY: ${QLOO_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      DATABASE_URL: ${DATABASE_URL:-}
+      DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}
+      TASTESPEC_RETENTION_DAYS: ${TASTESPEC_RETENTION_DAYS:-180}
+    volumes:
+      - tastespec-data:/data
+    restart: unless-stopped
+volumes:
+  tastespec-data:

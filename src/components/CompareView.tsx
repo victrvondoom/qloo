@@ -6,6 +6,8 @@ import { useState } from "react";
 import { PRESETS } from "./presets";
 import { Timeline } from "./Timeline";
 import { useAgentStream } from "./useAgentStream";
+import { RoomStage } from "./brief/RoomStage";
+import { buildDeepBrief } from "@/lib/deep/build";
 import { DIMENSION_BY_ID } from "@/lib/dimensions";
 import type { Brief } from "@/lib/types";
 
@@ -45,14 +47,14 @@ export function CompareView({ initialA, initialB }: { initialA?: Brief; initialB
       </div>
 
       {both ? (
-        <section className="card" style={{ marginBottom: 16, borderColor: "var(--accent)" }}>
+        <section className="card" style={{ marginBottom: 16, borderColor: "var(--amber)" }}>
           <div className="eyebrow">Result</div>
           <h2>
             {differing.length} of {briefA.spec.length} spec lines differ between Maya and Jordan.
           </h2>
           <p className="muted" style={{ margin: 0 }}>
             Their literal readings are identical, because their words are. Every difference below comes from Qloo data.
-            {briefA.dataMode === "fixture" || briefB.dataMode === "fixture" ? " (This run used SIMULATED data.)" : ""}
+            {briefA.dataMode === "fixture" || briefB.dataMode === "fixture" ? " (This run used synthetic demo data.)" : ""}
           </p>
         </section>
       ) : null}
@@ -69,6 +71,10 @@ export function CompareView({ initialA, initialB }: { initialA?: Brief; initialB
             {s.error ? <div className="err">{s.error}</div> : null}
             {brief ? (
               <>
+                <RoomStage spec={brief.spec} dims={brief.dimensions} trade={brief.input.trade} room={brief.input.room} label={`${preset.title}'s room, drawn from the spec`} />
+                <p className="serif" style={{ fontSize: 24, fontStyle: "italic", color: "var(--amber-text)", margin: "14px 0 6px" }}>
+                  {buildDeepBrief(brief).title}
+                </p>
                 {brief.words.map((w) => (
                   <p key={w.word} style={{ margin: "6px 0" }}>
                     <em>“{w.word}”</em> → <b>{w.chosen?.meaning ?? "unmapped"}</b>{" "}

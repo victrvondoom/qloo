@@ -1,7 +1,7 @@
 // Small helpers shared by API routes.
 
 import { NextResponse } from "next/server";
-import { getStore } from "./store";
+import { briefs, events, maybePrune } from "./store";
 import { currentOwnerHash, isOwner } from "./owner";
 import type { Brief } from "./types";
 
@@ -27,7 +27,7 @@ export async function readJson<T>(req: Request, maxBytes = 16_384): Promise<{ ok
 }
 
 export async function loadBrief(id: string): Promise<Brief | undefined> {
-  return getStore().get(id);
+  return briefs.get(id);
 }
 
 /** Load a brief the current visitor owns, or an error response. */
@@ -37,6 +37,13 @@ export async function loadOwnedBrief(id: string): Promise<{ ok: true; brief: Bri
   const owner = await currentOwnerHash();
   if (!isOwner(brief.ownerHash, owner)) return { ok: false, res: jsonError("Only the designer who created this brief can change it.", 403) };
   return { ok: true, brief, owner: owner! };
+}
+
+/** Save a changed brief and record what happened in its activity feed. */
+export async function saveWithEvent(brief: Brief, kind: string, actor: "designer" | "client" | "agent", payload: Record<string, unknown> = {}) {
+  await briefs.put(brief);
+  await events.add(brief.id, kind, actor, payload);
+  void maybePrune().catch(() => {});
 }
 
 const hits = new Map<string, number[]>();
@@ -56,3 +63,32 @@ export function rateLimited(req: Request, bucket: string, limit: number): boolea
 
 export const RUN_LIMIT = Number(process.env.TASTESPEC_RUNS_PER_10_MIN ?? 12);
 export const WRITE_LIMIT = 120;
+
+/** NDJSON streaming response helper: `send` is safe to call after the client disconnects. */
+export function ndjson(rid: string, work: (send: (e: unknown) => void) => Promise<void>): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      let open = true;
+      const send = (e: unknown) => {
+        if (!open) return;
+        try {
+          controller.enqueue(encoder.encode(`${JSON.stringify(e)}\n`));
+        } catch {
+          open = false;
+        }
+      };
+      try {
+        await work(send);
+      } finally {
+        open = false;
+        try {
+          controller.close();
+        } catch {}
+      }
+    },
+  });
+  return new Response(stream, {
+    headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store", "X-Accel-Buffering": "no", "X-Request-Id": rid },
+  });
+}

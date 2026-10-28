@@ -39,6 +39,69 @@ export interface BriefInput {
   /** Entity choices the pro pinned after reviewing resolution (input text -> entity id). */
   pinned?: Record<string, string>;
   challenge?: Challenge;
+  /** Designer's project / job name, for grouping. */
+  project?: string;
+  /** The client's message as pasted (owner-only; never sent to Qloo, never shown on share links). */
+  sourceText?: string;
+}
+
+/** A real place from the client's taste neighbourhood, offered as a design reference. */
+export interface ReferenceRoom {
+  entity_id: string;
+  name: string;
+  city?: string;
+  affinity?: number;
+  popularity?: number;
+  dimensions: DimensionId[];
+  terms: string[];
+}
+
+/**
+ * One rung of "progressively niche": the same taste signals, restricted to less
+ * popular places (both crowd and baseline, so the lift stays fair).
+ */
+export interface DepthLayer {
+  level: 0 | 1 | 2;
+  label: "Mainstream" | "Curated" | "Deep cut";
+  popularityMax?: number;
+  /** How the popularity cap was applied: by Qloo (filter param) or locally on returned popularity. */
+  method: "none" | "api_filter" | "client_filter";
+  crowdN: number;
+  baseN: number;
+  /** False when this depth returned too few places to say anything. */
+  usable: boolean;
+  dimensions: DimensionScore[];
+  references: ReferenceRoom[];
+  evidence: number[];
+  computedAt: string;
+  note?: string;
+}
+
+export type GraphColumn = "said" | "means" | "rooms" | "atmospheres" | "decisions" | "spec";
+
+export interface GraphNode {
+  id: string;
+  column: GraphColumn;
+  label: string;
+  sub?: string;
+  /** 0..1 emphasis (score, affinity, weight). */
+  weight: number;
+  kind: "word" | "reference" | "reading" | "entity" | "place" | "atmosphere" | "decision" | "constraint" | "question" | "line" | "abstained";
+  dimension?: DimensionId;
+  muted?: boolean;
+}
+
+export interface GraphEdge {
+  from: string;
+  to: string;
+  weight: number;
+  kind: "reading" | "resolves" | "affinity" | "carries" | "selects" | "drives" | "bounds" | "answers";
+}
+
+export interface TasteGraph {
+  columns: { id: GraphColumn; title: string; count: number; note?: string }[];
+  nodes: GraphNode[];
+  edges: GraphEdge[];
 }
 
 export interface QlooEntity {
@@ -75,9 +138,13 @@ export interface VenueEvidence {
   name: string;
   affinity?: number;
   popularity?: number;
+  city?: string;
   dimensions: DimensionId[];
-  /** Matched terms, for display: which tag/keyword triggered which dimension. */
-  matches: { dimension: DimensionId; term: string; source: "tag" | "keyword" | "category" }[];
+  /**
+   * Matched terms, for display: which tag/keyword triggered which dimension.
+   * source "mapped" = a term the lexicon missed, mapped by a model (see Brief.tagMap).
+   */
+  matches: { dimension: DimensionId; term: string; source: "tag" | "keyword" | "category" | "mapped" }[];
 }
 
 export interface DimensionScore {
@@ -286,10 +353,32 @@ export interface Brief {
   stats: RunStats;
   ledger: LedgerEntry[];
   outcome?: { rating?: number; note?: string; at?: string };
+  /** The client's reactions to spec lines on their share link (latest per line). */
+  clientFeedback?: Record<string, ClientReaction>;
+  /** Where the place evidence came from: the city itself, places weighted toward it, or anywhere. */
+  scope?: "city" | "weighted" | "global";
+  /** Cross-domain taste tags as returned (kept so the run can be replayed from stored evidence). */
+  tasteTags?: { name: string; affinity?: number }[];
+  /** Progressively niche views of the same taste (level 0 = the main run). */
+  depth?: DepthLayer[];
+  /** Which depth level the spec was derived from (default 0). */
+  appliedDepth?: 0 | 1 | 2;
+  /** Place tags mapped to atmospheres by a model (only when the lexicon missed them). */
+  tagMap?: { model: string; mapped: Record<string, DimensionId[]> };
+}
+
+export interface ClientReaction {
+  reaction: "love" | "unsure" | "change";
+  note?: string;
+  at: string;
+  /** The line value the client reacted to (a re-score may change the line later). */
+  value: string;
 }
 
 export type AgentEvent =
   | { type: "step"; id: string; label: string; status: "running" | "done" | "warn" | "error"; detail?: string; state?: AgentState }
   | { type: "decision"; label: string; detail: string }
+  /** Progressive graph: each event replaces the columns it carries. */
+  | { type: "graph"; graph: TasteGraph }
   | { type: "brief"; brief: Brief }
   | { type: "error"; message: string; state?: AgentState };
