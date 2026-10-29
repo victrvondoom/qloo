@@ -119,6 +119,14 @@ Level 0 is the main run. Levels 1 (Curated) and 2 (Deep cut) ask Qloo the same t
 
 `influence.ts` (on request, owner only) re-runs the taste-matched query once per resolved reference with that reference left out, keeping the geography, city baseline, taste tags and the client's answer fixed, and rebuilds the spec each time. A reference *decides* a line when its absence changes the value; its *push* is the score drop per atmosphere. Lines no single reference decides are counted as robust. Fragile lines feed the hand-over's open questions. Cost: one paged query per reference, all ledgered.
 
+## Taste anatomy
+
+`anatomy.ts` (on request, owner only, ~3 queries per reference + 1) asks Qloo once per resolved reference with only that reference, against the same city baseline, and compares the facets: pairwise cosine agreement and coherence; the least-agreeing pair and a bridge query carrying both; a consensus core (places chosen by a majority of facets); bootstrap stability (400 resamples, seeded, so it is reproducible); flip distance (greedy removal of the driving atmosphere among the strongest places); the spec each domain builds alone; place-vs-tag corroboration; and a Jensen–Shannon niche index. The result is stored on the brief and ledgered; the spec is not changed. Unstable lines and the conflict feed the hand-over's open risks.
+
+## Studio tools
+
+`studio.ts` holds pure functions behind the product tools: `quantityPlan` (lumen method, N = E·A / (Φ·UF·MF), UF 0.5, MF 0.8, labelled an estimate), `dayClock` (the scene, kelvin and level at each hour), `fixtureScheduleCsv` / `specJson` (exports carry the ledger head), `specHistory` (from the ledger), `tasteAxes` and `similarity` (taste space and similar clients, owner-scoped), and `mergeDuet` (two briefs → one room; mean of the measured atmospheres, both sets of hard constraints kept, no new Qloo calls). `Room3D.tsx` and `TasteSpace3D.tsx` use three.js, loaded only on the client, and fall back to a message without WebGL.
+
 ## The hand-over (deep brief)
 
 `deep/build.ts` turns a brief into the document a designer hands on, with no network calls: direction name and summary, what each word means, scenes, a zone-by-scene programming table, zones with plans and rules of thumb, palette, reference places (from the applied depth), a buying list by category (no brands), an installer checklist, open risks, and a client note. Every item says what it rests on: a spec line, the evidence, the client, or a labelled rule of thumb.

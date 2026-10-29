@@ -108,6 +108,19 @@ export default function Method() {
         </p>
       </section>
 
+      <section className="card section" id="anatomy">
+        <h2>Taste anatomy</h2>
+        <p>
+          On request, each thing the client loves is sent to Qloo on its own, against the same city baseline, so music, screen and places can be compared as separate facets. From those
+          answers: how much the facets agree (cosine of their atmosphere vectors), which pair conflicts and the rooms Qloo finds when asked with both, the places most facets choose
+          independently, how often each line survives 400 resamples of the evidence, how many strong places would have to change before a line flips, what each domain alone would
+          build, whether place evidence and taste tags corroborate each other, and how far the taste neighbourhood sits from the city mainstream (Jensen–Shannon divergence).
+        </p>
+        <p className="small muted" style={{ margin: 0 }}>
+          None of this changes the spec. It is ledgered like any other query, and weak lines are passed to the hand-over as open risks.
+        </p>
+      </section>
+
       <section className="card section">
         <h2>Limits, plainly</h2>
         <ul>

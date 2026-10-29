@@ -10,6 +10,7 @@ import { DeepBriefView } from "./DeepBriefView";
 import { DepthLadder } from "./DepthLadder";
 import { EvidenceTab } from "./EvidenceTab";
 import { InfluencePanel } from "./InfluencePanel";
+import { AnatomyPanel } from "./AnatomyPanel";
 import { QuestionCard } from "./QuestionCard";
 import { RoomStage } from "./RoomStage";
 import { SpecList } from "./SpecList";
@@ -18,7 +19,7 @@ import { buildTasteGraph } from "@/lib/graph";
 import { ROOM_LABEL, TRADE_LABEL } from "@/lib/rulebooks";
 import type { Brief } from "@/lib/types";
 
-type Tab = "spec" | "handover" | "pathways" | "evidence" | "activity";
+type Tab = "spec" | "handover" | "anatomy" | "pathways" | "evidence" | "activity";
 
 export function BriefWorkspace({ initial, canEdit, shared, llm }: { initial: Brief; canEdit: boolean; shared: boolean; llm: string | null }) {
   const [brief, setBrief] = useState(initial);
@@ -62,6 +63,7 @@ export function BriefWorkspace({ initial, canEdit, shared, llm }: { initial: Bri
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: "spec", label: "Spec", count: brief.spec.length },
     { id: "handover", label: "Hand-over" },
+    { id: "anatomy", label: "Anatomy" },
     { id: "pathways", label: "Pathways", count: graph.nodes.length },
     { id: "evidence", label: "Evidence", count: brief.ledger.length },
     ...(canEdit ? [{ id: "activity" as const, label: "Client & activity" }] : []),
@@ -184,6 +186,8 @@ export function BriefWorkspace({ initial, canEdit, shared, llm }: { initial: Bri
           />
         ) : tab === "handover" ? (
           <DeepBriefView brief={brief} canEdit={canEdit} llm={llm} />
+        ) : tab === "anatomy" ? (
+          <AnatomyPanel brief={brief} canEdit={canEdit} onBrief={(b) => accept(b, "Anatomy measured")} />
         ) : tab === "pathways" ? (
           <div className="stack">
             <div className="panel-title">

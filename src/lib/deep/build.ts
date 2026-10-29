@@ -305,6 +305,12 @@ function risks(b: Brief): DeepBrief["risks"] {
   for (const w of b.warnings.slice(0, 4)) out.push({ text: w, level: "check" });
   if (b.question && !b.question.answer) out.push({ text: `Still to ask: ${b.question.prompt} (${b.question.optionA.name} or ${b.question.optionB.name}). About ${b.question.expectedChange.toFixed(1)} lines depend on it.`, level: "check" });
   for (const l of b.spec.filter((l) => l.confidence === "low" && l.basis !== "literal_fallback").slice(0, 3)) out.push({ text: `Confirm "${l.category}" with the client: the evidence is weak here.`, level: "check" });
+  if (b.anatomy) {
+    const a = b.anatomy;
+    const nm = (id: string) => a.facets.find((f) => f.entity_id === id)?.name ?? id;
+    if (a.conflict) out.push({ text: `${nm(a.conflict.a)} and ${nm(a.conflict.b)} pull ${b.input.clientLabel}'s taste in different directions (agreement ${a.conflict.cosine.toFixed(2)}). Bridge rooms: ${(a.bridge?.places ?? []).slice(0, 3).map((p) => p.name).join(", ") || "none found"}.`, level: "check" });
+    for (const l of a.stability.lines.filter((x) => x.stable < 0.6)) out.push({ text: `"${l.category}" holds in only ${Math.round(l.stable * 100)}% of resamples of the evidence${l.alternatives[0] ? `; the alternative is ${l.alternatives[0].value}` : ""}.`, level: "check" });
+  }
   if (b.influence) {
     const nameOf = (id: string) => b.influence!.references.find((r) => r.entity_id === id)?.name ?? id;
     for (const l of b.influence.lines.filter((x) => !x.robust).slice(0, 3)) {

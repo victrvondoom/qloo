@@ -21,7 +21,7 @@ const PLACE = "urn:entity:place";
 const WANT = 40;
 const MIN_USABLE = 6;
 
-function withAnswer(brief: Brief, dims: DimensionScore[]): DimensionScore[] {
+export function withAnswer(brief: Brief, dims: DimensionScore[]): DimensionScore[] {
   const q = brief.question;
   if (!q?.answer || q.answer === "neither") return dims;
   const chosen = q.answer === "A" ? q.optionA : q.optionB;
@@ -29,13 +29,13 @@ function withAnswer(brief: Brief, dims: DimensionScore[]): DimensionScore[] {
   return applyClientAnswer(dims, chosen.carries, rejected.carries);
 }
 
-function specFor(brief: Brief, dims: DimensionScore[]) {
+export function specFor(brief: Brief, dims: DimensionScore[]) {
   const effective = withAnswer(brief, dims);
   const words = decodeWords(brief, effective);
   return buildSpec(brief.input.trade, brief.input.room, effective, words, brief.input.words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [] });
 }
 
-function scopeParams(brief: Brief): Params {
+export function scopeParams(brief: Brief): Params {
   const city = brief.input.city;
   if (!brief.scope || brief.scope === "city") return { "filter.location.query": city };
   if (brief.scope === "weighted") return { "signal.location.query": city };

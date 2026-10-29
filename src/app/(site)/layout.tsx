@@ -3,6 +3,7 @@ import { envReport } from "@/lib/env";
 import { BrandMark } from "@/components/ui/Brand";
 import { NavLinks } from "@/components/ui/NavLinks";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { CommandPalette, PaletteButton } from "@/components/ui/CommandPalette";
 
 // Render at request time so the data-mode banner always reflects the running configuration.
 export const dynamic = "force-dynamic";
@@ -43,6 +44,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           </Link>
           <NavLinks />
           <span className="spacer" />
+          <PaletteButton />
           <ThemeToggle />
           <Link href="/app" className="btn primary sm hide-sm" style={{ marginLeft: 8 }}>
             New brief <span className="arrow">→</span>
@@ -50,6 +52,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         </div>
       </nav>
       <ModeBanner />
+      <CommandPalette />
       {children}
       <footer className="site">
         <div className="wrap cols">

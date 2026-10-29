@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { RoomRender } from "../RoomRender";
+
+const Room3D = dynamic(() => import("../Room3D").then((m) => m.Room3D), { ssr: false, loading: () => <div className="room room3d"><span className="cap">Loading 3D…</span></div> });
 import { cctRange, kelvinToRgb, roomVisualAt, scenePosition, scenesOf, type SceneId } from "@/lib/render";
 import type { DimensionId, RoomType, SpecLine, Trade } from "@/lib/types";
 
@@ -22,6 +25,7 @@ export function RoomStage({
   scene = "evening",
   showControls = true,
   label,
+  initialView = "2d",
 }: {
   spec: Pick<SpecLine, "id" | "value">[];
   dims?: { id: DimensionId; score: number }[];
@@ -30,10 +34,12 @@ export function RoomStage({
   scene?: SceneId;
   showControls?: boolean;
   label?: string;
+  initialView?: "2d" | "3d";
 }) {
   const scenes = useMemo(() => scenesOf(spec), [spec]);
   const start = scenes.some((s) => s.id === scene) ? scene : scenes[0].id;
   const [pos, setPos] = useState(() => scenePosition(spec, start));
+  const [view, setView] = useState<"2d" | "3d">(initialView);
   const raf = useRef<number | undefined>(undefined);
   const visual = useMemo(() => roomVisualAt({ spec, dims, trade, room, position: pos }), [spec, dims, trade, room, pos]);
   const cct = cctRange(spec);
@@ -61,13 +67,24 @@ export function RoomStage({
 
   return (
     <div>
-      <div className="room">
-        <RoomRender visual={visual} room={room} label={label} />
-        <span className="cap">{visual.caption}</span>
-      </div>
+      {view === "3d" ? (
+        <Room3D visual={visual} room={room} label={label} />
+      ) : (
+        <div className="room">
+          <RoomRender visual={visual} room={room} label={label} />
+          <span className="cap">{visual.caption}</span>
+        </div>
+      )}
       {showControls ? (
         <div className="dimmer">
           <div className="row between">
+            <div className="segmented" role="group" aria-label="View">
+              {(["2d", "3d"] as const).map((v) => (
+                <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}>
+                  {v.toUpperCase()}
+                </button>
+              ))}
+            </div>
             <div className="segmented" role="group" aria-label="Scenes from the dimming line">
               {scenes.map((s) => (
                 <button key={s.id} type="button" aria-pressed={active.id === s.id} onClick={() => glideTo(scenePosition(spec, s.id))}>

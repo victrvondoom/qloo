@@ -7,6 +7,32 @@ import { publicStats } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
+const MEASURES = [
+  ["Facets", "Each thing they love sent to Qloo on its own, so music, screen and places each get their own atmosphere reading against the city."],
+  ["Cross-domain agreement", "How far their music agrees with their TV, their hotels with their brands: one coherence score, every pair shown."],
+  ["Conflict", "The two facets that pull hardest apart, named, so the clarifying question is about something real."],
+  ["Bridge rooms", "Qloo asked with only the conflicting pair: the places where opposite pulls in one person's taste meet."],
+  ["Consensus core", "Places a majority of facets choose independently: the narrowest intersection of their taste."],
+  ["Influence", "Each love left out in turn: which lines it decides, and how many survive dropping any one."],
+  ["Bootstrap stability", "The evidence resampled hundreds of times: how often each line holds."],
+  ["Flip distance", "How many places would have to read differently before a line changes."],
+  ["Two channels", "Place evidence and Qloo's cross-domain taste tags, measured separately; an atmosphere both support is corroborated."],
+  ["Niche index", "How far their taste neighbourhood diverges from the city mainstream, and whether to go deeper."],
+];
+
+const HANDS = [
+  ["A room in 3D", "Lit by the spec: kelvin-coloured lights where the zones are, beams as wide as the optics line, the same dimmer."],
+  ["Progressive depth", "Mainstream, Curated, Deep cut: the same taste among less obvious places, compared fairly."],
+  ["Duet", "Two people, one room: both tastes merged, agreements and clashes per line, the compromise drawn."],
+  ["A 24-hour light clock", "Which scene, colour and level is on at every hour of the day."],
+  ["Quantities", "Room size in, fittings and lumens out, by the lumen method, labelled as the estimate it is."],
+  ["Fixture schedule", "CSV for the electrician, JSON for a lighting tool, the evidence bundle for anyone who doubts it."],
+  ["Client link", "Their room on their phone; answers and reactions land in your feed live; revoke any time."],
+  ["Spec history", "Run, answer, depth, decisions, reactions, analyses: the brief's life from its own ledger."],
+  ["Taste space", "Every client you've briefed, placed in three dimensions of measured taste, plus the ones most like this one."],
+  ["Mood card", "One image with the direction, what their words mean, the palette, the references and the room."],
+];
+
 const STEPS = [
   { n: "01", t: "What they said", d: "Their words and the things they love, pulled from one pasted message.", w: 100 },
   { n: "02", t: "What it could mean", d: "Every professional reading of each word; each reference resolved in Qloo, or dropped.", w: 86 },
@@ -112,6 +138,53 @@ export default async function Home() {
             Same words, same room, same city: {differing.length} of {demo.lines} spec lines differ, and every difference comes from what they love. Taken literally, both would get the same room.{" "}
             <Link href="/compare">Run the same-words test yourself →</Link>
           </p>
+        </div>
+      </section>
+
+      <section className="band" id="walk">
+        <div className="wrap">
+          <div className="band-head">
+            <div className="eyebrow amber">Walk into the spec</div>
+            <h2>{demo.maya.name}&apos;s room, built from her brief and lit by it.</h2>
+            <p className="lede">
+              Drag to walk around it. Every light is a line of the spec: where it sits, its colour temperature, how wide it throws, how far it dims. Slide the dimmer and it warms the way the spec says it
+              will. Demo data.
+            </p>
+          </div>
+          <div className="card pad-lg">
+            <RoomStage spec={demo.maya.spec} dims={demo.maya.dims} trade={demo.trade} room={demo.room} initialView="3d" label={`${demo.maya.name}'s living room in 3D`} />
+          </div>
+        </div>
+      </section>
+
+      <section className="band alt" id="twenty">
+        <div className="wrap">
+          <div className="band-head">
+            <div className="eyebrow amber">Twenty things</div>
+            <h2>Ten ways it measures taste. Ten things it hands you.</h2>
+            <p className="lede">Every measurement is a query to Qloo or a resample of the evidence it returned, recorded in the brief&apos;s ledger. Nothing is a model&apos;s opinion.</p>
+          </div>
+          <div className="twenty">
+            {[
+              { title: "It measures", items: MEASURES },
+              { title: "It hands you", items: HANDS },
+            ].map((col) => (
+              <div key={col.title}>
+                <h3 className="twenty-head">{col.title}</h3>
+                <ol>
+                  {col.items.map(([t, d], i) => (
+                    <li key={t}>
+                      <span className="twenty-n">{["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"][i]}</span>
+                      <div>
+                        <b>{t}</b>
+                        <p>{d}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

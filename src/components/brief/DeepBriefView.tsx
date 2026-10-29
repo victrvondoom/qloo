@@ -5,6 +5,7 @@ import { readNdjson } from "./api";
 import { buildDeepBrief, type DeepBrief } from "@/lib/deep/build";
 import { applyProse, type DeepProse, type ProseField } from "@/lib/deep/prose";
 import { ROOM_LABEL } from "@/lib/rulebooks";
+import { ExportBar, LightClock, QuantityCalculator } from "./StudioTools";
 import type { Brief } from "@/lib/types";
 
 const BASIS: Record<string, string> = { spec: "spec", evidence: "evidence", client: "client", rule_of_thumb: "rule of thumb" };
@@ -300,6 +301,13 @@ export function DeepBriefView({ brief, canEdit, llm }: { brief: Brief; canEdit: 
       ) : null}
       {err ? <div className="err no-print" style={{ marginBottom: 12 }}>{err}</div> : null}
       <HandOver deep={merged} roomLabel={ROOM_LABEL[brief.input.room]} />
+      <div className="stack section">
+        <LightClock brief={brief} />
+        <QuantityCalculator brief={brief} />
+        <div className="no-print">
+          <ExportBar brief={brief} deep={merged} />
+        </div>
+      </div>
       <section className="card section">
         <div className="panel-title">
           <div className="eyebrow">Note to {brief.input.clientLabel}</div>

@@ -21,6 +21,7 @@ We tested it against baselines on a seeded synthetic world (60 scenarios, 4 seed
 3. **0:55** The brief: "They mean Amber Parlour." Drag the dimmer from Day to Late (dim-to-warm). Point at the question card: two real places, asked only because the evidence can't call it.
 4. **1:20** Spec tab: basis labels and the literal value each line replaced. Pathways: click "Colour temperature" and walk it back to "warm" and the places behind it.
 5. **1:35** Measure influence: "4 of 7 lines survive dropping any one reference; Layering changes without Norah Jones." Measured by asking Qloo again with each love left out.
+5b. **1:42** Anatomy: run it; "coherence 0.30, The Bear pulls vintage, Wes Anderson pulls refined"; the bridge rooms both choose; Fixture character survives only 47% of resamples, so it goes into the risks. Flip to 3D on Hand-over and orbit the room.
 6. **1:50** Go deeper → Curated: same taste, less popular places, both sides capped; use it for the spec.
 7. **2:05** Client & activity → create the link, open it on a phone, react "change this", watch it land in the feed. Revoke: the link 404s.
 8. **2:30** Evidence: verify the ledger in the browser, replay the spec from stored evidence. Benchmark band on the landing page: "and here's when it helps, and where it doesn't yet."

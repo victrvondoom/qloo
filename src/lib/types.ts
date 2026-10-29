@@ -359,6 +359,8 @@ export interface Brief {
   scope?: "city" | "weighted" | "global";
   /** Cross-domain taste tags as returned (kept so the run can be replayed from stored evidence). */
   tasteTags?: { name: string; affinity?: number }[];
+  /** The taste taken apart by domain: facets, agreement, consensus core, stability (on request). */
+  anatomy?: TasteAnatomy;
   /** Which loves moved which lines, measured by leaving each one out (on request). */
   influence?: InfluenceMap;
   /** Progressively niche views of the same taste (level 0 = the main run). */
@@ -385,6 +387,33 @@ export interface InfluenceMap {
   }[];
   lines: { lineId: string; category: string; value: string; deciders: string[]; robust: boolean }[];
   robustLines: number;
+  evidence: number[];
+}
+
+type DimVec = Record<DimensionId, number>;
+interface AnatomyPlace {
+  entity_id: string;
+  name: string;
+  city?: string;
+  popularity?: number;
+  dimensions: DimensionId[];
+}
+
+export interface TasteAnatomy {
+  computedAt: string;
+  facets: { entity_id: string; name: string; type: string; domain: string; crowdN: number; usable: boolean; vector: DimVec; tagVector: DimVec; leans?: DimensionId }[];
+  agreement: { a: string; b: string; cosine: number }[];
+  /** Mean pairwise cosine between facet vectors (1 = every facet points the same way). */
+  coherence: number;
+  conflict?: { a: string; b: string; cosine: number; aLeans: DimensionId; bLeans: DimensionId };
+  core: { threshold: number; of: number; n: number; vector?: DimVec; places: (AnatomyPlace & { votes: number })[] };
+  bridge?: { places: (AnatomyPlace & { inBoth: boolean })[]; vector?: DimVec };
+  stability: { samples: number; lines: { lineId: string; category: string; value: string; stable: number; alternatives: { value: string; share: number }[] }[]; dims: { id: DimensionId; lo: number; hi: number }[] };
+  flip: { lineId: string; category: string; places: number | null; driver?: DimensionId; toValue?: string; reason?: string }[];
+  domains: { domain: string; facets: string[]; spec: { lineId: string; value: string }[]; agrees: number }[];
+  lineDomains: { lineId: string; category: string; agree: number; of: number }[];
+  corroboration: { id: DimensionId; place: number; tags: number; status: "both" | "places only" | "tags only" | "neither" }[];
+  niche: { jsd: number; crowdPopularity?: number; basePopularity?: number; index: number; recommendDepth: 0 | 1 | 2; reading: string };
   evidence: number[];
 }
 

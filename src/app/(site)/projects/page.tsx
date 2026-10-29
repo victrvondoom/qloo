@@ -2,6 +2,10 @@ import Link from "next/link";
 import { briefs as store, type BriefSummary } from "@/lib/store";
 import { currentOwnerHash } from "@/lib/owner";
 import { ROOM_LABEL, TRADE_LABEL } from "@/lib/rulebooks";
+import { DIMENSION_BY_ID } from "@/lib/dimensions";
+import { tasteAxes } from "@/lib/studio";
+import { TasteSpaceLazy } from "@/components/TasteSpaceLazy";
+import type { SpacePoint } from "@/components/TasteSpace3D";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +27,14 @@ export default async function Projects() {
   const withLlm = pool.filter((b) => b.llmAgreement !== undefined);
   const llmAgree = withLlm.length ? withLlm.reduce((a, b) => a + (b.llmAgreement ?? 0), 0) / withLlm.length : undefined;
   const rated = pool.filter((b) => b.rating);
+  const points: SpacePoint[] = [];
+  for (const s of briefs.filter((b) => b.status === "COMPLETE" || b.status === "NEEDS_CLARIFICATION").slice(0, 120)) {
+    const full = await store.get(s.id);
+    if (!full) continue;
+    const dims = full.depth?.find((d) => d.level === 0)?.dimensions ?? full.dimensions;
+    const top = [...dims].sort((x, y) => y.score - x.score)[0];
+    points.push({ id: s.id, label: s.clientLabel, words: s.words, city: s.city, dataMode: s.dataMode, top: top ? DIMENSION_BY_ID[top.id].short : "", ...tasteAxes(Object.fromEntries(dims.map((d) => [d.id, d.score]))) });
+  }
   return (
     <main id="main">
       <div className="wrap">
@@ -34,6 +46,18 @@ export default async function Projects() {
         a line without revision, and how an LLM-only answer compared.
         {" "}Only briefs created in this browser are listed.
       </p>
+      {points.length ? (
+        <section className="section">
+          <div className="panel-title">
+            <div>
+              <div className="eyebrow amber">Your clients in taste space</div>
+              <h2 style={{ margin: 0 }}>Every brief, placed by what its evidence measured</h2>
+            </div>
+            <span className="small muted">warm ↔ cool · characterful ↔ minimal · social ↔ calm · drag to orbit, click to open</span>
+          </div>
+          <TasteSpaceLazy points={points} />
+        </section>
+      ) : null}
       <div className="grid3 section">
         <div className="card">
           <div className="eyebrow">Lines changed by evidence</div>

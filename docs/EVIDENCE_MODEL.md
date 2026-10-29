@@ -87,6 +87,8 @@ Each `qloo_call` entry stores the SHA-256 of the response body and Qloo's reques
 | 11 | Model-mapped place terms are visible and symmetric | `tagmap.ts` maps only terms the lexicon missed, ≤2 valid atmospheres each, cached 30 days; matches carry `source: "mapped"`; applied to taste-matched and baseline places alike; ledgered | `depth-replay.test.ts` tag-mapper tests |
 | 12 | Generated prose can't add facts | numbers and capitalised names must appear in the brief's fact sheet; otherwise the template text stays and the rejection is recorded | `deep.test.ts` grounding tests |
 | 14 | Influence is measured, not attributed | leave-one-out queries to Qloo (same scope, baseline, taste tags and answer), ledgered; the spec itself is not changed | `depth-replay.test.ts` influence tests; e2e |
+| 15 | Anatomy is measured and doesn't touch the spec | per-facet and bridge queries are ledgered; bootstrap is seeded; stored on `brief.anatomy` only | `anatomy.test.ts`; e2e |
+| 16 | Exports say what they are | CSV/JSON carry the data mode (SYNTHETIC in demo) and the ledger head; quantities are labelled an estimate with assumptions | `studio.test.ts`; e2e |
 | 13 | A client's link shows only the client view | no brief id, owner hash, pasted message, ledger or trace; revocation 404s | `depth-replay.test.ts`, e2e |
 
 Client actions (answer, reactions) are ledgered as `client_input` with `via: "client"`, so the provenance of a line changed by the client's answer is visible in the bundle.

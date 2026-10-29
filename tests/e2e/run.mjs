@@ -146,6 +146,36 @@ async function main() {
     assert((await page.locator(".influence tbody tr").count()) >= 2, "influence matrix missing");
   });
 
+  await check("anatomy: each love queried alone; coherence, conflict, core, stability", async () => {
+    await page.getByRole("tab", { name: /Anatomy/ }).click();
+    await page.getByRole("button", { name: /Run anatomy/ }).click();
+    await page.locator(".heatmap").waitFor({ timeout: 40_000 });
+    for (const t of ["Coherence", "Niche index", "Consensus core", "Solid lines"]) await page.getByText(t, { exact: true }).first().waitFor();
+    assert((await page.locator(".heat-cell").count()) >= 20, "heatmap too small");
+  });
+
+  await check("hand-over: 3D room, light clock, quantities, CSV and JSON exports", async () => {
+    await page.getByRole("tab", { name: /Hand-over/ }).click();
+    await page.getByText("What's on, hour by hour").waitFor();
+    await page.getByText("Quantities for this room size").waitFor();
+    await page.locator(".room-stage, .card").getByRole("button", { name: "3D", exact: true }).first().click();
+    await page.locator(".room3d canvas, .room3d .cap").first().waitFor({ timeout: 20_000 });
+    const api = briefUrl.replace("/brief/", "/api/briefs/");
+    const csv = await page.evaluate((u) => fetch(`${u}/export?format=csv`).then(async (r) => [r.status, await r.text()]), api);
+    assert(csv[0] === 200 && /SYNTHETIC/.test(csv[1]), `csv ${csv[0]} ${String(csv[1]).slice(0, 120)}`);
+    const json = await page.evaluate((u) => fetch(`${u}/export?format=json`).then((r) => r.status), api);
+    assert(json === 200, `json ${json}`);
+  });
+
+  await check("command palette opens with ⌘K and jumps to a page", async () => {
+    await page.keyboard.press("ControlOrMeta+k");
+    await page.getByRole("dialog", { name: "Command palette" }).waitFor();
+    await page.keyboard.type("method");
+    await page.keyboard.press("Enter");
+    await page.waitForURL(/\/method/);
+    await page.goto(briefUrl);
+  });
+
   await check("evidence: ledger verifies in the browser and replay rebuilds the spec", async () => {
     await page.getByRole("tab", { name: /Evidence/ }).click();
     await page.getByText("Agent execution trace").waitFor();
@@ -246,6 +276,23 @@ async function main() {
     await page.getByRole("button", { name: "Run both briefs" }).click();
     await page.getByText(/of \d+ spec lines differ between Maya and Jordan/).waitFor({ timeout: 40_000 });
     assert((await page.locator(".room svg").count()) === 2, "rooms missing");
+  });
+
+  await check("activity: spec history from the ledger and similar past clients", async () => {
+    await page.goto(briefUrl);
+    await page.getByRole("tab", { name: /Client & activity/ }).click();
+    await page.getByText("Spec history · from the ledger").waitFor();
+    await page.getByText("Clients like this one · your past briefs").waitFor();
+  });
+
+  await check("duet: two briefs merge into one room with verdicts per line", async () => {
+    await page.goto(`${BASE}/projects`);
+    await page.locator(".space3d").waitFor();
+    const ids = await page.evaluate(() => fetch("/api/space").then((r) => r.json()));
+    const list = ids.points ?? ids;
+    assert(list.length >= 2, `space has ${list.length} points`);
+    await page.goto(`${BASE}/compare?a=${list[0].id}&b=${list[1].id}`);
+    await page.getByText(/taste similarity/).waitFor({ timeout: 20_000 });
   });
 
   await check("owner can delete a brief, with its activity", async () => {

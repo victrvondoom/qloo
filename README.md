@@ -32,7 +32,26 @@ Taste agents assume the user's words carry their preferences. In design work the
 5. **Hand it over.** Direction, scenes and a zone-by-scene dimming table, palette, reference places, a buying list by category, an installer checklist, open risks, a client note. Print to PDF.
 6. **Send the client their room.** A revocable link: they see the plan in plain words on their phone, answer the question, react to lines; you watch it land in the activity feed.
 7. **See what moved it.** The influence map asks Qloo again with each of the client's loves left out and shows which lines each one decides ("Layering changes without Norah Jones"), plus how many lines survive dropping any single reference. Measured, not attributed by a model.
-8. **Prove it.** Pathways traces any line back to the words that produced it; the ledger verifies in any browser; replay rebuilds the spec from stored evidence.
+8. **Take the taste apart.** The Anatomy tab sends each love to Qloo on its own and compares the facets across domains: coherence, the conflicting pair and the "bridge" rooms both sides choose, a consensus core, bootstrap stability per line, flip distance, what music / screen / places alone would build, place-vs-tag corroboration and a niche index. Ten measurements, listed below.
+9. **Walk into the room, then hand it on.** A 3D room lit by the spec (orbit, dim, warm), a 24-hour light clock, lumen-method fitting counts for a room size, a fixture schedule CSV, a spec JSON, a mood card PNG, spec history from the ledger, similar past clients, a duet merge for couples, a 3D taste space of all your briefs, and a ⌘K palette.
+10. **Prove it.** Pathways traces any line back to the words that produced it; the ledger verifies in any browser; replay rebuilds the spec from stored evidence.
+
+## Twenty things: ten measurements, ten hand-overs
+
+**It measures** (Taste Anatomy, `src/lib/anatomy.ts`; each is a Qloo query or a resample of evidence already returned, ledgered, and never changes the spec):
+
+1. **Facets.** Each love goes to Qloo alone (music, screen & people, places & brands), each scored against the same city baseline.
+2. **Cross-domain agreement.** Cosine similarity of every pair of facets' atmosphere vectors, and a coherence score (the mean).
+3. **Conflict.** The least-agreeing pair, named with what each pulls toward.
+4. **Bridge rooms.** Qloo asked with both conflicting signals together; places that each facet also chose alone are marked "in both".
+5. **Consensus core.** Places chosen by a majority of facets independently, and the atmosphere of just that core.
+6. **Bootstrap stability.** 400 seeded resamples of the evidence; how often each line keeps its value, and the next most likely value.
+7. **Flip distance.** How many of the strongest places must stop showing a line's driving atmosphere before the value changes.
+8. **Domain-alone specs.** The spec built from each domain on its own, and how many domains agree per line.
+9. **Two evidence channels.** Whether place evidence and Qloo's taste tags independently support each leading atmosphere.
+10. **Niche index.** Jensen–Shannon divergence of the taste neighbourhood's atmosphere mix from the city's, plus mean popularity vs typical places.
+
+**It hands you:** a 3D room lit by the spec · progressive depth (Mainstream → Curated → Deep cut) · a duet merge for two people (per line: agree, leans A/B, middle ground) · a 24-hour light clock · fitting quantities by the lumen method (an estimate, assumptions shown) · a fixture schedule CSV (labelled synthetic in demo mode, carrying the ledger head) and spec JSON · a revocable client link · spec history from the ledger · a 3D taste space and similar past clients · a mood card PNG.
 
 ## How it stays honest
 

@@ -7,6 +7,7 @@ import { PRESETS } from "./presets";
 import { Timeline } from "./Timeline";
 import { useAgentStream } from "./useAgentStream";
 import { RoomStage } from "./brief/RoomStage";
+import { DuetPanel } from "./DuetPanel";
 import { buildDeepBrief } from "@/lib/deep/build";
 import { DIMENSION_BY_ID } from "@/lib/dimensions";
 import type { Brief } from "@/lib/types";
@@ -111,6 +112,7 @@ export function CompareView({ initialA, initialB }: { initialA?: Brief; initialB
           </div>
         ))}
       </div>
+      {both ? <DuetPanel key={`${briefA.id}-${briefB.id}`} a={briefA.id} b={briefB.id} /> : null}
       {both ? (
         <section className="card section">
           <div className="eyebrow">If you only listened to the words</div>

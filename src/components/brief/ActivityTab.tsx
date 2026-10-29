@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { postBrief, timeAgo } from "./api";
 import type { BriefEvent } from "@/lib/store";
+import { HistoryPanel, SimilarClients } from "./HistoryPanel";
 import type { Brief } from "@/lib/types";
 
 const LABEL: Record<string, (p: Record<string, unknown>, b: Brief) => string> = {
@@ -17,6 +18,7 @@ const LABEL: Record<string, (p: Record<string, unknown>, b: Brief) => string> = 
   depth_explored: (p) => `Explored depth ${p.level} (${p.crowdN} places${p.usable ? "" : ", too few"})`,
   depth_applied: (p) => `Spec switched to depth ${p.level}${Array.isArray(p.changed) && p.changed.length ? ` · changed ${p.changed.join(", ")}` : ""}`,
   prose_written: () => "Claude prose written for the hand-over",
+  anatomy: (p) => `Taste anatomy run: coherence ${Number(p.coherence).toFixed(2)}, ${p.core} core places, niche index ${p.niche}`,
   influence: (p) => `Influence measured: ${p.robust} of ${p.lines} lines survive dropping any one reference`,
 };
 
@@ -222,7 +224,11 @@ export function ActivityTab({ brief, canEdit, shared, onBrief }: { brief: Brief;
           {err ? <div className="err" style={{ marginTop: 10 }}>{err}</div> : null}
         </section>
       </div>
-      <Feed brief={brief} onRemoteChange={refresh} />
+      <div className="stack">
+        <Feed brief={brief} onRemoteChange={refresh} />
+        <SimilarClients brief={brief} />
+        <HistoryPanel brief={brief} />
+      </div>
     </div>
   );
 }
