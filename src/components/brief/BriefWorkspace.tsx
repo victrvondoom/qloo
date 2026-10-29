@@ -9,6 +9,7 @@ import { postBrief } from "./api";
 import { DeepBriefView } from "./DeepBriefView";
 import { DepthLadder } from "./DepthLadder";
 import { EvidenceTab } from "./EvidenceTab";
+import { InfluencePanel } from "./InfluencePanel";
 import { QuestionCard } from "./QuestionCard";
 import { RoomStage } from "./RoomStage";
 import { SpecList } from "./SpecList";
@@ -212,6 +213,7 @@ export function BriefWorkspace({ initial, canEdit, shared, llm }: { initial: Bri
               </div>
             ) : null}
             <NarrowingGraph key={focusLine ?? "none"} graph={graph} initialFocus={focusLine ? `s:${focusLine}` : undefined} />
+            <InfluencePanel brief={brief} canEdit={canEdit} onBrief={(b) => accept(b, "Influence measured")} />
           </div>
         ) : tab === "evidence" ? (
           <EvidenceTab brief={brief} canEdit={canEdit} />

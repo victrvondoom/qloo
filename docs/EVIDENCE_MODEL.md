@@ -86,6 +86,7 @@ Each `qloo_call` entry stores the SHA-256 of the response body and Qloo's reques
 | 10 | Depth layers compare like with like | the same popularity cap on crowd and baseline; same geography as the main run; local filtering is labelled | `depth-replay.test.ts` (every insights call in a layer carries the cap; fallback on a rejected parameter) |
 | 11 | Model-mapped place terms are visible and symmetric | `tagmap.ts` maps only terms the lexicon missed, ≤2 valid atmospheres each, cached 30 days; matches carry `source: "mapped"`; applied to taste-matched and baseline places alike; ledgered | `depth-replay.test.ts` tag-mapper tests |
 | 12 | Generated prose can't add facts | numbers and capitalised names must appear in the brief's fact sheet; otherwise the template text stays and the rejection is recorded | `deep.test.ts` grounding tests |
+| 14 | Influence is measured, not attributed | leave-one-out queries to Qloo (same scope, baseline, taste tags and answer), ledgered; the spec itself is not changed | `depth-replay.test.ts` influence tests; e2e |
 | 13 | A client's link shows only the client view | no brief id, owner hash, pasted message, ledger or trace; revocation 404s | `depth-replay.test.ts`, e2e |
 
 Client actions (answer, reactions) are ledgered as `client_input` with `via: "client"`, so the provenance of a line changed by the client's answer is visible in the bundle.

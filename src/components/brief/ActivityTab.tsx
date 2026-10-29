@@ -17,6 +17,7 @@ const LABEL: Record<string, (p: Record<string, unknown>, b: Brief) => string> = 
   depth_explored: (p) => `Explored depth ${p.level} (${p.crowdN} places${p.usable ? "" : ", too few"})`,
   depth_applied: (p) => `Spec switched to depth ${p.level}${Array.isArray(p.changed) && p.changed.length ? ` · changed ${p.changed.join(", ")}` : ""}`,
   prose_written: () => "Claude prose written for the hand-over",
+  influence: (p) => `Influence measured: ${p.robust} of ${p.lines} lines survive dropping any one reference`,
 };
 
 function SharePanel({ brief, initiallyShared }: { brief: Brief; initiallyShared: boolean }) {

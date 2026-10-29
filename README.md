@@ -31,7 +31,8 @@ Taste agents assume the user's words carry their preferences. In design work the
 4. **Go deeper.** Mainstream → Curated → Deep cut asks the same taste question among less popular places (both sides of the comparison), for reference rooms nobody else will have shown the client.
 5. **Hand it over.** Direction, scenes and a zone-by-scene dimming table, palette, reference places, a buying list by category, an installer checklist, open risks, a client note. Print to PDF.
 6. **Send the client their room.** A revocable link: they see the plan in plain words on their phone, answer the question, react to lines; you watch it land in the activity feed.
-7. **Prove it.** Pathways traces any line back to the words that produced it; the ledger verifies in any browser; replay rebuilds the spec from stored evidence.
+7. **See what moved it.** The influence map asks Qloo again with each of the client's loves left out and shows which lines each one decides ("Layering changes without Norah Jones"), plus how many lines survive dropping any single reference. Measured, not attributed by a model.
+8. **Prove it.** Pathways traces any line back to the words that produced it; the ledger verifies in any browser; replay rebuilds the spec from stored evidence.
 
 ## How it stays honest
 
@@ -60,7 +61,7 @@ Across four seeds B3 is 0.76–0.88 vs B0 0.39. **Not shown:** that the clarifyi
 | | |
 |---|---|
 | Qloo integration | Built to the documented contract and unit-tested. **Live calls not verified from this workspace** (no key; the proxy blocks Qloo). Run `npm run probe -- Chicago` with a key; it also checks the popularity filter the depth levels use. |
-| Tests | 131 unit/property/adversarial tests (both database drivers included) and a 29-check browser suite (designer flow, client link round-trip, isolation, tampering, mobile, dark mode). |
+| Tests | 133 unit/property/adversarial tests (both database drivers included) and a 30-check browser suite (designer flow, client link round-trip, isolation, tampering, mobile, dark mode). |
 | Human preference study | Not run. Protocol in `docs/EVALUATION_METHODOLOGY.md`. |
 | Deployment | Not verified from this workspace. Docker, any Node host, or serverless with libSQL/Turso: `docs/DEPLOYMENT.md`. |
 

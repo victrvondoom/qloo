@@ -595,3 +595,8 @@ pre.json { white-space: pre-wrap; word-break: break-word; background: var(--card
   .workspace, .brief-hero { display: block; }
 }
 .print-only { display: none; }
+
+/* influence matrix */
+.influence th { white-space: nowrap; }
+.inf-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--line-2); vertical-align: middle; }
+.inf-dot.on { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 0 4px var(--amber-glow); }

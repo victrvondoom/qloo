@@ -115,6 +115,10 @@ flowchart LR
 
 Level 0 is the main run. Levels 1 (Curated) and 2 (Deep cut) ask Qloo the same taste question restricted to places at or below a popularity cap — the median and 25th percentile of the main run's places, so the ladder adapts to whatever scale Qloo returns. The cap applies to **both** the taste-matched side and the city baseline, so the lift still compares like with like. If Qloo rejects `filter.popularity.max`, the layer fetches unfiltered pages and filters locally (`method: "client_filter"`), and says so. Layers with too few places are shown but marked thin or unusable; exploring never changes the spec until the designer applies a level.
 
+## Influence map
+
+`influence.ts` (on request, owner only) re-runs the taste-matched query once per resolved reference with that reference left out, keeping the geography, city baseline, taste tags and the client's answer fixed, and rebuilds the spec each time. A reference *decides* a line when its absence changes the value; its *push* is the score drop per atmosphere. Lines no single reference decides are counted as robust. Fragile lines feed the hand-over's open questions. Cost: one paged query per reference, all ledgered.
+
 ## The hand-over (deep brief)
 
 `deep/build.ts` turns a brief into the document a designer hands on, with no network calls: direction name and summary, what each word means, scenes, a zone-by-scene programming table, zones with plans and rules of thumb, palette, reference places (from the applied depth), a buying list by category (no brands), an installer checklist, open risks, and a client note. Every item says what it rests on: a spec line, the evidence, the client, or a labelled rule of thumb.

@@ -175,3 +175,29 @@ describe("tag mapper", () => {
     expect(b.ledger.some((e) => e.kind === "llm_call" && /place terms/.test(e.summary))).toBe(true);
   });
 });
+
+describe("influence map (leave-one-out)", () => {
+  it("measures which references decide which lines, ledgered, without touching the spec", async () => {
+    const { computeInfluence } = await import("@/lib/influence");
+    const { brief: next, influence } = await computeInfluence(brief, new FixtureTransport());
+    const used = brief.resolutions.filter((r) => r.usedAsSignal).length;
+    expect(influence.references).toHaveLength(used);
+    expect(influence.lines).toHaveLength(brief.spec.length);
+    expect(influence.robustLines).toBe(influence.lines.filter((l) => l.deciders.length === 0).length);
+    // every decider's alternative value really differs from the line's value
+    for (const r of influence.references) for (const d of r.decides) expect(d.without).not.toBe(brief.spec.find((l) => l.id === d.lineId)!.value);
+    // each leave-one-out query omits exactly that reference
+    const calls = next.ledger.slice(brief.ledger.length).filter((e) => e.kind === "qloo_call");
+    for (const r of influence.references) {
+      expect(calls.some((c) => !String((c.detail.params as Record<string, unknown>)["signal.interests.entities"]).includes(r.entity_id))).toBe(true);
+    }
+    expect(next.spec).toEqual(brief.spec);
+    expect((await verifyLedger(next.ledger)).ok).toBe(true);
+  });
+
+  it("refuses briefs without enough references or evidence", async () => {
+    const { computeInfluence } = await import("@/lib/influence");
+    const thin = await runBrief({ ...maya, loves: ["zzqv nonsense", "qqxx unknown"] }, () => {});
+    await expect(computeInfluence(thin, new FixtureTransport())).rejects.toThrow();
+  });
+});

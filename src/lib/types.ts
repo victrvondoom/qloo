@@ -359,12 +359,33 @@ export interface Brief {
   scope?: "city" | "weighted" | "global";
   /** Cross-domain taste tags as returned (kept so the run can be replayed from stored evidence). */
   tasteTags?: { name: string; affinity?: number }[];
+  /** Which loves moved which lines, measured by leaving each one out (on request). */
+  influence?: InfluenceMap;
   /** Progressively niche views of the same taste (level 0 = the main run). */
   depth?: DepthLayer[];
   /** Which depth level the spec was derived from (default 0). */
   appliedDepth?: 0 | 1 | 2;
   /** Place tags mapped to atmospheres by a model (only when the lexicon missed them). */
   tagMap?: { model: string; mapped: Record<string, DimensionId[]> };
+}
+
+export interface InfluenceMap {
+  computedAt: string;
+  method: "leave-one-out";
+  references: {
+    entity_id: string;
+    name: string;
+    /** False when too few places came back without it to say anything. */
+    usable: boolean;
+    crowdN: number;
+    /** Score drop per atmosphere when this reference is removed (positive = it pushes toward that atmosphere). */
+    push: Record<DimensionId, number>;
+    /** Lines whose value changes without this reference, and what they become. */
+    decides: { lineId: string; without: string }[];
+  }[];
+  lines: { lineId: string; category: string; value: string; deciders: string[]; robust: boolean }[];
+  robustLines: number;
+  evidence: number[];
 }
 
 export interface ClientReaction {

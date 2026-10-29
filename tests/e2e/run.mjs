@@ -140,6 +140,12 @@ async function main() {
     assert(/warm/.test(text) && /Colour temperature/.test(text), `pathway: ${text}`);
   });
 
+  await check("influence: leaving each love out measures which lines it decides", async () => {
+    await page.getByRole("button", { name: /Measure influence/ }).click();
+    await page.getByText(/lines survive dropping any one reference/).first().waitFor({ timeout: 30_000 });
+    assert((await page.locator(".influence tbody tr").count()) >= 2, "influence matrix missing");
+  });
+
   await check("evidence: ledger verifies in the browser and replay rebuilds the spec", async () => {
     await page.getByRole("tab", { name: /Evidence/ }).click();
     await page.getByText("Agent execution trace").waitFor();

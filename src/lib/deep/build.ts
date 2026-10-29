@@ -305,6 +305,12 @@ function risks(b: Brief): DeepBrief["risks"] {
   for (const w of b.warnings.slice(0, 4)) out.push({ text: w, level: "check" });
   if (b.question && !b.question.answer) out.push({ text: `Still to ask: ${b.question.prompt} (${b.question.optionA.name} or ${b.question.optionB.name}). About ${b.question.expectedChange.toFixed(1)} lines depend on it.`, level: "check" });
   for (const l of b.spec.filter((l) => l.confidence === "low" && l.basis !== "literal_fallback").slice(0, 3)) out.push({ text: `Confirm "${l.category}" with the client: the evidence is weak here.`, level: "check" });
+  if (b.influence) {
+    const nameOf = (id: string) => b.influence!.references.find((r) => r.entity_id === id)?.name ?? id;
+    for (const l of b.influence.lines.filter((x) => !x.robust).slice(0, 3)) {
+      out.push({ text: `"${l.category}" changes without ${l.deciders.map(nameOf).join(" or ")}: it hangs on one reference. Worth confirming with ${b.input.clientLabel}.`, level: "check" });
+    }
+  }
   const layer = b.depth?.find((d) => d.level === (b.appliedDepth ?? 0));
   if (layer?.note) out.push({ text: `${layer.label}: ${layer.note}`, level: "info" });
   if (b.scope && b.scope !== "city") out.push({ text: `The place evidence is ${b.scope === "weighted" ? `weighted toward ${b.input.city}` : "from anywhere"}, not only ${b.input.city}.`, level: "info" });
