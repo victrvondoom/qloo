@@ -12,6 +12,7 @@ import type { CompiledSpec } from "@/lib/compiler";
 import type { SensitivityReport } from "@/lib/sensitivity";
 import type { SpecDiff } from "@/lib/spec-diff";
 import type { Verification } from "@/lib/verify-spec";
+import type { WhyAnswer, WhyNotAnswer } from "@/lib/challenge";
 import type { Brief, BriefInput } from "@/lib/types";
 
 interface Report {
@@ -48,6 +49,9 @@ export function SpecChallenge() {
   const [proposal, setProposal] = useState<Proposal>();
   const [decision, setDecision] = useState<string>();
   const [sens, setSens] = useState<SensitivityReport>();
+  const [why, setWhy] = useState<WhyAnswer>();
+  const [whyNot, setWhyNot] = useState<WhyNotAnswer>();
+  const [approved, setApproved] = useState<string>();
   const [busy, setBusy] = useState<string>();
   const [err, setErr] = useState<string>();
 
@@ -82,6 +86,16 @@ export function SpecChallenge() {
     setReports({ maya: r1, jordan: r2 });
   };
   const verify = () => act("verify", async () => { await load(a!, b!); setVerified(true); });
+  const askWhy = () => act("why", async () => setWhy(await getJson<WhyAnswer>(`/api/briefs/${a!.id}/challenge`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ op: "why", lineId: "cct" }) })));
+  const askWhyNot = () => act("whynot", async () => setWhyNot(await getJson<WhyNotAnswer>(`/api/briefs/${a!.id}/challenge`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ op: "why_not", lineId: "cct", alternative: "4000K" }) })));
+  const approve = () =>
+    act("approve", async () => {
+      const post = (body: unknown) => getJson(`/api/briefs/${a!.id}/review`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const rep = await getJson<{ spec: CompiledSpec }>(`/api/briefs/${a!.id}/spec`);
+      for (const l of rep.spec.lines) await post({ lineId: l.id, action: "accept" });
+      await post({ approve: true, note: "Approved in the Proof Lab challenge" });
+      setApproved("Approved by a human reviewer (you). This records that a person reviewed this version; it is not a professional certification. The version is now locked.");
+    });
   const change = () =>
     act("change", async () => {
       setDecision(undefined);
@@ -100,7 +114,7 @@ export function SpecChallenge() {
     });
 
   const names = Object.fromEntries((reports?.maya?.spec.lines ?? []).map((l) => [l.id, l.category]));
-  const step = !ready ? 1 : !verified ? 3 : !proposal ? 4 : !sens ? 5 : 6;
+  const step = !ready ? 1 : !verified ? 3 : !proposal ? 4 : !sens ? 6 : 7;
 
   return (
     <section className="card section" id="challenge" aria-labelledby="challenge-h">
@@ -180,8 +194,34 @@ export function SpecChallenge() {
 
         {verified ? (
           <li>
+            <h3 style={{ margin: "0 0 6px" }}>4 · Challenge a recommendation: “Why this colour temperature?”</h3>
             <div className="row">
-              <button type="button" className="btn primary" onClick={change} disabled={busy === "change"}>{busy === "change" ? "Running the agent…" : `4 · Change one preference (${a!.input.loves.at(-1)} → Kendrick Lamar)`}</button>
+              <button type="button" className="btn primary" onClick={askWhy} disabled={busy === "why"}>Why this?</button>
+              <button type="button" className="btn" onClick={askWhyNot} disabled={busy === "whynot"}>Why not 4000K?</button>
+            </div>
+            {why ? (
+              <div className="callout" aria-label="Why this" style={{ marginTop: 8 }}>
+                <b>{why.value}</b>: {why.decidedBy.summary}
+                <ul className="small">
+                  <li>Rule {why.decidedBy.rule}; the client said {why.clientStatements.join("; ") || "nothing relevant"}.</li>
+                  <li>Constraints: {why.constraints.length ? why.constraints.map((c) => `${c.text} (${c.held ? "held" : "NOT held"})`).join("; ") : "no written limit on this line"}.</li>
+                  <li>Alternatives: {why.alternatives.map((x) => `${x.verdict} ${x.value.slice(0, 40)}`).join(" · ")}.</li>
+                </ul>
+              </div>
+            ) : null}
+            {whyNot ? (
+              <div className="callout" aria-label="Why not that" style={{ marginTop: 8 }}>
+                <b>{whyNot.verdict}</b>: {whyNot.reasons.join(" ")}
+                <p className="small">{whyNot.evidenceView}</p>
+              </div>
+            ) : null}
+          </li>
+        ) : null}
+
+        {verified ? (
+          <li>
+            <div className="row">
+              <button type="button" className="btn primary" onClick={change} disabled={busy === "change"}>{busy === "change" ? "Running the agent…" : `5 · Change one preference (${a!.input.loves.at(-1)} → Kendrick Lamar)`}</button>
             </div>
             {proposal ? (
               <div style={{ marginTop: 10 }}>
@@ -203,7 +243,7 @@ export function SpecChallenge() {
         {proposal ? (
           <li>
             <div className="row">
-              <button type="button" className="btn primary" onClick={stress} disabled={busy === "stress"}>{busy === "stress" ? "Asking Qloo without each reference…" : "5 · Remove one cultural signal at a time"}</button>
+              <button type="button" className="btn primary" onClick={stress} disabled={busy === "stress"}>{busy === "stress" ? "Asking Qloo without each reference…" : "6 · Remove one cultural signal at a time"}</button>
             </div>
             {sens ? <div style={{ marginTop: 10 }}><SensitivityView s={sens} /></div> : null}
           </li>
@@ -211,8 +251,12 @@ export function SpecChallenge() {
 
         {sens ? (
           <li>
-            <h3 style={{ margin: "0 0 6px" }}>6 · Export the professional specification</h3>
+            <h3 style={{ margin: "0 0 6px" }}>7 · Approve and export the professional specification</h3>
             <div className="row">
+              <button type="button" className="btn" onClick={approve} disabled={busy === "approve" || Boolean(approved)}>{busy === "approve" ? "Approving…" : "Accept every line and approve"}</button>
+            </div>
+            {approved ? <p role="status" className="small">{approved}</p> : null}
+            <div className="row" style={{ marginTop: 8 }}>
               <a className="btn primary" href={`/api/briefs/${a!.id}/spec?format=html`} target="_blank" rel="noreferrer">Open printable document</a>
               <a className="btn" href={`/api/briefs/${a!.id}/spec?format=json&download=1`}>JSON</a>
               <a className="btn" href={`/api/briefs/${a!.id}/spec?format=csv&download=1`}>CSV</a>
@@ -221,7 +265,7 @@ export function SpecChallenge() {
           </li>
         ) : null}
       </ol>
-      <p className="tiny muted" aria-live="polite">Step {step} of 6.</p>
+      <p className="tiny muted" aria-live="polite">Step {step} of 7.</p>
     </section>
   );
 }

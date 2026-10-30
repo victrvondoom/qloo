@@ -174,6 +174,32 @@ async function main() {
     assert(cs === 200 && csv.split("\n").length >= 8 && /document_status/.test(csv), "CSV export incomplete");
   });
 
+  await check("specification tab: challenge a line (why, why not, apply, prove, review) from the UI", async () => {
+    await page.getByRole("tab", { name: /^Specification/ }).click();
+    const sec = page.locator("section[aria-labelledby=chal-h]");
+    await sec.getByRole("button", { name: "Why this?" }).click();
+    await sec.getByLabel("Why this").getByText(/Rule: rulebook/).waitFor();
+    await sec.getByLabel("Alternative to test").fill("4000K");
+    await sec.getByRole("button", { name: "Why not that?" }).click();
+    await sec.getByLabel("Why not that").getByText(/BLOCKED/).waitFor();
+    await sec.getByLabel("Alternative to test").fill("CRI 140");
+    await sec.locator("select").selectOption({ label: "Colour rendering" });
+    await sec.getByRole("button", { name: "Why not that?" }).click();
+    await sec.getByLabel("Why not that").getByText(/not possible/).waitFor();
+    await sec.getByLabel("Alternative to test").fill("CRI 99");
+    await sec.getByRole("button", { name: "Why not that?" }).click();
+    await sec.getByLabel("Why not that").getByText(/ALLOWED/).waitFor();
+    await sec.getByRole("button", { name: "Apply this alternative" }).click();
+    await sec.getByText(/Applied: CRI 99\+/).waitFor();
+    await sec.getByRole("button", { name: "Prove it" }).click();
+    await sec.getByLabel("Prove it").getByText(/DESIGNER_OVERRIDE|replaced the rulebook/).first().waitFor();
+    await sec.getByRole("button", { name: "Request clarification" }).click();
+    await sec.getByText(/Give a reason/).first().waitFor();
+    await sec.getByRole("button", { name: "Accept", exact: true }).click();
+    await sec.getByText(/Accept: recorded/).waitFor();
+    assert(/approved/.test(await page.locator("table[aria-label='Specification lines']").innerText()), "line state should show approved");
+  });
+
   await check("hand-over: 3D room, light clock, quantities, CSV and JSON exports", async () => {
     await page.getByRole("tab", { name: /Hand-over/ }).click();
     await page.getByText("What's on, hour by hour").waitFor();
@@ -446,20 +472,27 @@ async function main() {
     await ch.getByRole("button", { name: "3 · Verify requirements" }).click();
     await ch.getByRole("table", { name: "Verification findings" }).first().waitFor({ timeout: 20_000 });
     assert((await ch.getByText(/Constraint correctness: pass/i).count()) >= 2, "written limits should pass for both clients");
-    await ch.getByRole("button", { name: /4 · Change one preference/ }).click();
+    await ch.getByRole("button", { name: "Why this?" }).click();
+    await ch.getByLabel("Why this").getByText(/Rule rulebook/).waitFor();
+    await ch.getByRole("button", { name: "Why not 4000K?" }).click();
+    await ch.getByLabel("Why not that").getByText(/BLOCKED/).waitFor();
+    assert(/written limit|warm word|3000K/.test(await ch.getByLabel("Why not that").innerText()), "blocked reason must name the limit");
+    await ch.getByRole("button", { name: /5 · Change one preference/ }).click();
     await ch.getByRole("table", { name: "Before and after" }).waitFor({ timeout: 40_000 });
     const diff = await ch.innerText();
     assert(/Reference “Norah Jones” → “Kendrick Lamar”/.test(diff) && /Written limits unchanged/.test(diff), "diff does not show the change and the preserved limits");
     await ch.getByRole("button", { name: "Accept revision" }).click();
     await ch.getByText(/Accepted: the revised brief/).waitFor();
-    await ch.getByRole("button", { name: /5 · Remove one cultural signal/ }).click();
+    await ch.getByRole("button", { name: /6 · Remove one cultural signal/ }).click();
     await ch.getByText(/of reference × line pairs unchanged|Not enough places/).first().waitFor({ timeout: 40_000 });
     assert(/Written limits held in every recomputation: yes/.test(await ch.innerText()), "limits must hold in every recomputation");
+    await ch.getByRole("button", { name: "Accept every line and approve" }).click();
+    await ch.getByText(/Approved by a human reviewer \(you\)/).waitFor();
     const link = ch.getByRole("link", { name: "Open printable document" });
     await link.waitFor();
     const href = await link.getAttribute("href");
     const html = await page.evaluate((u) => fetch(u).then((r) => r.text()), href);
-    assert(/SYNTHETIC DATA/.test(html) && /Revision summary/.test(html), "exported document incomplete");
+    assert(/SYNTHETIC DATA/.test(html) && /Revision summary/.test(html) && /Approved by a human reviewer/.test(html) && /Review history/.test(html) && /not a professional certification/.test(html), "exported document incomplete");
   });
 
   await check("oversized request body is rejected", async () => {

@@ -3,19 +3,21 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { postBrief } from "./api";
+import { LineChallenge } from "./LineChallenge";
 import { DiffView, SensitivityView, StatusBanner, VerificationView } from "./SpecViews";
 import type { CompiledSpec } from "@/lib/compiler";
 import type { SensitivityReport } from "@/lib/sensitivity";
 import type { SpecDiff } from "@/lib/spec-diff";
 import type { RevisionRow } from "@/lib/store";
 import type { Verification } from "@/lib/verify-spec";
-import type { Brief } from "@/lib/types";
+import type { Brief, ReviewEntry, ReviewState } from "@/lib/types";
 
 interface Report {
   spec: CompiledSpec;
   verification: Verification;
   revision?: { row: RevisionRow; diff: SpecDiff };
   sensitivity?: SensitivityReport;
+  review: { states: Record<string, ReviewState>; entries: ReviewEntry[]; approval?: { at: string; specVersionId: string; note?: string }; approvalValid: boolean; locked: boolean };
   canEdit: boolean;
 }
 interface Proposal {
@@ -105,6 +107,15 @@ export function SpecificationPanel({ brief, canEdit, onBrief }: { brief: Brief; 
       if (action !== "accept") setProposal(undefined);
       void r;
     });
+  const [note, setNote] = useState("");
+  const approve = () =>
+    act("approve", async () => {
+      onBrief((await postBrief(`/api/briefs/${brief.id}/review`, { approve: true, note })).brief);
+    });
+  const changed = (b?: Brief) => {
+    if (b) onBrief(b);
+    void load();
+  };
   const sensitivity = () =>
     act("sensitivity", async () => {
       onBrief((await postBrief(`/api/briefs/${brief.id}/influence`, {})).brief);
@@ -161,7 +172,7 @@ export function SpecificationPanel({ brief, canEdit, onBrief }: { brief: Brief; 
                   <td className="small mono">{l.machine.kind === "text" ? "–" : l.machine.kind === "cct" ? `${l.machine.min === l.machine.max ? l.machine.min : `${l.machine.min}–${l.machine.max}`} K` : l.machine.kind === "cri" ? `Ra ≥ ${l.machine.min}` : l.machine.kind === "dimming" ? (l.machine.floor ? `≤ ${l.machine.floor} %` : "–") : l.machine.target ? `${l.machine.target} lx` : "–"}</td>
                   <td className="small">{l.basis.replace(/_/g, " ")} · {l.confidence}</td>
                   <td className="small mono">{l.evidenceIds.length ? l.evidenceIds.map((e) => `#${e}`).join(" ") : "–"}</td>
-                  <td className="small">{l.review}</td>
+                  <td className="small">{report.review.states[l.id]?.replace(/_/g, " ").toLowerCase()}{l.override ? " · overridden" : ""}</td>
                 </tr>
               ))}
             </tbody>
@@ -173,7 +184,34 @@ export function SpecificationPanel({ brief, canEdit, onBrief }: { brief: Brief; 
         </details>
       </section>
 
+      {canEdit ? <LineChallenge brief={brief} spec={spec} states={report.review.states} locked={report.review.locked} onChanged={changed} /> : null}
+
       {canEdit ? (
+        <section className="card" aria-labelledby="approve-h">
+          <div className="eyebrow">Approve</div>
+          <h2 id="approve-h" style={{ margin: "0 0 6px" }}>Final review by a person</h2>
+          {report.review.approval ? (
+            <p className="small" role="status">
+              <b>{report.review.approvalValid ? "Approved" : "Approved an earlier version"}</b> by a human reviewer on {new Date(report.review.approval.at).toLocaleString()} (version {report.review.approval.specVersionId.slice(0, 10)}). This version is locked; a change is a revision. This records that a person reviewed it. It is not a professional certification.
+            </p>
+          ) : (
+            <>
+              <p className="small muted">Every line must be approved and verification must have no errors. Approval means a human reviewed this exact version; it is not a certification, and it locks the version.</p>
+              <p className="small">{Object.values(report.review.states).filter((s) => s === "APPROVED").length} of {spec.lines.length} lines approved.</p>
+              <label className="field"><span>Approval note (optional)</span><input type="text" value={note} maxLength={300} onChange={(e) => setNote(e.target.value)} /></label>
+              <button type="button" className="btn primary" onClick={approve} disabled={busy === "approve"}>Approve this specification</button>
+            </>
+          )}
+          {report.review.entries.length ? (
+            <details style={{ marginTop: 8 }}>
+              <summary className="small muted">Review history ({report.review.entries.length})</summary>
+              <ol className="small">{report.review.entries.map((e) => <li key={e.seq}>{new Date(e.at).toLocaleString()} · {e.category}: {e.action.replace(/_/g, " ")} ({e.from} → {e.to}){e.note ? ` · ${e.note}` : ""}</li>)}</ol>
+            </details>
+          ) : null}
+        </section>
+      ) : null}
+
+      {canEdit && !report.review.locked ? (
         <section className="card" aria-labelledby="revise-h">
           <div className="eyebrow">Challenge it</div>
           <h2 id="revise-h" style={{ margin: "0 0 6px" }}>What if the client changes their mind?</h2>
