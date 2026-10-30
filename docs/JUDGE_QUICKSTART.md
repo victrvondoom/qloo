@@ -11,7 +11,20 @@ Clients describe rooms with words like "warm" and "modern", and each word has se
 - **Locally (about a minute):** `npm ci && npm run demo`, then open <http://localhost:3000>. It runs on synthetic data and says so on every screen. Needs Node 22.13+.
 - **A public URL:** none is claimed. Deployment is documented in `docs/DEPLOYMENT.md`; if a URL appears in the Devpost entry, `npm run release:check` with `TASTESPEC_PUBLIC_URL` set tests it.
 
-## The three-minute walk-through
+## The 90-second challenge (start here)
+
+Open **Proof Lab** (`/lab`). The first card is *The two-client specification challenge*: both clients say "warm, modern" and also wrote a requirement (editable: `Light between 2700K and 3000K, minimum CRI 90.`).
+
+1. **Generate specifications.** The real agent runs for both. The mode is shown (DEMO fixtures labelled synthetic, or LIVE).
+2. **Evidence.** Per client: Qloo requests, ledger entries, and the atmospheres their taste neighbourhood over-represents against the city baseline.
+3. **Verify requirements.** The real verifier runs: seven checks (constraints, evidence, provenance, consistency, professional review, revision safety, unknowns), typed findings per line, and "not a certificate".
+4. **Change one preference.** Swap one of Maya's references; the agent reruns and a semantic diff shows what changed, what was preserved, why, and that the written limits are unchanged. Accept or reject.
+5. **Remove one cultural signal at a time.** Qloo is asked again without each reference; each line is robust, or hangs on one reference. The written limits must hold in every recomputation.
+6. **Export.** The printable specification (print to PDF), JSON and CSV, with verification status, evidence, assumptions and unknowns.
+
+In a brief, the **Specification** tab does the same for your own briefs, plus revision history and *return to previous version*.
+
+## The longer guided run
 
 Open **Proof Lab** (`/lab`) and use the guided run at the top.
 
@@ -34,6 +47,7 @@ Qloo supplies the evidence: which places people with the client's taste choose, 
 
 | | Status |
 |---|---|
+| Compiled specifications, verification, revisions, sensitivity | **Implemented and tested on synthetic data.** On fixture data the exported document says SYNTHETIC DATA. Not exercised against live Qloo. |
 | Everything you see in demo mode | **Synthetic.** Places, ids and scores come from a fictional test world; briefs are labelled FIXTURE. |
 | Benchmark (`reports/benchmark-summary.md`) | **Synthetic.** 64 scenarios, 4 seeds, scored against an oracle that uses our own rulebook. It measures taste recovery through the mapping, not design quality. |
 | Qloo integration | **CONTRACT TESTED** against recorded-shape stand-ins. **NOT LIVE VERIFIED:** no key or network was available. `npm run verify:qloo-live` does it in one command. |

@@ -37,7 +37,7 @@ const built = run("production build", "npm", ["run", "build"], 600_000);
 
 // 2. Files
 add("license file present", existsSync("LICENSE") && /permission is hereby granted|MIT|Apache/i.test(readFileSync("LICENSE", "utf8")) ? "PASS" : "FAIL", "LICENSE");
-const need = ["README.md", "docs/DEPLOYMENT.md", "docs/JUDGE_QUICKSTART.md", "docs/HUMAN_EVALUATION.md", "docs/QLOO_LIVE_VERIFICATION.md", "docs/SUBMISSION.md", "docs/RELEASE_CHECKLIST.md", "docs/AUTONOMOUS_SESSION.md"];
+const need = ["README.md", "docs/DEPLOYMENT.md", "docs/JUDGE_QUICKSTART.md", "docs/HUMAN_EVALUATION.md", "docs/QLOO_LIVE_VERIFICATION.md", "docs/SUBMISSION.md", "docs/RELEASE_CHECKLIST.md", "docs/AUTONOMOUS_SESSION.md", "docs/COMPETITOR_INTELLIGENCE_2026.md", "docs/DIFFERENTIATION_STRATEGY.md", "docs/SPECIFICATION_COMPILER.md", "docs/SPEC_VERIFICATION.md"];
 const missing = need.filter((f) => !existsSync(f));
 add("submission documents present", missing.length ? "FAIL" : "PASS", missing.length ? `missing: ${missing.join(", ")}` : `${need.length} files`);
 const deploy = ["Dockerfile", "docker-compose.yml", "vercel.json", ".github/workflows/ci.yml"].filter((f) => !existsSync(f));

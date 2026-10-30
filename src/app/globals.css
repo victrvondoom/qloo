@@ -669,3 +669,6 @@ pre.json { white-space: pre-wrap; word-break: break-word; background: var(--card
 .tour-panel { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); min-height: 220px; }
 .tour-panel h3 { margin-top: 0; }
 @media (max-width: 640px) { .tour-steps .btn { padding: 6px 9px; font-size: 12px; } }
+
+/* Specification views: long pills and buttons wrap instead of widening the page */
+#challenge .pill, #challenge .btn, [aria-label="Verification checks"] .pill, [aria-label="Proposed revision"] .btn { white-space: normal; max-width: 100%; text-align: left; height: auto; }

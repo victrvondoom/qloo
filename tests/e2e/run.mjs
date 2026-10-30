@@ -154,6 +154,26 @@ async function main() {
     assert((await page.locator(".heat-cell").count()) >= 20, "heatmap too small");
   });
 
+  await check("specification tab: verify runs the validator; HTML, JSON and CSV exports carry evidence, status and disclosures", async () => {
+    await page.getByRole("tab", { name: /^Specification/ }).click();
+    await page.getByRole("button", { name: "Verify specification" }).click();
+    await page.getByRole("table", { name: "Specification lines" }).waitFor();
+    await page.getByRole("table", { name: "Verification findings" }).waitFor();
+    const text = await page.locator("main").innerText();
+    assert(/Constraint correctness/i.test(text) && /Evidence integrity/i.test(text) && /not a certificate/i.test(text), "verification summary incomplete");
+    const id = page.url().split("/brief/")[1];
+    const get = (f) => page.evaluate(([i, fmt]) => fetch(`/api/briefs/${i}/spec?format=${fmt}`).then(async (r) => [r.status, r.headers.get("content-type"), await r.text()]), [id, f]);
+    const [hs, hct, html] = await get("html");
+    assert(hs === 200 && /text\/html/.test(hct), `html ${hs} ${hct}`);
+    for (const t of ["not an engineering design", "SYNTHETIC DATA", "Verification", "Unknown to this document", "Evidence"]) assert(html.includes(t), `HTML export missing "${t}"`);
+    const [js, , json] = await get("json");
+    const x = JSON.parse(json);
+    assert(js === 200 && x.schema === "tastespec.export/1" && x.spec.evidenceRefs.length > 0 && x.spec.lines.length === 7, "JSON export incomplete");
+    assert(x.spec.lines.filter((l) => l.basis === "qloo_evidence").every((l) => l.evidenceIds.length > 0), "evidence line without evidence ids");
+    const [cs, , csv] = await get("csv");
+    assert(cs === 200 && csv.split("\n").length >= 8 && /document_status/.test(csv), "CSV export incomplete");
+  });
+
   await check("hand-over: 3D room, light clock, quantities, CSV and JSON exports", async () => {
     await page.getByRole("tab", { name: /Hand-over/ }).click();
     await page.getByText("What's on, hour by hour").waitFor();
@@ -416,6 +436,32 @@ async function main() {
     assert(exp.status() === 404, `export must be off without STUDY_ADMIN_TOKEN, got ${exp.status()}`);
   });
 
+  await check("two-client specification challenge: generate, verify, change one preference, accept, remove one signal, export", async () => {
+    await page.goto(`${BASE}/lab`);
+    const ch = page.locator("#challenge");
+    await ch.getByText(/Both say/).waitFor();
+    await ch.getByRole("button", { name: "1 · Generate specifications" }).click();
+    await ch.getByText(/Qloo request\(s\), \d+ ledger entries/).first().waitFor({ timeout: 40_000 });
+    assert((await ch.getByText("FIXTURE · synthetic").count()) >= 2, "synthetic label missing");
+    await ch.getByRole("button", { name: "3 · Verify requirements" }).click();
+    await ch.getByRole("table", { name: "Verification findings" }).first().waitFor({ timeout: 20_000 });
+    assert((await ch.getByText(/Constraint correctness: pass/i).count()) >= 2, "written limits should pass for both clients");
+    await ch.getByRole("button", { name: /4 · Change one preference/ }).click();
+    await ch.getByRole("table", { name: "Before and after" }).waitFor({ timeout: 40_000 });
+    const diff = await ch.innerText();
+    assert(/Reference “Norah Jones” → “Kendrick Lamar”/.test(diff) && /Written limits unchanged/.test(diff), "diff does not show the change and the preserved limits");
+    await ch.getByRole("button", { name: "Accept revision" }).click();
+    await ch.getByText(/Accepted: the revised brief/).waitFor();
+    await ch.getByRole("button", { name: /5 · Remove one cultural signal/ }).click();
+    await ch.getByText(/of reference × line pairs unchanged|Not enough places/).first().waitFor({ timeout: 40_000 });
+    assert(/Written limits held in every recomputation: yes/.test(await ch.innerText()), "limits must hold in every recomputation");
+    const link = ch.getByRole("link", { name: "Open printable document" });
+    await link.waitFor();
+    const href = await link.getAttribute("href");
+    const html = await page.evaluate((u) => fetch(u).then((r) => r.text()), href);
+    assert(/SYNTHETIC DATA/.test(html) && /Revision summary/.test(html), "exported document incomplete");
+  });
+
   await check("oversized request body is rejected", async () => {
     const r = await page.request.post(`${BASE}/api/run`, { data: { loves: ["x".repeat(40_000)] } });
     assert(r.status() === 413, `expected 413, got ${r.status()}`);
@@ -445,6 +491,15 @@ async function main() {
       assert(sw <= 391, `scrollWidth ${sw}`);
     });
   }
+  await check("mobile: the challenge stays within the screen after it has run", async () => {
+    await m.goto(`${BASE}/lab`);
+    await m.locator("#challenge").getByRole("button", { name: "1 · Generate specifications" }).click();
+    await m.locator("#challenge").getByRole("button", { name: "3 · Verify requirements" }).waitFor({ timeout: 40_000 });
+    await m.locator("#challenge").getByRole("button", { name: "3 · Verify requirements" }).click();
+    await m.locator("#challenge").getByRole("table", { name: "Verification findings" }).first().waitFor({ timeout: 20_000 });
+    const sw = await m.evaluate(() => document.documentElement.scrollWidth);
+    assert(sw <= 391, `scrollWidth ${sw}`);
+  });
   await check("keyboard: skip link is first focusable and targets main", async () => {
     await m.goto(BASE);
     await m.keyboard.press("Tab");

@@ -53,6 +53,18 @@ Taste agents assume the user's words carry their preferences. In design work the
 
 **It hands you:** a 3D room lit by the spec · progressive depth (Mainstream → Curated → Deep cut) · a duet merge for two people (per line: agree, leans A/B, middle ground) · a 24-hour light clock · fitting quantities by the lumen method (an estimate, assumptions shown) · a fixture schedule CSV (labelled synthetic in demo mode, carrying the ledger head) and spec JSON · a revocable client link · spec history from the ledger · a 3D taste space and similar past clients · a mood card PNG.
 
+## A specification you can verify, revise and export
+
+Tastespec is a **cultural-intelligence-powered specification compiler**, not another AI interior designer. Open a brief's **Specification** tab (or the two-client challenge at the top of `/lab`):
+
+- **Compile** the agent's result into a versioned package: typed values with units, the limits that bound each line, evidence ids, the rule that produced it, assumptions and unknowns (`docs/SPECIFICATION_COMPILER.md`).
+- **Verify** it with a deterministic checker: seven dimensions, typed findings per line (`ERROR`, `WARNING`, `NEEDS_REVIEW`, `PASS`), repairs, and no certificate (`docs/SPEC_VERIFICATION.md`).
+- **Challenge** it: change a reference, a requirement, or remove all Qloo evidence; the real agent reruns and a semantic diff shows what changed, what was preserved and why. Accept, reject, or return to the previous version.
+- **Stress** it: remove one reference at a time and see which lines hang on a single one.
+- **Export** it as a print-ready document (save as PDF), JSON or CSV. A failing specification exports only as a DRAFT.
+
+Competitor research and where this differs: `docs/COMPETITOR_INTELLIGENCE_2026.md`, `docs/DIFFERENTIATION_STRATEGY.md`.
+
 ## What the client writes down outranks the evidence
 
 If the message contains a colour-temperature limit ("between 2700K and 3000K", "no cooler than 3000K"), a minimum CRI ("CRI of at least 95", "Ra 90 or above"), a dimming floor ("must dim to 5%", "dimming range 5% to 100%"), a dimming requirement, or a lux target ("about 250 lux"), it is parsed by fixed patterns (never by a model), shown as a **Hard limits** chip before you build, stored on the brief and applied inside the rulebook. Each is its own quantity and none is converted into another: lumens are noted but never turned into a room target without room and fitting data, and CRI is not presented as the whole of colour quality. Contradictory or impossible requirements (two different CRI minimums, a 0% dimming floor, a minimum above a maximum) are shown in red, stop the build, and are refused again on the server. They beat both Qloo evidence and the warm-word floor. A line it changes is marked `constraint` with a note saying what the rulebook would have said; the literal baseline, the "without Qloo" recompute, replay, the influence map and the duet merge all honour it, and a spec outside it fails validation. Tested by a 300-case property, an end-to-end run and the benchmark's `explicit_range` scenarios.

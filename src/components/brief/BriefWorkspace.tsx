@@ -14,12 +14,13 @@ import { AnatomyPanel } from "./AnatomyPanel";
 import { QuestionCard } from "./QuestionCard";
 import { RoomStage } from "./RoomStage";
 import { SpecList } from "./SpecList";
+import { SpecificationPanel } from "./SpecificationPanel";
 import { buildDeepBrief } from "@/lib/deep/build";
 import { buildTasteGraph } from "@/lib/graph";
 import { ROOM_LABEL, TRADE_LABEL } from "@/lib/rulebooks";
 import type { Brief } from "@/lib/types";
 
-type Tab = "spec" | "handover" | "anatomy" | "pathways" | "evidence" | "activity";
+type Tab = "spec" | "compiled" | "handover" | "anatomy" | "pathways" | "evidence" | "activity";
 
 export function BriefWorkspace({ initial, canEdit, shared, llm }: { initial: Brief; canEdit: boolean; shared: boolean; llm: string | null }) {
   const [brief, setBrief] = useState(initial);
@@ -62,6 +63,7 @@ export function BriefWorkspace({ initial, canEdit, shared, llm }: { initial: Bri
 
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: "spec", label: "Spec", count: brief.spec.length },
+    { id: "compiled", label: "Specification" },
     { id: "handover", label: "Hand-over" },
     { id: "anatomy", label: "Anatomy" },
     { id: "pathways", label: "Pathways", count: graph.nodes.length },
@@ -184,6 +186,8 @@ export function BriefWorkspace({ initial, canEdit, shared, llm }: { initial: Bri
             busy={busy}
             decide={(lineId, status, revisedTo) => act(async () => (await postBrief(`/api/briefs/${brief.id}/decision`, { lineId, status, revisedTo })).brief, status === "accepted" ? "Accepted" : status === "revised" ? "Revision saved" : "Back to proposed")}
           />
+        ) : tab === "compiled" ? (
+          <SpecificationPanel brief={brief} canEdit={canEdit} onBrief={(b) => accept(b, "Sensitivity measured")} />
         ) : tab === "handover" ? (
           <DeepBriefView brief={brief} canEdit={canEdit} llm={llm} />
         ) : tab === "anatomy" ? (
