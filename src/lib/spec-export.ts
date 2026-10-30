@@ -7,6 +7,7 @@
 import { rangeLabel } from "./constraints";
 import { lineVersionOf, SPEC_SCHEMA, type CompiledSpec } from "./compiler";
 import type { SpecDiff } from "./spec-diff";
+import type { ReviewBoard, ReviewEntry } from "./types";
 import type { SensitivityReport } from "./sensitivity";
 import { verifySpec, type DocumentStatus, type Verification } from "./verify-spec";
 
@@ -20,6 +21,7 @@ export interface SpecExport {
   verification: Verification;
   revision?: SpecDiff;
   sensitivity?: SensitivityReport;
+  review?: { entries: ReviewEntry[]; approval?: ReviewBoard["approval"]; approvalValid: boolean };
 }
 
 export const STATUS_TEXT: Record<DocumentStatus, string> = {
@@ -28,8 +30,8 @@ export const STATUS_TEXT: Record<DocumentStatus, string> = {
   DRAFT_CHECKS_FAILED: "DRAFT: one or more automated checks failed. Do not rely on this document.",
 };
 
-export function buildExport(spec: CompiledSpec, verification: Verification, extra: { revision?: SpecDiff; sensitivity?: SensitivityReport; now?: string } = {}): SpecExport {
-  return { schema: EXPORT_SCHEMA, documentStatus: verification.documentStatus, exportedAt: extra.now ?? new Date().toISOString(), spec, verification, ...(extra.revision ? { revision: extra.revision } : {}), ...(extra.sensitivity ? { sensitivity: extra.sensitivity } : {}) };
+export function buildExport(spec: CompiledSpec, verification: Verification, extra: { revision?: SpecDiff; sensitivity?: SensitivityReport; review?: SpecExport["review"]; now?: string } = {}): SpecExport {
+  return { schema: EXPORT_SCHEMA, documentStatus: verification.documentStatus, exportedAt: extra.now ?? new Date().toISOString(), spec, verification, ...(extra.revision ? { revision: extra.revision } : {}), ...(extra.sensitivity ? { sensitivity: extra.sensitivity } : {}), ...(extra.review ? { review: extra.review } : {}) };
 }
 
 export const exportJson = (x: SpecExport) => JSON.stringify(x, null, 2);
@@ -122,6 +124,9 @@ ${s.ledgerHead ? `<p class="mute">Ledger head ${esc(s.ledgerHead.slice(0, 24))}�
 ${x.revision ? `<p>${x.revision.counts.revised} revised · ${x.revision.counts.unchanged} unchanged · ${x.revision.counts.needsReview} needing review. Written limits ${x.revision.limitsUnchanged ? "unchanged" : "changed"}.</p>
 <table><thead><tr><th>Line</th><th>Change</th><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>${x.revision.lines.filter((l) => l.change !== "none").map((l) => `<tr><td>${esc(l.category)}</td><td>${esc(l.change.replace(/_/g, " "))}</td><td>${esc(l.before ?? "")}</td><td>${esc(l.after ?? "")}</td><td>${esc(l.reason)}</td></tr>`).join("")}</tbody></table>` : "<p>First version: no revisions.</p>"}
 ${x.sensitivity ? `<h2>7. Evidence sensitivity</h2><p>${esc(x.sensitivity.indexDefinition)} Index: ${x.sensitivity.stabilityIndex ?? "n/a"}.</p><ul>${x.sensitivity.lines.map((l) => `<li><b>${esc(l.category)}:</b> ${esc(l.stability.replace(/_/g, " "))}. ${esc(l.advice)}</li>`).join("")}</ul>` : ""}
+${x.review && (x.review.entries.length || x.review.approval) ? `<h2>8. Review history</h2>
+${x.review.approval ? `<p class="${x.review.approvalValid ? "PASS" : "WARNING"}"><b>${x.review.approvalValid ? "Approved by a human reviewer" : "Approval is for an earlier version"}</b> on ${esc(x.review.approval.at.slice(0, 10))} (version ${esc(x.review.approval.specVersionId)}).${x.review.approval.note ? ` Note: ${esc(x.review.approval.note)}` : ""} This records that a person reviewed this version. It is not a professional certification.</p>` : "<p>Not yet approved by a human reviewer.</p>"}
+${x.review.entries.length ? `<table><thead><tr><th>When</th><th>Line</th><th>Action</th><th>State</th><th>Before</th><th>After</th><th>Checks then</th><th>Note</th></tr></thead><tbody>${x.review.entries.map((e) => `<tr><td>${esc(e.at.slice(0, 16).replace("T", " "))}</td><td>${esc(e.category)}</td><td>${esc(e.action.replace(/_/g, " "))}</td><td>${esc(e.from)} → ${esc(e.to)}</td><td>${esc(e.before)}</td><td>${esc(e.after ?? "")}</td><td>${esc(e.verification.replace(/_/g, " "))}${e.findings.length ? `<br>${e.findings.map(esc).join("; ")}` : ""}</td><td>${esc(e.note ?? "")}</td></tr>`).join("")}</tbody></table>` : ""}` : ""}
 <footer>${esc(s.notCertified)} Generated ${esc(x.exportedAt)} by Tastespec.</footer>
 </body></html>`;
 }

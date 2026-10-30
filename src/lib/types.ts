@@ -373,12 +373,42 @@ export interface Brief {
   anatomy?: TasteAnatomy;
   /** Which loves moved which lines, measured by leaving each one out (on request). */
   influence?: InfluenceMap;
+  review?: ReviewBoard;
   /** Progressively niche views of the same taste (level 0 = the main run). */
   depth?: DepthLayer[];
   /** Which depth level the spec was derived from (default 0). */
   appliedDepth?: 0 | 1 | 2;
   /** Place tags mapped to atmospheres by a model (only when the lexicon missed them). */
   tagMap?: { model: string; mapped: Record<string, DimensionId[]> };
+}
+
+export type ReviewState = "DRAFT" | "NEEDS_REVIEW" | "APPROVED" | "REVISION_REQUESTED" | "REJECTED";
+export type ReviewAction = "accept" | "request_clarification" | "propose_alternative" | "reject" | "reopen";
+
+export interface ReviewEntry {
+  seq: number;
+  at: string;
+  lineId: string;
+  category: string;
+  action: ReviewAction;
+  from: ReviewState;
+  to: ReviewState;
+  specVersionId: string;
+  before: string;
+  after?: string;
+  note?: string;
+  /** Overall verification outcome when the action was taken. */
+  verification: string;
+  evidenceIds: number[];
+  /** Findings on this line at that moment. */
+  findings: string[];
+  ledgerSeq?: number;
+}
+
+export interface ReviewBoard {
+  entries: ReviewEntry[];
+  /** A human reviewed and approved this exact version. Not a professional certification. */
+  approval?: { at: string; specVersionId: string; note?: string; ledgerSeq?: number };
 }
 
 export interface InfluenceMap {

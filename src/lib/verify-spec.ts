@@ -126,6 +126,8 @@ export async function verifySpec(spec: CompiledSpec, ctx: Context = {}): Promise
   if (spec.dataMode === "fixture") add("WARNING", "B", "*", "SYNTHETIC_EVIDENCE", "The evidence is from a fictional test world, not from Qloo. Suitable for demonstration only.", "Run the brief against live Qloo before relying on it.");
   if (spec.status === "UPSTREAM_UNAVAILABLE" || spec.status === "INSUFFICIENT_EVIDENCE") add("WARNING", "B", "*", "NO_USABLE_EVIDENCE", `No usable Qloo evidence (${spec.status.replace(/_/g, " ").toLowerCase()}): every line is the literal reading of the client's words.`, "Add references Qloo can identify, or retry when Qloo is available.");
 
+  for (const l of spec.lines) if (l.override) add("WARNING", "C", l.id, "DESIGNER_OVERRIDE", `The designer replaced the rulebook's value ("${l.override.from}"). The cited evidence supported the original, not this value.`, "Keep the override only if the client or designer has a reason; it is recorded in the ledger.");
+
   // C. Interpretation provenance.
   for (const l of spec.lines) {
     const [rb, id] = l.interpretationRule.split(":");

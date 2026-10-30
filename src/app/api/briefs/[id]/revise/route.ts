@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
 import { AgentError } from "@/lib/agent";
-import { compileSpec } from "@/lib/compiler";
 import { jsonError, loadOwnedBrief, rateLimited, readJson, RUN_LIMIT } from "@/lib/http";
 import { QlooError } from "@/lib/qloo/client";
-import { ReviseError, runRevision, type Changes } from "@/lib/revise";
-import { diffSpecs } from "@/lib/spec-diff";
-import { briefs, events, revisions } from "@/lib/store";
-import { defaultTagMapper } from "@/lib/tagmap";
-import { verifySpec } from "@/lib/verify-spec";
+import { ReviseError, type Changes } from "@/lib/revise";
+import { proposeRevision } from "@/lib/revision-service";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -31,17 +27,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const unknown = Object.keys(changes).filter((k) => !KEYS.includes(k));
   if (unknown.length) return jsonError(`Unknown change: ${unknown.join(", ")}.`, 400);
   try {
-    const existing = await revisions.producing(r.brief.id, r.owner);
-    const rootBriefId = existing?.rootBriefId ?? r.brief.id;
-    const { brief: next } = await runRevision(r.brief, changes, { signal: req.signal, ownerHash: r.owner, tagMapper: defaultTagMapper() });
-    await briefs.put(next);
-    const before = await compileSpec(r.brief);
-    const after = await compileSpec(next, { version: (await revisions.list(rootBriefId, r.owner)).length + 2, parentVersionId: before.versionId });
-    const diff = diffSpecs(before, after);
-    const verification = await verifySpec(after, { brief: next, previous: before });
-    const row = await revisions.create({ rootBriefId, fromBriefId: r.brief.id, toBriefId: next.id, ownerHash: r.owner, changes: changes as Record<string, unknown>, diff, fromVersion: before.versionId, toVersion: after.versionId });
-    await events.add(next.id, "created", "agent", { status: next.status, lines: next.spec.length, revisionOf: r.brief.id });
-    return NextResponse.json({ revision: row, diff, verification, briefId: next.id });
+    return NextResponse.json(await proposeRevision(r.brief, r.owner, changes, req.signal));
   } catch (err) {
     if (err instanceof ReviseError) return jsonError(err.message, 400);
     if (err instanceof QlooError) return jsonError(`Qloo couldn't answer (${err.kind}). Nothing was changed.`, 502);

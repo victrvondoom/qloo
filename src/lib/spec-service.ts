@@ -5,14 +5,16 @@ import { currentOwnerHash, isOwner } from "./owner";
 import { sensitivityFromBrief, type SensitivityReport } from "./sensitivity";
 import { diffSpecs, type SpecDiff } from "./spec-diff";
 import { briefs, publicView, revisions, type RevisionRow } from "./store";
+import { approvalValid, isLocked, lineStates } from "./review";
 import { verifySpec, type Verification } from "./verify-spec";
-import type { Brief } from "./types";
+import type { Brief, ReviewBoard, ReviewEntry, ReviewState } from "./types";
 
 export interface SpecReport {
   spec: CompiledSpec;
   verification: Verification;
   revision?: { row: RevisionRow; diff: SpecDiff };
   sensitivity?: SensitivityReport;
+  review: { states: Record<string, ReviewState>; entries: ReviewEntry[]; approval?: ReviewBoard["approval"]; approvalValid: boolean; locked: boolean };
   canEdit: boolean;
 }
 
@@ -42,5 +44,5 @@ export async function specReport(brief: Brief): Promise<SpecReport> {
       sensitivity = undefined;
     }
   }
-  return { spec, verification, ...(row && previous ? { revision: { row, diff: diffSpecs(previous, spec) } } : {}), ...(sensitivity ? { sensitivity } : {}), canEdit };
+  return { spec, verification, ...(row && previous ? { revision: { row, diff: diffSpecs(previous, spec) } } : {}), ...(sensitivity ? { sensitivity } : {}), review: { states: lineStates(view, verification), entries: canEdit ? view.review?.entries ?? [] : [], approval: view.review?.approval, approvalValid: approvalValid(view, spec.versionId), locked: isLocked(view) }, canEdit };
 }

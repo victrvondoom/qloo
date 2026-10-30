@@ -17,8 +17,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const r = await specReport(brief);
   const url = new URL(req.url);
   const format = url.searchParams.get("format") ?? "report";
-  if (format === "report") return NextResponse.json({ spec: r.spec, verification: r.verification, revision: r.revision, sensitivity: r.sensitivity, canEdit: r.canEdit });
-  const x = buildExport(r.spec, r.verification, { revision: r.revision?.diff, sensitivity: r.sensitivity });
+  if (format === "report") return NextResponse.json({ spec: r.spec, verification: r.verification, revision: r.revision, sensitivity: r.sensitivity, review: r.review, canEdit: r.canEdit });
+  const x = buildExport(r.spec, r.verification, { revision: r.revision?.diff, sensitivity: r.sensitivity, review: r.review });
   const name = `tastespec-${r.spec.client.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-v${r.spec.version}${x.documentStatus === "DRAFT_CHECKS_FAILED" ? "-DRAFT" : ""}`;
   const disposition = url.searchParams.get("download") ? `attachment; filename="${name}` : "inline";
   if (format === "json") return new NextResponse(exportJson(x), { headers: { "Content-Type": "application/json; charset=utf-8", "Content-Disposition": disposition === "inline" ? "inline" : `${disposition}.json"` } });

@@ -9,6 +9,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (rateLimited(req, "write", WRITE_LIMIT)) return jsonError("Too many changes; slow down.", 429);
   const r = await loadOwnedBrief((await params).id);
   if (!r.ok) return r.res;
+  if (r.brief.review?.approval) return jsonError("This version is approved and locked. Make a revision to change it.", 409);
   const body = await readJson<{ lineId?: string; status?: string; revisedTo?: string; note?: string }>(req, 4096);
   if (!body.ok) return body.res;
   const b = body.value;

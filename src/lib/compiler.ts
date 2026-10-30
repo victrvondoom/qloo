@@ -49,6 +49,8 @@ export interface CompiledLine {
   literalValue: string;
   review: ReviewStatus;
   reviewNote?: string;
+  /** Set when a designer replaced the rulebook's value (after a challenge). The original stays recorded here. */
+  override?: { from: string; by: "designer" };
   /** Content hash of everything above that defines the line's meaning (not its explanation). */
   lineVersion: string;
   /** Why the rulebook chose it, in the rulebook's own words. Explanation only. */
@@ -168,11 +170,14 @@ export async function compileSpec(brief: Brief, opts: { version?: number; parent
       ...clientLimits.map((c) => `wrote: ${c.replace(/^client /, "").split(":")[0]}`),
       ...(l.basis === "qloo_evidence" ? used.map((u) => `loves: ${u}`) : []),
     ];
-    const machine = machineValue(l.id, l.value);
+    const overridden = l.status === "revised" && l.revisedTo ? l.revisedTo : undefined;
+    const value = overridden ?? l.value;
+    const machine = machineValue(l.id, value);
     const line: Omit<CompiledLine, "lineVersion"> = {
       id: l.id,
       category: l.category,
-      requirement: l.value,
+      requirement: value,
+      ...(overridden ? { override: { from: l.value, by: "designer" as const } } : {}),
       machine,
       hardConstraints: hard,
       clientRefs: refs,
@@ -181,7 +186,7 @@ export async function compileSpec(brief: Brief, opts: { version?: number; parent
       interpretationRule: interpretationRule(l.id),
       basis: l.basis,
       confidence: l.confidence,
-      uncertainty: uncertaintyText(l),
+      uncertainty: overridden ? `Set by the designer after a challenge. The rulebook's value was "${l.value}"; the evidence below supported that value, not this one.` : uncertaintyText(l),
       assumptions: LINE_ASSUMPTIONS[l.id] ?? [],
       literalValue: l.literalValue,
       review: l.status,
