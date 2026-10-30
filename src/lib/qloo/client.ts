@@ -40,6 +40,14 @@ export interface Transport {
 
 export type QlooErrorKind = "auth" | "rate_limit" | "upstream" | "network" | "timeout" | "bad_request" | "budget" | "cancelled" | "deadline";
 
+/** Upstream error text can echo a credential back. Strip the configured key and anything shaped like one before it can reach a log, ledger or browser. */
+export function redactSecrets(text: string): string {
+  let out = text;
+  const key = process.env.QLOO_API_KEY;
+  if (key && key.length >= 8) out = out.split(key).join("[redacted]");
+  return out.replace(/\b(?:sk|key|tok|token|api)[-_][A-Za-z0-9_-]{8,}\b/gi, "[redacted]").replace(/(x-api-key["']?\s*[:=]\s*)\S+/gi, "$1[redacted]");
+}
+
 export class QlooError extends Error {
   constructor(
     readonly kind: QlooErrorKind,
@@ -47,7 +55,7 @@ export class QlooError extends Error {
     message: string,
     readonly requestId?: string,
   ) {
-    super(`Qloo ${kind} (HTTP ${status}): ${message}`);
+    super(redactSecrets(`Qloo ${kind} (HTTP ${status}): ${message}`));
   }
 }
 

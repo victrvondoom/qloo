@@ -4,7 +4,16 @@ Tastespec is one Next.js app with an embedded database. It runs the same way on 
 
 ## Status
 
-**No public deployment has been verified from this workspace.** The build sandbox has no hosting credentials and its proxy blocks Qloo, so deploying and checking the live URL must be done from your account. Everything below was run locally (synthetic data) except where marked.
+**NOT DEPLOYED.** No public deployment exists or is claimed. The build sandbox has no hosting credentials (no Vercel, Netlify or Fly login, no `gh` authentication to a hosting integration) and its proxy blocks Qloo, so deploying and checking the live URL must be done from your account. What is ready: `vercel.json`, a `Dockerfile` and `docker-compose.yml`, a CI workflow (`.github/workflows/ci.yml`, no secrets, nothing is published), health endpoint, durable-storage detection and `npm run release:check`. Everything below was run locally on synthetic data except where marked.
+
+### Deploy and verify in six steps (Vercel + Turso)
+
+1. Create a Turso database and token (below). Import the repository in Vercel (the included `vercel.json` sets the build and gives `/api/run` 60 s).
+2. Set environment variables: `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `QLOO_API_KEY`. Do **not** set `QLOO_MODE`. Optional: `ANTHROPIC_API_KEY`, `STUDY_ADMIN_TOKEN`.
+3. Deploy. Open `/api/health`: expect `"qloo": "live"`, `"db": {"kind": "libsql", "durable": true}`, `"issues": []`.
+4. Run `TASTESPEC_PUBLIC_URL=https://your-app.vercel.app npm run release:check -- --skip-e2e`. It checks reachability, the data-mode disclosure and that no credential is exposed.
+5. Run `QLOO_API_KEY=… npm run verify:qloo-live` (locally or in CI with the secret) and commit `reports/qloo-live-verification.json` if it says LIVE VERIFIED.
+6. Click through `/lab` (guided run), build a brief, reload it from its URL, open it in a second browser (read-only), and only then put the URL in the submission.
 
 ## Local, any OS (two commands)
 
@@ -51,6 +60,8 @@ Without `DATABASE_URL` on a serverless host the app still works, but briefs live
 | `TASTESPEC_DB_PATH` | no | SQLite file path (default `./.data/tastespec.db`) |
 | `TASTESPEC_RETENTION_DAYS` | no | Delete briefs untouched this long (default 180) |
 | `TASTESPEC_RUNS_PER_10_MIN` | no | Per-IP brief limit (default 12) |
+| `STUDY_ADMIN_TOKEN` | no | Enables `/api/study/export` (bearer token). Off when unset |
+| `TASTESPEC_PUBLIC_URL` | no | Only read by `npm run release:check`, to test a deployment |
 | `PORT`, `HOST` | no | For `npm run demo` / `npm run serve` (default 3000, 0.0.0.0) |
 
 ## What gets stored

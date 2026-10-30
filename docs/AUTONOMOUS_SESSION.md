@@ -1,46 +1,39 @@
 # Autonomous session record
 
-Branch `claude/sweet-cori-f9x9j0`. Starting commit `932dd08`. No Qloo key and no network to Qloo in this environment, so live verification is **blocked**; nothing below was run against live Qloo.
+Branch `claude/sweet-cori-f9x9j0`. Sessions so far: (1) engineering foundation and 20 features, (2) explicit CCT constraints and adversarial tests (ended `5f44d0d`), (3) this release sprint.
 
-## What was already there (from earlier sessions)
+## Standing blockers (unchanged by any session)
 
-Most of the requested Proof Engine existed before this session: hardened Qloo adapter (retries, deadline, budget, cancellation, secret-safe ledger), typed agent states with a decision trace, evidence-linked spec lines with a literal baseline, replay, a hash-chained ledger, the benchmark harness (B0, B2, B3, B4 ablations; B1 needs an LLM key), the Proof Lab and Same Words comparison, owner-scoped storage, and e2e tests. This session audited those against the brief and filled the gaps below.
+- **Qloo: NOT LIVE VERIFIED.** No `QLOO_API_KEY`; `hackathon.api.qloo.com` is unreachable from the sandbox.
+- **Deployment: NOT DEPLOYED.** No hosting credentials. No URL is claimed.
+- **Human study: ZERO HUMAN RESPONSES.**
+- **B1 (LLM only): not run.** No Anthropic key.
 
-## Baseline (start of session)
+## Session 3: release sprint (start `5f44d0d`)
 
-typecheck clean · lint clean · 150 unit tests pass · build ok · 35/35 e2e (after the 20-feature commit).
+Start state re-verified: clean tree, 171 unit tests, 36 e2e, build ok.
 
-## Gaps found and closed
-
-| Gap | Change | Verified by |
+| Area | What changed | Verified by |
 |---|---|---|
-| Only the warm-*word* floor existed; a number the client wrote ("2700K–3000K") could be overridden by evidence | `src/lib/constraints.ts`; `BriefInput.cctRange`; rulebook clamps; threaded through spec, questions, replay, influence, duet, literal baseline; intake parses it; Composer shows a "Hard limit" chip; `validateBrief` rejects a violation | `tests/constraints.test.ts` (12), e2e, benchmark |
-| No tests for corrupted payloads, injected text in place data, thin local coverage, simultaneous runs | `tests/adversarial.test.ts` (9): 2000 random shapes through the parsers, corrupted responses, all-garbage abstention, injection, widening disclosed, no-coverage abstention, 6 parallel runs, forged evidence | passes. The first run showed the tamper hook had no effect because the response cache is keyed by mode and request, so the test clears the cache before each case (a test artefact, not a production issue) |
-| Benchmark had no written-range scenarios | 4 `explicit_range` scenarios (64 total) and a `writtenRangeViolationRate` metric; oracle and B0 given the range, B2 deliberately not | `reports/benchmark-summary*.md` regenerated for 4 seeds |
-| Command palette could drop the first keystrokes (focus set after 10 ms) | input uses `autoFocus` | e2e (was failing intermittently) |
-| e2e "two rooms" count was racy once the duet panel loaded | asserts 2 client rooms + 1 duet room after the panel renders | 3 consecutive full runs |
+| Numeric constraints | CRI minimum, dimming floor and requirement, lux target, parsed separately; lumens noted not converted; conflicts and impossible values stop the build (Composer, INTAKE step) | `constraints.test.ts` (22 tests), e2e |
+| Judge demo | Eight-step guided run at the top of `/lab`, all steps call the real pipeline; mode labelled | Playwright walkthrough with screenshots |
+| Human study | `/study`, `/study/results`, five API routes, migration 2, `study/cases.json` (5 synthetic-mode cases), `npm run study:cases`, `npm run study:report`, `docs/HUMAN_EVALUATION.md`, summary says NO HUMAN DATA | `study.test.ts` (12), e2e on a throwaway database |
+| Live verification | `live-verify.ts`, `npm run verify:qloo-live` (exit 0/1/2), `docs/QLOO_LIVE_VERIFICATION.md`. Run here: **BLOCKED (exit 2)**, nothing written | `live-verify.test.ts` (6) |
+| Failure recovery | Auth, 429, timeout, malformed, cancellation, duplicate runs, edited ledger. **Defect found and fixed:** an upstream error body that echoed the API key reached the brief; now redacted. Actionable hints per failure kind | `recovery.test.ts` (9) |
+| Release auditor | `npm run release:check`: 20 checks, PASS/FAIL/BLOCKED/NOT RUN | run here: see below |
+| Deployment config | `vercel.json`, `.github/workflows/ci.yml`, `docs/DEPLOYMENT.md` six-step list | `release:check` presence check |
+| Docs | JUDGE_QUICKSTART, QLOO_LIVE_VERIFICATION, RELEASE_CHECKLIST (new); README, SUBMISSION (Devpost text in ten parts), DEPLOYMENT, EVIDENCE_MODEL, ARCHITECTURE updated | `release:check` |
 
-## Results now
+Also fixed: a palette focus race and a racy e2e room count (earlier in the sprint chain).
 
-typecheck clean · lint clean · 171 unit tests · build ok · 36/36 e2e (three consecutive runs).
+## Results at the end of session 3
 
-Benchmark (synthetic, seed 20261028, 59 scorable of 64): B0 0.41, B2 0.78 (26% warm-light violations), B3 0.88 (0%). Four seeds: B3 0.77–0.88. Written-range check has n=4, so its intervals are wide; the 300-case property test is the stronger evidence. Not measured: human preference, live Qloo, B1 (LLM-only; needs `ANTHROPIC_API_KEY` and `--with-llm`).
-
-## Commits this session
-
-1. Explicit constraints, adversarial tests, benchmark scenarios, palette and e2e fixes.
-2. Regenerated benchmark reports at that commit, docs and this record.
-
-## Blockers
-
-- Live Qloo verification (`npm run probe`) needs `QLOO_API_KEY` and network access to `hackathon.api.qloo.com`.
-- B1 needs an Anthropic key. Not run, not faked.
-- No public deployment was made or tested; no live URL is claimed.
-- Human preference study not run.
+See the final commit message and `reports/release-check.json` (untracked; regenerate with `npm run release:check`). The last run had no FAIL; Qloo live verification was BLOCKED and the public URL NOT RUN.
 
 ## Next
 
-1. Run `npm run probe` and a live brief once a key is available; capture sanitized diagnostics.
-2. Collect human preference labels (protocol in `docs/EVALUATION_METHODOLOGY.md`).
-3. Let a client write other hard limits (CRI floor, dimming) the way the colour-temperature range works.
-4. Deploy and test the public URL independently.
+1. Key + network: `npm run verify:qloo-live`; commit the report only if LIVE VERIFIED.
+2. Deploy per `docs/DEPLOYMENT.md`; run `release:check` with `TASTESPEC_PUBLIC_URL`.
+3. Recruit participants for `/study`; `npm run study:report`.
+4. `npm run benchmark -- --with-llm` for B1 once a model key exists.
+5. Study mode where participants enter their own loves (needs live Qloo).

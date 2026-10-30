@@ -1,0 +1,30 @@
+# Verification on every push and pull request. No secrets are used: tests and the
+# browser suite run on the labelled synthetic world. Deployment is a separate,
+# manual step (see docs/DEPLOYMENT.md); nothing here publishes anything.
+name: ci
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save playwright && npx playwright install --with-deps chromium
+      - name: Typecheck, lint, unit tests, build
+        run: npm run typecheck && npm run lint && npm test && npm run build
+      - name: Browser suite
+        run: npm run test:e2e
+      - name: Benchmark artifacts reproduce
+        run: npm run benchmark
+      - name: Release audit (live Qloo and public URL are reported BLOCKED / NOT RUN here, not passed)
+        run: npm run release:check -- --skip-e2e

@@ -1,18 +1,40 @@
 # Submission kit
 
-## Devpost description (edit the status lines once the live probe and deployment are done)
+## Devpost text (paste by hand; edit the three status lines at the end once they change)
 
-**Tastespec: “warm and modern” means a different room for every client.**
+**Tastespec: "warm and modern" means a different room for every client.**
 
-Interior designers and lighting pros get briefs like "warm, modern, cozy". Each word has several professional meanings ("warm" can mean 2700K light, oak and linen, a lived-in room, or a sociable one), and pros find out which one the client meant at the walkthrough. A chatbot that only hears the words gives everyone who says them the same room.
+### 1. Problem
+Interior designers and lighting pros get briefs like "warm, modern, cozy". Each word has several professional meanings ("warm" can mean 2700K light, oak and linen, a lived-in room, or a sociable one), and designers find out which one the client meant at the walkthrough, after the revision rounds.
 
-Tastespec asks clients what they can answer: what they love. A designer pastes the client's message; Tastespec pulls out the words and the loves (in the browser, or with Claude, keeping only what's actually in the message), resolves the loves in Qloo, pulls the places people with that taste choose in the client's city and compares them with the city's typical places. The atmospheres that are over-represented say what the client's words mean. A versioned rulebook turns that into a buildable lighting or finishes spec, with hard constraints the evidence can't override, and the spec is drawn as a room with its own scenes on a dimmer.
+### 2. Why existing approaches fail
+A tool that only hears the words gives everyone who says them the same room. A language model asked to guess reasons from stereotypes about famous names; it does not know which places people with that taste actually choose in the client's city, or how that compares with what is typical there, and it cannot show counts.
 
-The agent remembers nothing between clients: its whole working state is a graph that narrows from what the client said to the spec, streamed live while it runs, and any spec line can be traced back along it. It abstains on references it can't identify, widens the search when a city is thin, falls back to the literal reading when evidence is insufficient or Qloo is down (and says so), and asks one question only when the answer is uncertain and would change the spec. "Go deeper" repeats the taste question among less popular places for reference rooms nobody else will have shown the client. The hand-over (scenes, a zone-by-scene dimming table, palette, references, a buying list, an installer checklist) is built from the same evidence, and the client gets a revocable link where they can answer and react on their phone while the designer watches the activity feed.
+### 3. Tastespec's idea
+Ask clients what they can answer: what they love. A designer pastes the client's message; Tastespec extracts the words and the loves (in the browser, or with Claude keeping only what is in the message), and Qloo tells it which places people with that taste choose. Places are rooms. The atmospheres that are over-represented against the city's typical places say what the client's words mean. A versioned rulebook turns that into a buildable lighting or finishes specification. **Things the client writes down outrank the evidence:** a colour-temperature range, a minimum CRI, a dimming floor, a lux target; contradictory requirements stop the build and ask which one is meant.
 
-Every Qloo call, decision, model call and client action goes into a hash-chained ledger; replay rebuilds any spec from its stored evidence; every line is classified as evidence-supported, derived, client-stated or unsupported. It runs on any OS with Node 22 (built-in SQLite, no native modules) or on serverless with libSQL/Turso.
+### 4. How Qloo contributes
+Qloo is the evidence: entity resolution (`/search`), the places a taste neighbourhood chooses and the city baseline (`/v2/insights`, `urn:entity:place`), and cross-domain taste tags (`urn:tag`). Without Qloo the specification falls back to the literal reading and says so. The taste anatomy tab sends each love to Qloo on its own to measure how the client's tastes agree, conflict and bridge.
 
-We tested it against baselines on a seeded synthetic world (64 scenarios, 4 seeds): literal reading, Qloo evidence alone, Tastespec, and ablations. Tastespec matched the synthetic clients' known taste far better than the literal reading (0.77–0.88 vs 0.41). Evidence alone broke the client's stated constraint in 23–43% of warm briefs; Tastespec in none. We also report what didn't hold up: the clarifying question has no measurable accuracy gain yet.
+### 5. Agent architecture
+A typed state machine (intake, normalise, resolve entities, assess evidence, interpret, check constraints, generate spec, simulate alternatives, validate) with a step budget, timeouts, bounded retries, cancellation and a recorded decision trace. The agent remembers nothing between clients; its working state is a graph that narrows from what the client said to the spec and streams live. It abstains on references it cannot identify, widens a thin city with a disclosed warning, asks one question only when the answer would change the spec, and never lets a model set a spec value.
+
+### 6. Product walkthrough
+`/lab` has a three-minute guided run that executes the real pipeline: two clients with identical words, their loves, the Qloo evidence, the decision trace, the two specifications side by side, a real no-Qloo baseline, a challenge with a written requirement, and in-browser verification of the evidence ledger. Beyond that: a drawn and 3D room lit by the spec, a hand-over document, a revocable client link, Duet (two people, one room), anatomy, and a blinded human preference study.
+
+### 7. Engineering evidence
+Hash-chained ledger of every Qloo call, decision, model call and client action; replay rebuilds any spec from its stored evidence; every line is classified as evidence-supported, derived, client-stated or unsupported. 200+ unit, property and adversarial tests, a browser suite on desktop and mobile, and a seeded synthetic benchmark (64 scenarios, 4 seeds, baselines and ablations) with the oracle's limits stated. On the synthetic benchmark the full agent agrees with the oracle 0.77-0.88 of the time versus 0.41 for the literal reading, and breaks no warm-light rule where evidence alone breaks it in 23-43% of warm briefs. **This is synthetic and uses our own rulebook as the oracle; it is not human satisfaction and not proof that clients prefer the output.**
+
+### 8. Real-world use
+Independent designers and lighting pros who lose margin to revision rounds. We have not measured time saved and do not claim to.
+
+### 9. Limitations
+Not verified against live Qloo (no key or network was available; `npm run verify:qloo-live` is ready). Benchmark results are synthetic. No human has judged the output yet: the study is built and has zero responses. The LLM-only baseline has not been run. The rulebook is our own design judgement. Not deployed publicly from the build environment.
+
+### 10. What's next
+Run the live verification and the human study; add a participant-own-preferences study mode; more trades; and let the designer give the agent their own rulebook.
+
+**Status lines (edit before submitting):** Live Qloo verification: NOT LIVE VERIFIED. Public demo URL: NOT DEPLOYED. Human responses: ZERO.
 
 ## 3-minute demo
 
@@ -40,10 +62,8 @@ We tested it against baselines on a seeded synthetic world (64 scenarios, 4 seed
 
 | Gate | Requirement | Status |
 |---|---|---|
-| A Correctness | Invariants verified, no fabricated evidence, abstention, replayable | **Pass**: 131 unit/property/adversarial tests; 0 invariant violations in the benchmark; replay identical on stored briefs |
-| B Qloo | Live integration tested, provenance intact | **Not verified**: needs a key and network; run `npm run probe -- Chicago` |
-| C Evaluation | Reproducible baselines, honest limits | **Pass (synthetic only)**: B1 needs a Claude key; no human study |
-| D Product | Message → brief → spec → hand-over → client link → outcome, persistent, accessible, any OS | **Pass locally**: browser suite (designer + client flows, mobile, dark mode); deployment not verified from this workspace |
-| E Submission | Public repo, license, live demo, setup, description, video | **Partial**: license, docs, film (`public/media`) done; repo visibility and live URL are owner actions |
-
-Before submitting: set `QLOO_API_KEY`, run the probe and commit `reports/qloo-live-probe.json`; deploy (Docker or serverless + Turso, `docs/DEPLOYMENT.md`); run the demo above on the live URL; make the repo public.
+| A Correctness | Invariants verified, no fabricated evidence, abstention, replayable | **Pass** (unit, property, adversarial and recovery tests; replay identical) |
+| B Qloo | Live integration tested, provenance intact | **Not live verified.** Contract tested; `npm run verify:qloo-live` ready |
+| C Evaluation | Reproducible baselines, honest limits, independent judgement | **Synthetic only.** Human study built, zero responses; B1 not run |
+| D Product | Message to brief to spec to hand-over to client link, persistent, accessible, any OS | **Pass locally** (browser suite, desktop and mobile) |
+| E Submission | Public repo, licence, live demo, setup, description, video | **Partial:** licence, docs, Devpost text, film done; repo visibility, deployment and the Devpost entry are owner actions (`docs/RELEASE_CHECKLIST.md`) |

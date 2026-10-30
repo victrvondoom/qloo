@@ -219,6 +219,25 @@ class Run {
   }
 }
 
+/** What to tell the designer, and what to do about it, for each way Qloo can fail. Never includes a key or a response body. */
+export function upstreamHint(kind: QlooError["kind"] | undefined): string {
+  switch (kind) {
+    case "auth":
+      return "Qloo rejected the API key (expired, wrong or not for this host). Check QLOO_API_KEY on the server; then run again.";
+    case "rate_limit":
+      return "Qloo is rate-limiting this key. Wait a minute and run again.";
+    case "timeout":
+    case "deadline":
+      return "Qloo did not answer in time. Run again; if it keeps happening, check Qloo's status.";
+    case "network":
+      return "Qloo could not be reached. Check the server's network access, then run again.";
+    case "budget":
+      return "The run hit its Qloo request budget before finishing. Try again with fewer references.";
+    default:
+      return "Qloo returned an error. Run again in a moment.";
+  }
+}
+
 function isUpstream(err: unknown): err is QlooError {
   return err instanceof QlooError && UPSTREAM_KINDS.has(err.kind);
 }
@@ -341,11 +360,15 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
       const settled = await Promise.allSettled(input.loves.map((l) => resolveLove(qloo, l, input.pinned?.[l])));
       const resolutions: Resolution[] = [];
       let upstreamFailures = 0;
+      let upstreamKind: QlooError["kind"] | undefined;
       settled.forEach((s, i) => {
         if (s.status === "fulfilled") resolutions.push(s.value);
         else {
           if (s.reason instanceof QlooError && s.reason.kind === "cancelled") throw s.reason;
-          if (isUpstream(s.reason)) upstreamFailures++;
+          if (isUpstream(s.reason)) {
+            upstreamFailures++;
+            upstreamKind ??= s.reason.kind;
+          }
           resolutions.push({ input: input.loves[i], status: "not_found", alternatives: [], similarity: 0, confidence: 0, method: "top_result", usedAsSignal: false, evidence: [], note: `Lookup failed: ${(s.reason as Error).message.slice(0, 120)}` });
         }
       });
@@ -362,7 +385,7 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
       if (used.length === 0 && upstreamFailures > 0) {
         degraded = true;
         status = "UPSTREAM_UNAVAILABLE";
-        upstreamReason = "Qloo search was unavailable, so no references could be resolved.";
+        upstreamReason = `Qloo search was unavailable, so no references could be resolved. ${upstreamHint(upstreamKind)}`;
       } else if (used.length === 0) {
         status = "INSUFFICIENT_EVIDENCE";
       }
@@ -419,7 +442,7 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
             if (isUpstream(err)) {
               degraded = true;
               status = "UPSTREAM_UNAVAILABLE";
-              upstreamReason = `Qloo insights failed (${err.kind}${err.status ? ` ${err.status}` : ""}).`;
+              upstreamReason = `Qloo insights failed (${err.kind}${err.status ? ` ${err.status}` : ""}). ${upstreamHint(err.kind)}`;
               return { value: undefined, decision: "upstream unavailable", rationale: upstreamReason, validation: "fail" as const, evidence: evidenceLedger };
             }
             // A 4xx for this scope's parameters: record it and try the next scope.

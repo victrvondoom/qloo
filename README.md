@@ -55,7 +55,7 @@ Taste agents assume the user's words carry their preferences. In design work the
 
 ## What the client writes down outranks the evidence
 
-If the message contains a colour-temperature limit ("between 2700K and 3000K", "no cooler than 3000K"), it is parsed by fixed patterns (never by a model), shown as a **Hard limit** chip before you build, stored on the brief and applied inside the rulebook. It beats both Qloo evidence and the warm-word floor. A line it changes is marked `constraint` with a note saying what the rulebook would have said; the literal baseline, the "without Qloo" recompute, replay, the influence map and the duet merge all honour it, and a spec outside it fails validation. Tested by a 300-case property, an end-to-end run and the benchmark's `explicit_range` scenarios.
+If the message contains a colour-temperature limit ("between 2700K and 3000K", "no cooler than 3000K"), a minimum CRI ("CRI of at least 95", "Ra 90 or above"), a dimming floor ("must dim to 5%", "dimming range 5% to 100%"), a dimming requirement, or a lux target ("about 250 lux"), it is parsed by fixed patterns (never by a model), shown as a **Hard limits** chip before you build, stored on the brief and applied inside the rulebook. Each is its own quantity and none is converted into another: lumens are noted but never turned into a room target without room and fitting data, and CRI is not presented as the whole of colour quality. Contradictory or impossible requirements (two different CRI minimums, a 0% dimming floor, a minimum above a maximum) are shown in red, stop the build, and are refused again on the server. They beat both Qloo evidence and the warm-word floor. A line it changes is marked `constraint` with a note saying what the rulebook would have said; the literal baseline, the "without Qloo" recompute, replay, the influence map and the duet merge all honour it, and a spec outside it fails validation. Tested by a 300-case property, an end-to-end run and the benchmark's `explicit_range` scenarios.
 
 ## How it stays honest
 
@@ -79,14 +79,26 @@ Agreement with a synthetic oracle that applies the same rulebook to each scenari
 
 Across four seeds B3 is 0.77–0.88 vs B0 0.41. **Not shown:** that the clarifying question improves accuracy (CIs span zero), or anything about real clients. The oracle shares our rulebook, so this measures taste recovery through the mapping, not design quality. Details: `docs/EVALUATION_METHODOLOGY.md`.
 
+## Prove it yourself
+
+| Command | What it does |
+|---|---|
+| `npm run demo` | Serve on synthetic data. Open `/lab` for the three-minute guided run (`docs/JUDGE_QUICKSTART.md`) |
+| `npm run verify` | Typecheck, lint, tests, build, browser suite, benchmark |
+| `npm run release:check` | Release audit: PASS / FAIL / BLOCKED / NOT RUN per check; live Qloo and a public URL are BLOCKED / NOT RUN unless configured, never passed |
+| `QLOO_API_KEY=… npm run verify:qloo-live` | One-command live Qloo verification (exit 0 LIVE VERIFIED, 1 FAILED, 2 BLOCKED) |
+| `npm run benchmark` | Synthetic benchmark (64 scenarios) |
+| `/study`, `npm run study:report` | Blinded human preference study and its summary |
+
 ## Status, honestly
 
 | | |
 |---|---|
-| Qloo integration | Built to the documented contract and unit-tested. **Live calls not verified from this workspace** (no key; the proxy blocks Qloo). Run `npm run probe -- Chicago` with a key; it also checks the popularity filter the depth levels use. |
-| Tests | 133 unit/property/adversarial tests (both database drivers included) and a 30-check browser suite (designer flow, client link round-trip, isolation, tampering, mobile, dark mode). |
-| Human preference study | Not run. Protocol in `docs/EVALUATION_METHODOLOGY.md`. |
-| Deployment | Not verified from this workspace. Docker, any Node host, or serverless with libSQL/Turso: `docs/DEPLOYMENT.md`. |
+| Qloo integration | **NOT LIVE VERIFIED.** Built to the documented contract and contract-tested (auth, 429, malformed, timeout, cancellation, key redaction). No key and no network to Qloo in the build sandbox. `npm run verify:qloo-live` does it in one command (`docs/QLOO_LIVE_VERIFICATION.md`). |
+| Tests | 200+ unit, property, adversarial and recovery tests (both database drivers included) and a 40-check browser suite (designer flow, client link, isolation, tampering, guided run, study, mobile, dark mode). |
+| Human preference study | **ZERO HUMAN RESPONSES.** The blinded study at `/study` is built and tested; `reports/human-evaluation-summary.md` says NO HUMAN DATA COLLECTED. `docs/HUMAN_EVALUATION.md`. |
+| LLM-only baseline (B1) | Not run: needs a model key. |
+| Deployment | **NOT DEPLOYED.** Configuration (`vercel.json`, Docker, CI) and instructions are ready: `docs/DEPLOYMENT.md`. |
 
 ## Commands
 

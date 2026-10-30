@@ -16,6 +16,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "verify": "npm run typecheck && npm run lint && npm test && npm run build && npm run test:e2e && npm run benchmark",
+    "verify:qloo-live": "tsx --tsconfig tsconfig.json scripts/verify-qloo-live.ts",
+    "release:check": "node scripts/release-check.mjs",
     "probe": "tsx --tsconfig tsconfig.json scripts/probe-qloo.ts",
     "benchmark": "tsx --tsconfig tsconfig.json benchmarks/run.ts",
     "study:report": "tsx --tsconfig tsconfig.json scripts/study-report.ts",
