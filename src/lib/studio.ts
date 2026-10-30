@@ -226,7 +226,11 @@ export function mergeDuet(a: Brief, b: Brief): Duet {
   });
   const words = [...new Set([...a.input.words, ...b.input.words])];
   const decoded = decodeWords({ ...a, input: { ...a.input, words } }, dims);
-  const together = buildSpec(a.input.trade, a.input.room, dims, decoded, words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [] });
+  // Both people's written ranges must hold; where they don't overlap neither is silently dropped, so none is applied and the note says so.
+  const ra = a.input.cctRange;
+  const rb = b.input.cctRange;
+  const cctRange = ra && rb ? (Math.max(ra.min, rb.min) <= Math.min(ra.max, rb.max) ? { min: Math.max(ra.min, rb.min), max: Math.min(ra.max, rb.max) } : undefined) : ra ?? rb;
+  const together = buildSpec(a.input.trade, a.input.room, dims, decoded, words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [], cctRange });
   const specA = buildSpec(a.input.trade, a.input.room, da, decodeWords(a, da), a.input.words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [] });
   const specB = buildSpec(a.input.trade, a.input.room, db, decodeWords({ ...b, input: { ...b.input, trade: a.input.trade, room: a.input.room } }, db), b.input.words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [] });
   const lines = together.map((l) => {

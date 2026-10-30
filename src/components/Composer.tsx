@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { EXAMPLES } from "./examples";
 import { RunTheater } from "./RunTheater";
 import { useAgentStream } from "./useAgentStream";
+import { rangeLabel } from "@/lib/constraints";
 import { parseIntakeHeuristic, type IntakeDraft } from "@/lib/intake";
 import { ROOM_LABEL, TRADE_LABEL } from "@/lib/rulebooks";
 import type { BriefInput, RoomType, Trade } from "@/lib/types";
@@ -71,6 +72,7 @@ export function Composer({ llm, canRun, initialText = "" }: { llm: boolean; canR
     words: over.words ?? base?.words ?? [],
     loves: over.loves ?? base?.loves ?? [],
     project: over.project,
+    cctRange: base?.cctRange,
   };
   const problems = [
     ...(input.city ? [] : ["a city"]),
@@ -168,6 +170,14 @@ export function Composer({ llm, canRun, initialText = "" }: { llm: boolean; canR
               <label>They love</label>
               <ChipsInput label="Things they love" values={input.loves} onChange={(loves) => setOver({ ...over, loves })} placeholder="Bands, shows, films, brands, places…" />
             </div>
+            {input.cctRange ? (
+              <div className="line">
+                <label>Hard limit</label>
+                <span className="chip">
+                  Light: {rangeLabel(input.cctRange)} <span className="tiny muted">· written in their message; outranks the evidence</span>
+                </span>
+              </div>
+            ) : null}
             <div className="line">
               <label htmlFor="d-city">Where</label>
               <div className="row tight">

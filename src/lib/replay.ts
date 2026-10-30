@@ -41,7 +41,7 @@ export async function replayBrief(brief: Brief): Promise<ReplayResult> {
   let replayed: { id: string; value: string }[];
   const fallback = brief.status === "INSUFFICIENT_EVIDENCE" || brief.status === "UPSTREAM_UNAVAILABLE";
   if (fallback) {
-    replayed = literalSpec(brief.input.trade, brief.input.room, brief.input.words).map((l) => ({ id: l.id, value: l.value }));
+    replayed = literalSpec(brief.input.trade, brief.input.room, brief.input.words, brief.input.cctRange).map((l) => ({ id: l.id, value: l.value }));
     checks.push({ name: "No personalisation without evidence", ok: brief.spec.every((l) => l.value === l.literalValue), detail: "Fallback briefs must equal the literal reading." });
   } else {
     const base = brief.depth?.find((d) => d.level === 0);

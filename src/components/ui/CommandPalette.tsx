@@ -46,7 +46,6 @@ export function CommandPalette() {
 
   useEffect(() => {
     if (!open) return;
-    setTimeout(() => input.current?.focus(), 10);
     fetch("/api/briefs")
       .then((r) => r.json())
       .then((j: { briefs: { id: string; clientLabel: string; words: string[]; city: string; project: string }[] }) =>
@@ -71,7 +70,7 @@ export function CommandPalette() {
     <div className="palette-backdrop" onClick={() => setOpen(false)}>
       <div className="palette" role="dialog" aria-modal="true" aria-label="Command palette" onClick={(e) => e.stopPropagation()}>
         <input
-          ref={input}
+          ref={input} autoFocus
           type="search"
           value={q}
           placeholder="Jump to a page or a client…"

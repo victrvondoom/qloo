@@ -32,7 +32,7 @@ export function withAnswer(brief: Brief, dims: DimensionScore[]): DimensionScore
 export function specFor(brief: Brief, dims: DimensionScore[]) {
   const effective = withAnswer(brief, dims);
   const words = decodeWords(brief, effective);
-  return buildSpec(brief.input.trade, brief.input.room, effective, words, brief.input.words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [] });
+  return buildSpec(brief.input.trade, brief.input.room, effective, words, brief.input.words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [], cctRange: brief.input.cctRange });
 }
 
 export function scopeParams(brief: Brief): Params {

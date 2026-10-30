@@ -275,7 +275,9 @@ async function main() {
     await page.goto(`${BASE}/compare`);
     await page.getByRole("button", { name: "Run both briefs" }).click();
     await page.getByText(/of \d+ spec lines differ between Maya and Jordan/).waitFor({ timeout: 40_000 });
-    assert((await page.locator(".room svg").count()) === 2, "rooms missing");
+    // Two rooms from each client's own spec, plus the duet panel's merged room.
+    await page.getByText(/taste similarity/).waitFor({ timeout: 20_000 });
+    assert((await page.locator(".room svg").count()) === 3, "expected two client rooms and one duet room");
   });
 
   await check("activity: spec history from the ledger and similar past clients", async () => {
@@ -303,6 +305,23 @@ async function main() {
     await page.waitForURL(/\/app$/);
     const r = await page.request.get(briefUrl.replace("/brief/", "/api/briefs/"));
     assert(r.status() === 404, `expected 404 after delete, got ${r.status()}`);
+  });
+
+  await check("a colour-temperature range written in the message is shown as a hard limit and holds in the spec", async () => {
+    await page.goto(`${BASE}/app`);
+    const text = "Hi, we're in Chicago and want a modern living room. We love Fred again.., Severance (show), MUJI and Blue Bottle Coffee. Please keep the light between 2700K and 3000K.\n\nThanks, Jordan";
+    await page.getByRole("textbox").first().fill(text);
+    await page.getByText("Hard limit").waitFor();
+    await page.getByRole("button", { name: /Build the brief/ }).click();
+    await page.waitForURL(/\/brief\/b-/, { timeout: 30_000 });
+    await page.getByText("What to build").waitFor();
+    const id = page.url().split("/brief/")[1];
+    const j = await page.evaluate((i) => fetch(`/api/briefs/${i}`).then((r) => r.json()), id);
+    const cct = j.brief.spec.find((l) => l.id === "cct");
+    const ks = (cct.value.match(/\d{4}/g) ?? []).map(Number);
+    assert(ks.length > 0 && ks.every((k) => k >= 2700 && k <= 3000), `cct ${cct.value}`);
+    assert(j.brief.input.cctRange?.min === 2700 && j.brief.input.cctRange?.max === 3000, "range not stored on the brief");
+    await page.request.delete(`${BASE}/api/briefs/${id}`).catch(() => {});
   });
 
   await check("oversized request body is rejected", async () => {

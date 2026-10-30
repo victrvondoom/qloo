@@ -6,6 +6,7 @@
 //              and reference it returns must actually occur in the message, so
 //              it can tidy but never invent.
 
+import { parseCctRange, type CctRange } from "./constraints";
 import { ROOM_LABEL } from "./rulebooks";
 import { lexiconFor, normaliseWord, WORD_LEXICON } from "./words";
 import type { RoomType, Trade } from "./types";
@@ -21,6 +22,8 @@ export interface IntakeDraft {
   /** What the parser couldn't find or had to guess, in plain words. */
   notes: string[];
   found: { city: boolean; room: boolean; words: boolean; loves: boolean };
+  /** A colour-temperature range written in the message. Parsed by pattern, never by a model. */
+  cctRange?: CctRange;
 }
 
 const MAX_TEXT = 4000;
@@ -226,6 +229,7 @@ export function parseIntakeHeuristic(raw: string): IntakeDraft {
     words: words.slice(0, 5),
     loves: uniqueLoves.slice(0, 10),
     source: "heuristic",
+    cctRange: parseCctRange(original),
     notes,
     found: { city: Boolean(city), room: Boolean(roomHit), words: words.length > 0, loves: uniqueLoves.length > 0 },
   };
@@ -283,7 +287,7 @@ export function groundDraft(text: string, d: Partial<IntakeDraft>): { draft: Int
   if (!words.length) notes.push("No style words found (like warm, modern, cozy).");
   if (loves.length < 2) notes.push("Fewer than two things they love.");
   return {
-    draft: { clientLabel, city, room, trade, words, loves, source: "model", notes, found: { city: Boolean(city), room: Boolean(d.room), words: words.length > 0, loves: loves.length > 0 } },
+    draft: { clientLabel, city, room, trade, words, loves, source: "model", cctRange: parseCctRange(text), notes, found: { city: Boolean(city), room: Boolean(d.room), words: words.length > 0, loves: loves.length > 0 } },
     dropped,
   };
 }

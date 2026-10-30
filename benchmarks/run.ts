@@ -83,7 +83,7 @@ function oracleSpec(world: SyntheticWorld, sc: Scenario): SpecMap | undefined {
     const chosen = truth[best.dimension] > 0.05 ? best : lex.find((r) => r.isDictionaryDefault) ?? lex[0];
     v[chosen.dimension] += 0.6;
   }
-  return toMap(runRulebook(input.trade, v, input.room, { warmFloor: warmFloor(input.words) }));
+  return toMap(runRulebook(input.trade, v, input.room, { warmFloor: warmFloor(input.words), cctRange: input.cctRange }));
 }
 
 function topDims(scores: Record<DimensionId, number>, k = 2): DimensionId[] {
@@ -93,6 +93,12 @@ function topDims(scores: Record<DimensionId, number>, k = 2): DimensionId[] {
 function agreement(a: SpecMap, b: SpecMap) {
   const ids = Object.keys(b);
   return ids.filter((id) => a[id] === b[id]).length / ids.length;
+}
+
+/** True when any colour temperature in the spec lies outside the range the client wrote down. */
+function violatesWrittenRange(input: Scenario["input"], spec: SpecMap) {
+  const r = cleanInput(input).cctRange;
+  return Boolean(r) && (spec.cct?.match(/\d{4}/g) ?? []).some((k) => Number(k) < r!.min || Number(k) > r!.max);
 }
 
 function violatesWarmFloor(input: Scenario["input"], spec: SpecMap) {
@@ -131,7 +137,7 @@ async function main() {
     clearQlooCache();
     world.failure = sc.failure ? { ...sc.failure } : { kind: "none" };
     const input = cleanInput(sc.input);
-    const row: Row = { id: sc.id, category: sc.category, specs: { B0: toMap(literalSpec(input.trade, input.room, input.words)) } };
+    const row: Row = { id: sc.id, category: sc.category, specs: { B0: toMap(literalSpec(input.trade, input.room, input.words, input.cctRange)) } };
     row.oracle = oracleSpec(world, sc);
     if (sc.intended.length) row.latentTop2 = topDims(world.truth(sc.intended));
 
@@ -161,7 +167,7 @@ async function main() {
         const tags = [...new Map(brief.dimensions.flatMap((d) => d.tasteTags).map((t) => [t.name, t])).values()];
         const dimsNoBase = computeDimensions(brief.crowdVenues, [], tags);
         const wordsNoBase = input.words.map((w) => decodeWord(w, dimsNoBase));
-        row.specs.B4b = toMap(buildSpec(input.trade, input.room, dimsNoBase, wordsNoBase, input.words, undefined, { evidenceUsable: true, evidenceLedger: [0], signalEntityIds: [] }));
+        row.specs.B4b = toMap(buildSpec(input.trade, input.room, dimsNoBase, wordsNoBase, input.words, undefined, { evidenceUsable: true, evidenceLedger: [0], signalEntityIds: [], cctRange: input.cctRange }));
       } else {
         row.specs.B2 = row.specs.B0; // no evidence: evidence-only system has nothing to say
         row.specs.B4b = row.specs.B4a;
@@ -238,6 +244,12 @@ async function main() {
     return [s, wilson(rs.filter((r) => violatesWarmFloor(scenarios.find((x) => x.id === r.id)!.input, r.specs[s]!)).length, rs.length)];
   }));
 
+  const rangeScen = rows.filter((r) => cleanInput(scenarios.find((s) => s.id === r.id)!.input).cctRange);
+  const rangeViolations = Object.fromEntries(systems.map((s) => {
+    const rs = rangeScen.filter((r) => r.specs[s]);
+    return [s, wilson(rs.filter((r) => violatesWrittenRange(scenarios.find((x) => x.id === r.id)!.input, r.specs[s]!)).length, rs.length)];
+  }));
+
   const abstainExpected = rows.filter((r) => ["missing_coverage"].includes(r.category));
   const abstainCorrect = wilson(abstainExpected.filter((r) => r.status === "INSUFFICIENT_EVIDENCE").length, abstainExpected.length);
   const dense = rows.filter((r) => ["same_words_diff_taste", "same_taste_diff_words", "irrelevant_change", "conflicting_taste", "explicit_constraint"].includes(r.category));
@@ -312,6 +324,7 @@ async function main() {
       exactOracleMatch: { description: "Share of briefs where every line equals the oracle. Wilson 95% CI.", bySystem: exactOracle },
       latentTasteRecovery: { description: "Does the fingerprint's top atmosphere appear in the client's true top-2? (B3 evidence)", top1InTrueTop2: latentRecoveryTop1, meanTop2Overlap: latentOverlap },
       constraintViolationRate: { description: "Warm-word lighting briefs whose colour temperature goes cooler than 3000K ambient.", bySystem: constraintViolations },
+      writtenRangeViolationRate: { description: "Briefs where the client wrote a colour-temperature range: share whose spec has any colour temperature outside it. B2 (evidence only) is not given the range, by design.", bySystem: rangeViolations },
       abstention: { correctAbstainOnMissingCoverage: abstainCorrect, falseAbstainOnDenseEvidence: falseAbstain, sparseCityStatuses: weak.map((r) => ({ id: r.id, status: r.status })) },
       entityMatchAccuracy: { ...entityAccuracy, details: ent.flatMap((r) => r.entity!.details.map((d) => ({ scenario: r.id, ...d, correct: d.label === d.got }))) },
       personalizationSensitivity: { description: "Same words, different latent taste. justifiedDifferenceRate = differing lines where each side equals its own oracle.", bySystem: sensitivity },
@@ -358,9 +371,9 @@ function summary(r: any): string {
     "",
     "The oracle applies the same rulebook to the synthetic client's latent taste, so this measures how well each system *recovers* taste, not whether the rulebook is good design.",
     "",
-    "| System | Mean line agreement (95% CI) | All lines match (95% CI) | Warm-floor violations (95% CI) |",
-    "|---|---|---|---|",
-    ...sys.map((s) => `| ${s} ${names[s]} | ${m.oracleAgreement.bySystem[s]?.mean === null || m.oracleAgreement.bySystem[s]?.mean === undefined ? m.oracleAgreement.bySystem[s]?.note ?? "—" : ci(m.oracleAgreement.bySystem[s])} | ${ci(m.exactOracleMatch.bySystem[s])} | ${ci(m.constraintViolationRate.bySystem[s])} |`),
+    "| System | Mean line agreement (95% CI) | All lines match (95% CI) | Warm-floor violations (95% CI) | Written-range violations (95% CI) |",
+    "|---|---|---|---|---|",
+    ...sys.map((s) => `| ${s} ${names[s]} | ${m.oracleAgreement.bySystem[s]?.mean === null || m.oracleAgreement.bySystem[s]?.mean === undefined ? m.oracleAgreement.bySystem[s]?.note ?? "—" : ci(m.oracleAgreement.bySystem[s])} | ${ci(m.exactOracleMatch.bySystem[s])} | ${ci(m.constraintViolationRate.bySystem[s])} | ${m.writtenRangeViolationRate.bySystem[s] ? ci(m.writtenRangeViolationRate.bySystem[s]) : "—"} |`),
     "",
     "## Behaviour",
     "",

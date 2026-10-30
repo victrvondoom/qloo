@@ -14,6 +14,7 @@ export type Category =
   | "missing_coverage"
   | "conflicting_taste"
   | "explicit_constraint"
+  | "explicit_range"
   | "unfamiliar_word"
   | "adversarial"
   | "upstream_failure";
@@ -149,6 +150,19 @@ export function buildBenchmark(seed = 20261028) {
   // 9. Explicit constraint (4): client says warm, taste pulls cool and bright.
   const cool = [["Glass Atlas", "Bright Line"], ["Paper Moon Studio", "Bright Line"], ["Sunday Brunch Club", "Glass Atlas"], ["Linen & Clay", "Bright Line", "Glass Atlas"]];
   cool.forEach((c, k) => scenarios.push({ id: `con-${k}`, category: "explicit_constraint", description: "Says warm; taste is bright and clean", input: base({ words: ["warm"], room: k % 2 ? "kitchen" : "living_room", loves: c }), intended: c.map((n) => L[n]), expectStatus: ["COMPLETE", "NEEDS_CLARIFICATION"] }));
+
+  // 9b. Explicit written range (4): the client wrote "2700K–3000K"; taste is bright and clean, and no warm word is used,
+  // so only the written range can hold the line. Correct: every colour temperature inside the range.
+  cool.forEach((c, k) =>
+    scenarios.push({
+      id: `rng-${k}`,
+      category: "explicit_range",
+      description: "Writes 2700K–3000K; taste is bright and clean",
+      input: base({ words: ["modern"], room: k % 2 ? "kitchen" : "living_room", loves: c, cctRange: { min: 2700, max: 3000 } }),
+      intended: c.map((n) => L[n]),
+      expectStatus: ["COMPLETE", "NEEDS_CLARIFICATION"],
+    }),
+  );
 
   // 10. Unfamiliar words (2).
   scenarios.push({ id: "unf-0", category: "unfamiliar_word", description: "'groovy' is not in the lexicon", input: base({ words: ["groovy", "warm"], loves: clusters[5] }), intended: clusters[5].map((n) => L[n]), expectStatus: ["COMPLETE", "NEEDS_CLARIFICATION"] });

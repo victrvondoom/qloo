@@ -3,6 +3,7 @@
 // so the same evidence always yields the same spec, and every line can name the
 // dimensions that drove it.
 
+import { applyCctRange, rangeLabel, type CctRange } from "../constraints";
 import type { DimensionId, RoomType, Trade } from "../types";
 
 export type Vector = Record<DimensionId, number>;
@@ -50,6 +51,8 @@ const TASK_ROOMS: RoomType[] = ["kitchen", "home_office", "retail", "bathroom"];
 export interface RuleOptions {
   /** The client used a word that can mean warm light; never spec cooler than 3000K. */
   warmFloor?: boolean;
+  /** The client's own written colour-temperature range; outranks the evidence and the warm floor. */
+  cctRange?: CctRange;
 }
 
 function lighting(v: Vector, room: RoomType, opts: RuleOptions): RuleLine[] {
@@ -72,11 +75,14 @@ function lighting(v: Vector, room: RoomType, opts: RuleOptions): RuleLine[] {
           : net > -0.6
             ? "3000K ambient, 3500K on task surfaces"
             : "3500K ambient, 4000K on task surfaces";
+  const bounded = opts.cctRange ? applyCctRange(cct, opts.cctRange) : undefined;
   lines.push({
     id: "cct",
     category: "Colour temperature",
-    value: cct,
-    why: floored
+    value: bounded?.value ?? cct,
+    why: bounded && bounded.value !== cct
+      ? `They wrote down ${rangeLabel(opts.cctRange!)}, which outranks what their rooms suggest.`
+      : floored
       ? "Their rooms run bright and crisp, but they asked for warm, so it stops at 3000K."
       : net > 0.15
         ? "Their rooms run warm and low."
@@ -91,6 +97,7 @@ function lighting(v: Vector, room: RoomType, opts: RuleOptions): RuleLine[] {
       ...(opts.warmFloor ? ["warm-floor: client used a word that can mean warm light, so never cooler than 3000K ambient"] : []),
       ...(TASK_ROOMS.includes(room) ? ["task-room: cooler task lighting allowed on work surfaces"] : []),
       ...(floored ? ["warm-floor applied: evidence pointed cooler"] : []),
+      ...(bounded ? [bounded.note] : []),
     ],
   });
 

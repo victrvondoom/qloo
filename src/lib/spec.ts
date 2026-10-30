@@ -8,6 +8,7 @@
 // With no evidence the two are identical, so every difference between the
 // spec and its literal column is attributable to Qloo data.
 
+import type { CctRange } from "./constraints";
 import { DIMENSIONS, DIMENSION_BY_ID } from "./dimensions";
 import { applyClientAnswer } from "./fingerprint";
 import { runRulebook, type Vector } from "./rulebooks";
@@ -53,8 +54,8 @@ export function warmFloor(clientWords: string[]): boolean {
 }
 
 /** B0: the spec from the client's words alone, with the same hard constraints. */
-export function literalSpec(trade: Trade, room: RoomType, clientWords: string[]) {
-  return runRulebook(trade, literalVector(clientWords), room, { warmFloor: warmFloor(clientWords) });
+export function literalSpec(trade: Trade, room: RoomType, clientWords: string[], cctRange?: CctRange) {
+  return runRulebook(trade, literalVector(clientWords), room, { warmFloor: warmFloor(clientWords), cctRange });
 }
 
 function evidenceFor(dim: DimensionScore): EvidenceRef {
@@ -78,6 +79,8 @@ export interface SpecContext {
   evidenceUsable: boolean;
   evidenceLedger: number[];
   signalEntityIds: string[];
+  /** The client's own written colour-temperature range. */
+  cctRange?: CctRange;
 }
 
 export function buildSpec(
@@ -89,9 +92,9 @@ export function buildSpec(
   previous?: SpecLine[],
   ctx: SpecContext = { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [] },
 ): SpecLine[] {
-  const opts = { warmFloor: warmFloor(clientWords) };
-  const lines = ctx.evidenceUsable ? runRulebook(trade, intentVector(dims, words), room, opts) : literalSpec(trade, room, clientWords);
-  const literal = literalSpec(trade, room, clientWords);
+  const opts = { warmFloor: warmFloor(clientWords), cctRange: ctx.cctRange };
+  const lines = ctx.evidenceUsable ? runRulebook(trade, intentVector(dims, words), room, opts) : literalSpec(trade, room, clientWords, ctx.cctRange);
+  const literal = literalSpec(trade, room, clientWords, ctx.cctRange);
   return lines.map((l) => {
     const drivers = l.drivers.map((id) => dims.find((d) => d.id === id)).filter((d): d is DimensionScore => Boolean(d));
     const literalValue = literal.find((x) => x.id === l.id)?.value ?? "";
@@ -100,7 +103,7 @@ export function buildSpec(
 
     let basis: LineBasis;
     if (!ctx.evidenceUsable) basis = "literal_fallback";
-    else if (l.constraints?.some((c) => c.startsWith("warm-floor applied"))) basis = "constraint";
+    else if (l.constraints?.some((c) => c.startsWith("warm-floor applied") || /^client range .* applied/.test(c))) basis = "constraint";
     else if (drivers.some((d) => d.clientAdjusted)) basis = "client_answer";
     else if (l.value !== literalValue || evidenceAgrees) basis = "qloo_evidence";
     else basis = "client_words";
@@ -135,7 +138,7 @@ export function buildSpec(
 }
 
 /** Every value each rulebook line can take, found by sweeping extreme vectors. */
-export function specMenu(trade: Trade, room: RoomType, clientWords: string[] = []): Record<string, { category: string; values: string[] }> {
+export function specMenu(trade: Trade, room: RoomType, clientWords: string[] = [], cctRange?: CctRange): Record<string, { category: string; values: string[] }> {
   const vectors: Vector[] = [zeroVector()];
   for (const d of DIMENSIONS) {
     for (const s of [1, 0.5, -0.5, -1]) {
@@ -145,7 +148,7 @@ export function specMenu(trade: Trade, room: RoomType, clientWords: string[] = [
     }
   }
   const menu: Record<string, { category: string; values: string[] }> = {};
-  const opts = { warmFloor: warmFloor(clientWords) };
+  const opts = { warmFloor: warmFloor(clientWords), cctRange };
   for (const v of vectors) {
     for (const l of runRulebook(trade, v, room, opts)) {
       menu[l.id] ??= { category: l.category, values: [] };
@@ -155,8 +158,8 @@ export function specMenu(trade: Trade, room: RoomType, clientWords: string[] = [
   return menu;
 }
 
-function specValues(trade: Trade, room: RoomType, dims: DimensionScore[], words: DecodedWord[], clientWords: string[]): Map<string, string> {
-  const opts = { warmFloor: warmFloor(clientWords) };
+function specValues(trade: Trade, room: RoomType, dims: DimensionScore[], words: DecodedWord[], clientWords: string[], cctRange?: CctRange): Map<string, string> {
+  const opts = { warmFloor: warmFloor(clientWords), cctRange };
   return new Map(runRulebook(trade, intentVector(dims, words), room, opts).map((l) => [l.id, l.value]));
 }
 
@@ -204,8 +207,9 @@ export function rankQuestions(
   dims: DimensionScore[],
   rescore: (dims: DimensionScore[]) => DecodedWord[],
   clientWords: string[],
+  cctRange?: CctRange,
 ): QuestionCandidate[] {
-  const now = specValues(trade, room, dims, rescore(dims), clientWords);
+  const now = specValues(trade, room, dims, rescore(dims), clientWords, cctRange);
   const seen = new Set<string>();
   const out: QuestionCandidate[] = [];
   for (const d of DIMENSIONS) {
@@ -214,8 +218,8 @@ export function rankQuestions(
     seen.add(key);
     const ifA = applyClientAnswer(dims, d.id, d.opposite);
     const ifB = applyClientAnswer(dims, d.opposite, d.id);
-    const valuesA = specValues(trade, room, ifA, rescore(ifA), clientWords);
-    const valuesB = specValues(trade, room, ifB, rescore(ifB), clientWords);
+    const valuesA = specValues(trade, room, ifA, rescore(ifA), clientWords, cctRange);
+    const valuesB = specValues(trade, room, ifB, rescore(ifB), clientWords, cctRange);
     const pA = answerPrior(dims, d.id, d.opposite);
     out.push({
       a: d.id,
@@ -240,9 +244,10 @@ export function planQuestion(
   rescore: (dims: DimensionScore[]) => DecodedWord[],
   clientLabel: string,
   clientWords: string[],
+  cctRange?: CctRange,
 ): ClarifyingQuestion | undefined {
   const byAffinity = [...crowd].sort((x, y) => (y.affinity ?? 0) - (x.affinity ?? 0));
-  for (const c of rankQuestions(trade, room, dims, rescore, clientWords)) {
+  for (const c of rankQuestions(trade, room, dims, rescore, clientWords, cctRange)) {
     if (c.expectedChange < MIN_EXPECTED_CHANGE || c.entropyBits < MIN_ENTROPY_BITS || c.impact < 2) continue;
     const venueA = byAffinity.find((v) => v.dimensions.includes(c.a) && !v.dimensions.includes(c.b));
     const venueB = byAffinity.find((v) => v.dimensions.includes(c.b) && !v.dimensions.includes(c.a));

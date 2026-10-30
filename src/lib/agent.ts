@@ -23,6 +23,7 @@ import { envReport, log } from "./env";
 import { HttpTransport, QlooClient, QlooError, SimulatedOutageTransport, type Params, type Transport } from "./qloo/client";
 import { FixtureTransport } from "./qloo/fixture";
 import { resolveLove } from "./resolve";
+import { cleanCctRange } from "./constraints";
 import { buildSpec, literalSpec, planQuestion, rankQuestions, specMenu, warmFloor } from "./spec";
 import { decodeWord, lexiconFor, normaliseWord } from "./words";
 import { llmAvailable, llmBaselineSpec, llmMapWord, llmModel, llmNarrative } from "./llm";
@@ -137,6 +138,7 @@ export function cleanInput(raw: Partial<BriefInput>): BriefInput {
     words,
     loves: [...new Set(loves)],
     pinned: Object.keys(pinned).length ? pinned : undefined,
+    cctRange: cleanCctRange(raw.cctRange),
     challenge: raw.challenge === "upstream_down" ? "upstream_down" : "none",
     project: text(raw.project, 60) || undefined,
     sourceText: typeof raw.sourceText === "string" && raw.sourceText.trim() ? raw.sourceText.replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, " ").trim().slice(0, 4000) : undefined,
@@ -246,6 +248,11 @@ export function validateBrief(b: Pick<Brief, "spec" | "status" | "input" | "data
     const cct = b.spec.find((l) => l.id === "cct");
     if (cct && /3500K ambient|4000K/.test(cct.value)) problems.push("cct: violates warm-light floor");
   }
+  if (b.input.cctRange) {
+    const cct = b.spec.find((l) => l.id === "cct");
+    const ks = (cct?.value.match(/\d{4}/g) ?? []).map(Number);
+    if (cct && ks.some((k) => k < b.input.cctRange!.min || k > b.input.cctRange!.max)) problems.push("cct: outside the range the client wrote down");
+  }
   return problems;
 }
 
@@ -293,7 +300,7 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
   });
 
   // The LLM-only baseline (B1) runs alongside the Qloo work; it never sees Qloo data.
-  const menu = specMenu(input.trade, input.room, input.words);
+  const menu = specMenu(input.trade, input.room, input.words, input.cctRange);
   const baselinePromise: Promise<LlmBaseline> = useLlm
     ? (llmCalls++,
       llmBaselineSpec({ trade: TRADE_LABEL[input.trade], room: ROOM_LABEL[input.room], words: input.words, loves: input.loves, menu, signal: opts.signal })
@@ -562,7 +569,7 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
 
   // GENERATE_SPEC
   const spec = await run.step("GENERATE_SPEC", `rulebook ${RULEBOOK_VERSION}`, `Drafting the ${TRADE_LABEL[input.trade].toLowerCase()} spec`, {}, async () => {
-    const spec = buildSpec(input.trade, input.room, dims, words, input.words, undefined, { evidenceUsable, evidenceLedger, signalEntityIds: signalIds });
+    const spec = buildSpec(input.trade, input.room, dims, words, input.words, undefined, { evidenceUsable, evidenceLedger, signalEntityIds: signalIds, cctRange: input.cctRange });
     const diffs = spec.filter((l) => l.value !== l.literalValue).length;
     const e = await ledger.append("computation", "Spec drafted from rulebook", {
       rulebookVersion: RULEBOOK_VERSION,
@@ -580,8 +587,8 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
     if (!evidenceUsable || opts.noQuestion) {
       return { value: undefined, decision: opts.noQuestion ? "disabled (ablation)" : "skipped: no usable evidence", rationale: "Questions are only planned on top of usable evidence.", validation: "n/a" as const };
     }
-    const ranked = rankQuestions(input.trade, input.room, dims, rescore, input.words);
-    const q = planQuestion(input.trade, input.room, dims, crowd, rescore, input.clientLabel, input.words);
+    const ranked = rankQuestions(input.trade, input.room, dims, rescore, input.words, input.cctRange);
+    const q = planQuestion(input.trade, input.room, dims, crowd, rescore, input.clientLabel, input.words, input.cctRange);
     const e = await ledger.append("decision", q ? "Planned a clarifying question" : "No clarifying question", {
       candidates: ranked.slice(0, 4).map((c) => ({ contrast: [c.a, c.b], pA: +c.pA.toFixed(3), impact: c.impact, expectedChange: +c.expectedChange.toFixed(3), entropyBits: +c.entropyBits.toFixed(3) })),
       chosen: q ? { contrast: [q.dimension, q.versus], optionA: q.optionA, optionB: q.optionB } : null,
@@ -768,5 +775,5 @@ export async function recordOutcome(brief: Brief, rating: number, note?: string)
 /** B0 for the Proof Lab "Without Qloo" control: computed fresh, no Qloo calls. */
 export function computeLiteral(input: BriefInput) {
   const clean = cleanInput(input);
-  return literalSpec(clean.trade, clean.room, clean.words).map((l) => ({ id: l.id, category: l.category, value: l.value, constraints: l.constraints ?? [] }));
+  return literalSpec(clean.trade, clean.room, clean.words, clean.cctRange).map((l) => ({ id: l.id, category: l.category, value: l.value, constraints: l.constraints ?? [] }));
 }
