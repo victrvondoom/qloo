@@ -1,42 +1,42 @@
 # Benchmark summary
 
-> **SYNTHETIC benchmark (seeded world, not Qloo data, no human labels).** Generated 2026-10-28T15:08:42.573Z · commit `3facf09` · seed 11 · 60 scenarios · rulebook-2026.10.28 · LLM: not used.
+> **SYNTHETIC benchmark (seeded world, not Qloo data, no human labels).** Generated 2026-10-30T06:39:48.828Z · commit `fe8f4af` · seed 11 · 64 scenarios · rulebook-2026.10.28 · LLM: not used.
 > These numbers test the pipeline's inference, abstention, constraints and reliability on synthetic data. They are **not** evidence that real clients prefer Tastespec's output: that needs human labels and live Qloo data, which have not been collected (see `docs/EVALUATION_METHODOLOGY.md`).
 
 ## Spec agreement with the synthetic oracle
 
 The oracle applies the same rulebook to the synthetic client's latent taste, so this measures how well each system *recovers* taste, not whether the rulebook is good design.
 
-| System | Mean line agreement (95% CI) | All lines match (95% CI) | Warm-floor violations (95% CI) |
-|---|---|---|---|
-| B0 Literal words only | 0.39 [0.32, 0.46] (n=55) | 0.04 [0.01, 0.12] (n=55) | 0.00 [0.00, 0.08] (n=47) |
-| B1 LLM only (no Qloo) | not run (needs ANTHROPIC_API_KEY and --with-llm) | — | — |
-| B2 Qloo evidence only (ignores words) | 0.72 [0.68, 0.77] (n=55) | 0.16 [0.09, 0.28] (n=55) | 0.23 [0.14, 0.37] (n=47) |
-| B3 Tastespec full | 0.76 [0.70, 0.81] (n=55) | 0.24 [0.14, 0.36] (n=55) | 0.00 [0.00, 0.08] (n=47) |
-| B4a Tastespec, no clarification | 0.76 [0.70, 0.81] (n=55) | 0.24 [0.14, 0.36] (n=55) | 0.00 [0.00, 0.08] (n=47) |
-| B4b Tastespec, no city baseline | 0.72 [0.66, 0.77] (n=55) | 0.09 [0.04, 0.20] (n=55) | 0.00 [0.00, 0.08] (n=47) |
+| System | Mean line agreement (95% CI) | All lines match (95% CI) | Warm-floor violations (95% CI) | Written-range violations (95% CI) |
+|---|---|---|---|---|
+| B0 Literal words only | 0.41 [0.34, 0.48] (n=59) | 0.03 [0.01, 0.12] (n=59) | 0.00 [0.00, 0.08] (n=47) | 0.00 [0.00, 0.49] (n=4) |
+| B1 LLM only (no Qloo) | not run (needs ANTHROPIC_API_KEY and --with-llm) | — | — | — |
+| B2 Qloo evidence only (ignores words) | 0.72 [0.67, 0.76] (n=59) | 0.15 [0.08, 0.27] (n=59) | 0.23 [0.14, 0.37] (n=47) | 1.00 [0.51, 1.00] (n=4) |
+| B3 Tastespec full | 0.77 [0.71, 0.81] (n=59) | 0.25 [0.16, 0.38] (n=59) | 0.00 [0.00, 0.08] (n=47) | 0.00 [0.00, 0.49] (n=4) |
+| B4a Tastespec, no clarification | 0.77 [0.71, 0.82] (n=59) | 0.25 [0.16, 0.38] (n=59) | 0.00 [0.00, 0.08] (n=47) | 0.00 [0.00, 0.49] (n=4) |
+| B4b Tastespec, no city baseline | 0.73 [0.68, 0.78] (n=59) | 0.10 [0.05, 0.20] (n=59) | 0.00 [0.00, 0.08] (n=47) | 0.00 [0.00, 0.49] (n=4) |
 
 ## Behaviour
 
 | Metric | Result |
 |---|---|
-| Latent taste recovery: top atmosphere in true top-2 | 0.98 [0.90, 1.00] (n=55) |
-| Mean top-2 overlap with true taste | 0.82 [0.75, 0.88] (n=55) |
+| Latent taste recovery: top atmosphere in true top-2 | 0.98 [0.91, 1.00] (n=59) |
+| Mean top-2 overlap with true taste | 0.82 [0.76, 0.88] (n=59) |
 | Entity match accuracy (labelled references incl. abstain cases) | 1.00 [0.85, 1.00] (n=22) |
 | Correct abstention when nothing resolves | 1.00 [0.44, 1.00] (n=3) |
 | False abstention on dense evidence | 0.00 [0.00, 0.09] (n=37) |
 | Sparse-city outcomes | weak-0: NEEDS_CLARIFICATION, weak-1: NEEDS_CLARIFICATION, weak-2: NEEDS_CLARIFICATION |
 | Irrelevant-input stability (identical spec) | 1.00 [0.61, 1.00] (n=6) |
-| Questions asked | 5 of 55 eligible briefs |
+| Questions asked | 5 of 59 eligible briefs |
 | Questions whose answer changed the spec | 0.60 [0.23, 0.88] (n=5) |
 | Expected vs realised lines changed per question | 2.66 vs 1.00 |
 | Oracle agreement gain per question | -0.03 [-0.11, 0.06] (n=5) |
 | Failure scenarios handled correctly | 1.00 [0.51, 1.00] (n=4) |
-| Normal scenarios completed without error | 1.00 [0.94, 1.00] (n=56) |
-| Evidence completeness (lines with full provenance) | 1.00 [0.99, 1.00] (n=400) |
+| Normal scenarios completed without error | 1.00 [0.94, 1.00] (n=60) |
+| Evidence completeness (lines with full provenance) | 1.00 [0.99, 1.00] (n=428) |
 | Invariant violations | 0 |
-| Orchestration latency p50 / p95 (synthetic transport) | 26 / 36 ms |
-| Qloo calls per brief p50 / p95 / max | 8 / 9 / 12 |
+| Orchestration latency p50 / p95 (synthetic transport) | 27 / 32 ms |
+| Qloo calls per brief p50 / p95 / max | 8 / 8 / 12 |
 
 ## Personalisation sensitivity (same words, different taste)
 

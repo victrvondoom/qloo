@@ -119,6 +119,10 @@ Level 0 is the main run. Levels 1 (Curated) and 2 (Deep cut) ask Qloo the same t
 
 `influence.ts` (on request, owner only) re-runs the taste-matched query once per resolved reference with that reference left out, keeping the geography, city baseline, taste tags and the client's answer fixed, and rebuilds the spec each time. A reference *decides* a line when its absence changes the value; its *push* is the score drop per atmosphere. Lines no single reference decides are counted as robust. Fragile lines feed the hand-over's open questions. Cost: one paged query per reference, all ledgered.
 
+## Explicit constraints
+
+`constraints.ts` parses a colour-temperature range from the client's message ("2700K–3000K", "no cooler than 3000K") by fixed patterns and bounds it to 1800–6500K. `BriefInput.cctRange` carries it; `cleanInput` re-validates anything from outside. `rulebooks/index.ts` clamps the colour-temperature line into the range (dim-to-warm ranges are narrowed, task-surface temperatures capped) after the evidence and the warm floor have spoken, and adds a constraint note. `buildSpec`, `literalSpec`, `specMenu`, `rankQuestions` and `planQuestion` all take the range, so the baseline, the question planner and replay see the same rule.
+
 ## Taste anatomy
 
 `anatomy.ts` (on request, owner only, ~3 queries per reference + 1) asks Qloo once per resolved reference with only that reference, against the same city baseline, and compares the facets: pairwise cosine agreement and coherence; the least-agreeing pair and a bridge query carrying both; a consensus core (places chosen by a majority of facets); bootstrap stability (400 resamples, seeded, so it is reproducible); flip distance (greedy removal of the driving atmosphere among the strongest places); the spec each domain builds alone; place-vs-tag corroboration; and a Jensen–Shannon niche index. The result is stored on the brief and ledgered; the spec is not changed. Unstable lines and the conflict feed the hand-over's open risks.
@@ -170,7 +174,7 @@ Both run the same migrations and the same store code; the test suite runs the st
 
 ```mermaid
 flowchart LR
-  S[benchmarks/scenarios.ts: 60 scenarios, 12 categories] --> W[benchmarks/world.ts: seeded synthetic world]
+  S[benchmarks/scenarios.ts: 64 scenarios, 13 categories] --> W[benchmarks/world.ts: seeded synthetic world]
   W --> R[benchmarks/run.ts]
   R --> B0[B0 literal] & B2[B2 evidence only] & B3[B3 full + simulated answer] & B4a[B4a no question] & B4b[B4b no baseline]
   R -.optional --with-llm.-> B1[B1 LLM only]

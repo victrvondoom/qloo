@@ -12,7 +12,7 @@ The agent remembers nothing between clients: its whole working state is a graph 
 
 Every Qloo call, decision, model call and client action goes into a hash-chained ledger; replay rebuilds any spec from its stored evidence; every line is classified as evidence-supported, derived, client-stated or unsupported. It runs on any OS with Node 22 (built-in SQLite, no native modules) or on serverless with libSQL/Turso.
 
-We tested it against baselines on a seeded synthetic world (60 scenarios, 4 seeds): literal reading, Qloo evidence alone, Tastespec, and ablations. Tastespec matched the synthetic clients' known taste far better than the literal reading (0.76–0.88 vs 0.39). Evidence alone broke the client's stated constraint in 23–43% of warm briefs; Tastespec in none. We also report what didn't hold up: the clarifying question has no measurable accuracy gain yet.
+We tested it against baselines on a seeded synthetic world (64 scenarios, 4 seeds): literal reading, Qloo evidence alone, Tastespec, and ablations. Tastespec matched the synthetic clients' known taste far better than the literal reading (0.77–0.88 vs 0.41). Evidence alone broke the client's stated constraint in 23–43% of warm briefs; Tastespec in none. We also report what didn't hold up: the clarifying question has no measurable accuracy gain yet.
 
 ## 3-minute demo
 

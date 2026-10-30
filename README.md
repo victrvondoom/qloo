@@ -53,6 +53,10 @@ Taste agents assume the user's words carry their preferences. In design work the
 
 **It hands you:** a 3D room lit by the spec · progressive depth (Mainstream → Curated → Deep cut) · a duet merge for two people (per line: agree, leans A/B, middle ground) · a 24-hour light clock · fitting quantities by the lumen method (an estimate, assumptions shown) · a fixture schedule CSV (labelled synthetic in demo mode, carrying the ledger head) and spec JSON · a revocable client link · spec history from the ledger · a 3D taste space and similar past clients · a mood card PNG.
 
+## What the client writes down outranks the evidence
+
+If the message contains a colour-temperature limit ("between 2700K and 3000K", "no cooler than 3000K"), it is parsed by fixed patterns (never by a model), shown as a **Hard limit** chip before you build, stored on the brief and applied inside the rulebook. It beats both Qloo evidence and the warm-word floor. A line it changes is marked `constraint` with a note saying what the rulebook would have said; the literal baseline, the "without Qloo" recompute, replay, the influence map and the duet merge all honour it, and a spec outside it fails validation. Tested by a 300-case property, an end-to-end run and the benchmark's `explicit_range` scenarios.
+
 ## How it stays honest
 
 - **No memory, one graph.** The agent keeps nothing between clients; everything it knows about this one is the narrowing graph, stored with the brief.
@@ -64,16 +68,16 @@ Taste agents assume the user's words carry their preferences. In design work the
 
 ## What the synthetic benchmark shows
 
-Agreement with a synthetic oracle that applies the same rulebook to each scenario's known latent taste (60 scenarios, seeded world, not real clients or Qloo data; `reports/benchmark-summary.md`):
+Agreement with a synthetic oracle that applies the same rulebook to each scenario's known latent taste (64 scenarios, seeded world, not real clients or Qloo data; `reports/benchmark-summary.md`):
 
 | System | Agreement (95% CI) | Warm-light violations |
 |---|---|---|
-| B0 literal words only | 0.39 [0.32, 0.46] | 0% |
-| B2 Qloo evidence, no safeguards | 0.78 [0.73, 0.83] | 26% |
-| **B3 Tastespec** | **0.88 [0.84, 0.91]** | **0%** |
-| B4b without the city baseline | 0.73 [0.68, 0.79] | 0% |
+| B0 literal words only | 0.41 [0.34, 0.48] | 0% |
+| B2 Qloo evidence, no safeguards | 0.78 [0.73, 0.82] | 26% |
+| **B3 Tastespec** | **0.88 [0.85, 0.91]** | **0%** |
+| B4b without the city baseline | 0.74 [0.69, 0.80] | 0% |
 
-Across four seeds B3 is 0.76–0.88 vs B0 0.39. **Not shown:** that the clarifying question improves accuracy (CIs span zero), or anything about real clients. The oracle shares our rulebook, so this measures taste recovery through the mapping, not design quality. Details: `docs/EVALUATION_METHODOLOGY.md`.
+Across four seeds B3 is 0.77–0.88 vs B0 0.41. **Not shown:** that the clarifying question improves accuracy (CIs span zero), or anything about real clients. The oracle shares our rulebook, so this measures taste recovery through the mapping, not design quality. Details: `docs/EVALUATION_METHODOLOGY.md`.
 
 ## Status, honestly
 

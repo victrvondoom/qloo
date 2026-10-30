@@ -96,8 +96,8 @@ export default function Method() {
       <section className="card section" id="evaluation">
         <h2>How it&apos;s evaluated</h2>
         <p>
-          On a seeded synthetic world (60 scenarios, four seeds), the spec is compared with an oracle that applies the same rulebook to each scenario&apos;s hidden taste. Tastespec agrees
-          0.76–0.88 of the time against 0.39 for the literal reading; evidence without the safeguards matches less often and breaks the warm-light rule in 23–43% of warm briefs, Tastespec in
+          On a seeded synthetic world (64 scenarios, four seeds), the spec is compared with an oracle that applies the same rulebook to each scenario&apos;s hidden taste. Tastespec agrees
+          0.77–0.88 of the time against 0.41 for the literal reading; evidence without the safeguards matches less often and breaks the warm-light rule in 23–43% of warm briefs, Tastespec in
           none. Because the oracle shares the rulebook, this measures how well taste is recovered through the mapping, not whether the mapping is good design: only people can say that,
           and the human study hasn&apos;t been run. The clarifying question has no measurable accuracy gain yet.
         </p>

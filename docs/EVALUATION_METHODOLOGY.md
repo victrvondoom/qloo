@@ -60,30 +60,32 @@ For scenarios with known intended references, the oracle spec applies **the same
 | Evidence completeness | Lines with a basis and, for evidence lines, cited atmospheres, Qloo requests and signals |
 | Latency, calls | In-process orchestration time (not network); Qloo attempts per brief |
 
-## Results (headline seed 20261028, 55 scorable scenarios)
+## Results (headline seed 20261028, 59 scorable of 64 scenarios)
 
 From `reports/benchmark-summary.md`:
 
-| System | Oracle agreement (95% CI) | Warm-floor violations |
-|---|---|---|
-| B0 literal | 0.39 [0.32, 0.46] | 0% |
-| B2 evidence only | 0.78 [0.73, 0.83] | 26% |
-| **B3 full** | **0.88 [0.84, 0.91]** | **0%** |
-| B4a no question | 0.87 [0.83, 0.91] | 0% |
-| B4b no baseline | 0.73 [0.68, 0.79] | 0% |
+| System | Oracle agreement (95% CI) | Warm-floor violations | Written-range violations (n=4) |
+|---|---|---|---|
+| B0 literal | 0.41 [0.34, 0.48] | 0% | 0% |
+| B2 evidence only | 0.78 [0.73, 0.82] | 26% | 100% [51, 100] |
+| **B3 full** | **0.88 [0.85, 0.91]** | **0%** | **0% [0, 49]** |
+| B4a no question | 0.87 [0.84, 0.91] | 0% | 0% |
+| B4b no baseline | 0.74 [0.69, 0.80] | 0% | 0% |
+
+The written-range column covers the four `explicit_range` scenarios (the client wrote "2700K–3000K"; taste is bright and clean; no warm word). With n=4 the intervals are wide, so read it as a regression check that the constraint holds (B0 and B3 are given the range, B2 by design is not), not as a rate. The stronger evidence is `tests/constraints.test.ts`, which checks 300 random cases.
 
 Robustness across three more seeds (11, 12, 13; `reports/benchmark-summary-seed-*.md`):
 
 | Seed | B0 | B2 | B3 | B2 violations | B3 violations | Justified differences B2 → B3 |
 |---|---|---|---|---|---|---|
-| 20261028 | 0.39 | 0.78 | 0.88 | 26% | 0% | 0.72 → 0.84 |
-| 11 | 0.39 | 0.72 | 0.76 | 23% | 0% | 0.64 → 0.60 |
-| 12 | 0.39 | 0.75 | 0.81 | 23% | 0% | 0.73 → 0.80 |
-| 13 | 0.39 | 0.76 | 0.84 | 43% | 0% | 0.66 → 0.87 |
+| 20261028 | 0.41 | 0.78 | 0.88 | 26% | 0% | 0.72 → 0.84 |
+| 11 | 0.41 | 0.72 | 0.77 | 23% | 0% | 0.64 → 0.60 |
+| 12 | 0.41 | 0.74 | 0.82 | 23% | 0% | 0.73 → 0.80 |
+| 13 | 0.41 | 0.76 | 0.85 | 43% | 0% | 0.66 → 0.87 |
 
 ## What the results support
 
-1. **Qloo evidence is necessary** (on synthetic data): every evidence-using system roughly doubles oracle agreement over the literal reading (0.39 → 0.72–0.88). B0 cannot personalise at all: it gives identical specs to clients with different taste in 9/9 pairs.
+1. **Qloo evidence is necessary** (on synthetic data): every evidence-using system roughly doubles oracle agreement over the literal reading (0.41 → 0.72–0.88). B0 cannot personalise at all: it gives identical specs to clients with different taste in 9/9 pairs.
 2. **Evidence alone is unsafe**: ignoring the client's words (B2) breaks the warm-light constraint in 23–43% of warm briefs. Tastespec's fusion keeps it at 0% while matching or beating B2 on agreement in every seed (by 0.04–0.10; on seed 11 the CIs overlap).
 3. **The city baseline matters**: removing it (B4b) costs about 0.15 agreement. Raw "what this crowd likes" is confounded with "what everyone likes here".
 4. **Abstention, reliability and provenance hold**: 100% correct abstention on missing coverage, 0 false abstentions on dense evidence, every injected failure handled, 100% evidence completeness, 0 invariant violations, entity accuracy 22/22 on labelled references.

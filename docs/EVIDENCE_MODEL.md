@@ -89,6 +89,8 @@ Each `qloo_call` entry stores the SHA-256 of the response body and Qloo's reques
 | 14 | Influence is measured, not attributed | leave-one-out queries to Qloo (same scope, baseline, taste tags and answer), ledgered; the spec itself is not changed | `depth-replay.test.ts` influence tests; e2e |
 | 15 | Anatomy is measured and doesn't touch the spec | per-facet and bridge queries are ledgered; bootstrap is seeded; stored on `brief.anatomy` only | `anatomy.test.ts`; e2e |
 | 16 | Exports say what they are | CSV/JSON carry the data mode (SYNTHETIC in demo) and the ledger head; quantities are labelled an estimate with assumptions | `studio.test.ts`; e2e |
+| 17 | A range the client wrote down is never exceeded | parsed from the message by fixed patterns (`constraints.ts`), applied inside the rulebook so it outranks evidence and the warm floor; `validateBrief` rejects a spec outside it | `constraints.test.ts` (300-case property, replay, answering the question), `adversarial.test.ts`, e2e, benchmark `explicit_range` |
+| 18 | Hostile Qloo payloads are absorbed or abstained on | tolerant parsers (2000 random shapes), bounded scores, injected text only ever lands in data fields; thin local coverage widens with a disclosed warning, none abstains | `adversarial.test.ts` |
 | 13 | A client's link shows only the client view | no brief id, owner hash, pasted message, ledger or trace; revocation 404s | `depth-replay.test.ts`, e2e |
 
 Client actions (answer, reactions) are ledgered as `client_input` with `via: "client"`, so the provenance of a line changed by the client's answer is visible in the bundle.

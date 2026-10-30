@@ -1,15 +1,15 @@
 {
   "kind": "SYNTHETIC benchmark (seeded world, not Qloo data, no human labels)",
-  "generatedAt": "2026-10-28T15:09:15.052Z",
+  "generatedAt": "2026-10-30T06:40:19.601Z",
   "environment": {
     "node": "v22.22.0",
     "platform": "linux",
-    "gitSha": "3facf09",
+    "gitSha": "fe8f4af",
     "seed": 12,
     "rulebookVersion": "rulebook-2026.10.28",
-    "scenarios": 60,
+    "scenarios": 64,
     "llm": "not used",
-    "durationMs": 6913
+    "durationMs": 5192
   },
   "notMeasured": {
     "preferenceAlignmentWithHumans": "NOT MEASURED: no independent human preference labels have been collected. Protocol: docs/EVALUATION_METHODOLOGY.md.",
@@ -19,13 +19,13 @@
   "metrics": {
     "oracleAgreement": {
       "description": "Mean fraction of spec lines equal to the synthetic oracle (same rulebook applied to the latent taste). 95% bootstrap CI.",
-      "scenarios": 55,
+      "scenarios": 59,
       "bySystem": {
         "B0": {
-          "mean": 0.3865,
-          "lo": 0.3153,
-          "hi": 0.4592,
-          "n": 55
+          "mean": 0.4111,
+          "lo": 0.3409,
+          "hi": 0.4814,
+          "n": 59
         },
         "B1": {
           "mean": null,
@@ -33,28 +33,28 @@
           "n": 0
         },
         "B2": {
-          "mean": 0.7486,
-          "lo": 0.6888,
-          "hi": 0.8062,
-          "n": 55
+          "mean": 0.739,
+          "lo": 0.6814,
+          "hi": 0.7942,
+          "n": 59
         },
         "B3": {
-          "mean": 0.8145,
-          "lo": 0.7532,
-          "hi": 0.8727,
-          "n": 55
+          "mean": 0.8174,
+          "lo": 0.7588,
+          "hi": 0.8722,
+          "n": 59
         },
         "B4a": {
-          "mean": 0.8223,
-          "lo": 0.7636,
-          "hi": 0.8758,
-          "n": 55
+          "mean": 0.8247,
+          "lo": 0.768,
+          "hi": 0.8765,
+          "n": 59
         },
         "B4b": {
-          "mean": 0.8036,
-          "lo": 0.7512,
-          "hi": 0.853,
-          "n": 55
+          "mean": 0.8073,
+          "lo": 0.7559,
+          "hi": 0.8542,
+          "n": 59
         }
       }
     },
@@ -62,10 +62,10 @@
       "description": "Share of briefs where every line equals the oracle. Wilson 95% CI.",
       "bySystem": {
         "B0": {
-          "p": 0.0364,
-          "lo": 0.01,
-          "hi": 0.1232,
-          "n": 55
+          "p": 0.0339,
+          "lo": 0.0093,
+          "hi": 0.1154,
+          "n": 59
         },
         "B1": {
           "p": null,
@@ -74,44 +74,44 @@
           "n": 0
         },
         "B2": {
-          "p": 0.2909,
-          "lo": 0.1877,
-          "hi": 0.4214,
-          "n": 55
+          "p": 0.2712,
+          "lo": 0.1744,
+          "hi": 0.396,
+          "n": 59
         },
         "B3": {
-          "p": 0.4364,
-          "lo": 0.3137,
-          "hi": 0.5673,
-          "n": 55
+          "p": 0.4237,
+          "lo": 0.3061,
+          "hi": 0.5507,
+          "n": 59
         },
         "B4a": {
-          "p": 0.4182,
-          "lo": 0.2974,
-          "hi": 0.5497,
-          "n": 55
+          "p": 0.4068,
+          "lo": 0.2909,
+          "hi": 0.5341,
+          "n": 59
         },
         "B4b": {
-          "p": 0.3455,
-          "lo": 0.2336,
-          "hi": 0.4775,
-          "n": 55
+          "p": 0.339,
+          "lo": 0.2314,
+          "hi": 0.4663,
+          "n": 59
         }
       }
     },
     "latentTasteRecovery": {
       "description": "Does the fingerprint's top atmosphere appear in the client's true top-2? (B3 evidence)",
       "top1InTrueTop2": {
-        "p": 0.9091,
-        "lo": 0.8042,
-        "hi": 0.9605,
-        "n": 55
+        "p": 0.9153,
+        "lo": 0.8165,
+        "hi": 0.9633,
+        "n": 59
       },
       "meanTop2Overlap": {
-        "mean": 0.8364,
-        "lo": 0.7818,
-        "hi": 0.9,
-        "n": 55
+        "mean": 0.839,
+        "lo": 0.7797,
+        "hi": 0.8983,
+        "n": 59
       }
     },
     "constraintViolationRate": {
@@ -152,6 +152,47 @@
           "lo": 0,
           "hi": 0.0756,
           "n": 47
+        }
+      }
+    },
+    "writtenRangeViolationRate": {
+      "description": "Briefs where the client wrote a colour-temperature range: share whose spec has any colour temperature outside it. B2 (evidence only) is not given the range, by design.",
+      "bySystem": {
+        "B0": {
+          "p": 0,
+          "lo": 0,
+          "hi": 0.4899,
+          "n": 4
+        },
+        "B1": {
+          "p": null,
+          "lo": null,
+          "hi": null,
+          "n": 0
+        },
+        "B2": {
+          "p": 1,
+          "lo": 0.5101,
+          "hi": 1,
+          "n": 4
+        },
+        "B3": {
+          "p": 0,
+          "lo": 0,
+          "hi": 0.4899,
+          "n": 4
+        },
+        "B4a": {
+          "p": 0,
+          "lo": 0,
+          "hi": 0.4899,
+          "n": 4
+        },
+        "B4b": {
+          "p": 0,
+          "lo": 0,
+          "hi": 0.4899,
+          "n": 4
         }
       }
     },
@@ -406,7 +447,7 @@
       "n": 6
     },
     "clarification": {
-      "briefsEligible": 55,
+      "briefsEligible": 59,
       "questionsAsked": 6,
       "questionsThatChangedTheSpec": {
         "p": 0.8333,
@@ -436,13 +477,13 @@
     },
     "latencyMs": {
       "description": "End-to-end runBrief on the in-process synthetic transport: orchestration cost only, not network latency.",
-      "p50": 30,
-      "p95": 39,
-      "n": 56
+      "p50": 25,
+      "p95": 41,
+      "n": 60
     },
     "qlooCallsPerBrief": {
       "p50": 8,
-      "p95": 9,
+      "p95": 8,
       "max": 12
     },
     "reliability": {
@@ -495,17 +536,17 @@
       },
       "normalCompletion": {
         "p": 1,
-        "lo": 0.9358,
+        "lo": 0.9398,
         "hi": 1,
-        "n": 56
+        "n": 60
       }
     },
     "evidenceCompleteness": {
       "description": "Spec lines with a basis, and (for Qloo-evidence lines) cited dimensions, ledger requests and signal entities.",
       "p": 1,
-      "lo": 0.9905,
+      "lo": 0.9911,
       "hi": 1,
-      "n": 400
+      "n": 428
     },
     "invariantViolations": []
   },
@@ -573,7 +614,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 57,
+      "ms": 54,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -658,7 +699,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 30,
+      "ms": 34,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -743,7 +784,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 29,
+      "ms": 28,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -828,7 +869,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 34,
+      "ms": 30,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -900,7 +941,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 33,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -972,7 +1013,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 30,
+      "ms": 26,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1057,7 +1098,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 30,
+      "ms": 33,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1142,7 +1183,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 34,
+      "ms": 40,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1236,7 +1277,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 38,
+      "ms": 37,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1321,7 +1362,7 @@
         "natural_organic",
         "calm_quiet"
       ],
-      "ms": 37,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1393,7 +1434,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 36,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1465,7 +1506,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 27,
+      "ms": 28,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1549,7 +1590,7 @@
         "natural_organic",
         "calm_quiet"
       ],
-      "ms": 27,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1633,7 +1674,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 34,
+      "ms": 26,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1717,7 +1758,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 39,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1801,7 +1842,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 34,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1875,7 +1916,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -1947,7 +1988,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 27,
+      "ms": 26,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2031,7 +2072,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 29,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2116,7 +2157,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 28,
+      "ms": 22,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2189,7 +2230,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 30,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2273,7 +2314,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 42,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2359,7 +2400,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 38,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2444,7 +2485,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 34,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2529,7 +2570,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 28,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2601,7 +2642,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 37,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2686,7 +2727,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 33,
+      "ms": 24,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2780,7 +2821,7 @@
         "natural_organic",
         "calm_quiet"
       ],
-      "ms": 32,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2852,7 +2893,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 35,
+      "ms": 26,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -2936,7 +2977,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 25,
+      "ms": 22,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3092,7 +3133,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 25,
+      "ms": 26,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3176,7 +3217,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 15,
+      "ms": 12,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 6,
       "qlooRetries": 0,
@@ -3271,7 +3312,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 14,
+      "ms": 12,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 6,
       "qlooRetries": 0,
@@ -3367,7 +3408,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 13,
+      "ms": 12,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 6,
       "qlooRetries": 0,
@@ -3461,7 +3502,7 @@
         "calm_quiet",
         "low_glow"
       ],
-      "ms": 33,
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3566,7 +3607,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 28,
+      "ms": 22,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3671,7 +3712,7 @@
         "vintage_character",
         "low_glow"
       ],
-      "ms": 32,
+      "ms": 23,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3776,7 +3817,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 26,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3882,7 +3923,7 @@
         "industrial_raw",
         "low_glow"
       ],
-      "ms": 29,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -3974,7 +4015,7 @@
           "cri": "CRI 90+."
         }
       },
-      "ms": 3,
+      "ms": 2,
       "status": "INSUFFICIENT_EVIDENCE",
       "qlooAttempts": 2,
       "qlooRetries": 0,
@@ -4140,7 +4181,7 @@
           "cri": "CRI 90+."
         }
       },
-      "ms": 4,
+      "ms": 2,
       "status": "INSUFFICIENT_EVIDENCE",
       "qlooAttempts": 2,
       "qlooRetries": 0,
@@ -4236,7 +4277,7 @@
         "low_glow",
         "bright_airy"
       ],
-      "ms": 29,
+      "ms": 26,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4322,7 +4363,7 @@
         "natural_organic",
         "industrial_raw"
       ],
-      "ms": 36,
+      "ms": 27,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4406,7 +4447,7 @@
         "low_glow",
         "energetic_social"
       ],
-      "ms": 37,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4491,7 +4532,7 @@
         "low_glow",
         "bright_airy"
       ],
-      "ms": 37,
+      "ms": 25,
       "status": "NEEDS_CLARIFICATION",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4586,7 +4627,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 37,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4672,7 +4713,7 @@
         "clean_minimal",
         "bright_airy"
       ],
-      "ms": 27,
+      "ms": 42,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4757,7 +4798,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 27,
+      "ms": 41,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -4843,7 +4884,351 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 27,
+      "ms": 41,
+      "status": "COMPLETE",
+      "qlooAttempts": 8,
+      "qlooRetries": 0,
+      "validation": [],
+      "systemTop2": [
+        "bright_airy",
+        "clean_minimal"
+      ],
+      "question": {
+        "asked": false
+      },
+      "evidence": {
+        "lines": 7,
+        "complete": 7,
+        "byBasis": {
+          "constraint": 1,
+          "qloo_evidence": 4,
+          "client_words": 2
+        }
+      },
+      "expectedStatusOk": true
+    },
+    {
+      "id": "rng-0",
+      "category": "explicit_range",
+      "specs": {
+        "B0": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient mid-range: ~150 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B4a": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B2": {
+          "cct": "3500K ambient, 4000K on task surfaces",
+          "layers": "Even ambient: perimeter cove or linear plus daylight-matched downlights.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B4b": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B3": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        }
+      },
+      "oracle": {
+        "cct": "3000K throughout",
+        "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+        "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+        "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+        "level": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)",
+        "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+        "cri": "CRI 90+."
+      },
+      "latentTop2": [
+        "bright_airy",
+        "clean_minimal"
+      ],
+      "ms": 29,
+      "status": "COMPLETE",
+      "qlooAttempts": 7,
+      "qlooRetries": 0,
+      "validation": [],
+      "systemTop2": [
+        "bright_airy",
+        "clean_minimal"
+      ],
+      "question": {
+        "asked": false
+      },
+      "evidence": {
+        "lines": 7,
+        "complete": 7,
+        "byBasis": {
+          "constraint": 1,
+          "qloo_evidence": 4,
+          "client_words": 2
+        }
+      },
+      "expectedStatusOk": true
+    },
+    {
+      "id": "rng-1",
+      "category": "explicit_range",
+      "specs": {
+        "B0": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient mid-range: ~400 lux. (Typical 300–500 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B4a": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~500 lux. (Typical 300–500 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B2": {
+          "cct": "3500K ambient, 4000K on task surfaces",
+          "layers": "Even ambient: perimeter cove or linear plus daylight-matched downlights.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~500 lux. (Typical 300–500 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B4b": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~500 lux. (Typical 300–500 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B3": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~500 lux. (Typical 300–500 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        }
+      },
+      "oracle": {
+        "cct": "3000K throughout",
+        "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+        "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+        "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+        "level": "Ambient at the upper end: ~500 lux. (Typical 300–500 lux for this room; confirm with a lighting calculation.)",
+        "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+        "cri": "CRI 95+ with R9 > 50, so wood, skin and food read true."
+      },
+      "latentTop2": [
+        "clean_minimal",
+        "bright_airy"
+      ],
+      "ms": 24,
+      "status": "COMPLETE",
+      "qlooAttempts": 7,
+      "qlooRetries": 0,
+      "validation": [],
+      "systemTop2": [
+        "bright_airy",
+        "clean_minimal"
+      ],
+      "question": {
+        "asked": false
+      },
+      "evidence": {
+        "lines": 7,
+        "complete": 7,
+        "byBasis": {
+          "constraint": 1,
+          "qloo_evidence": 4,
+          "client_words": 2
+        }
+      },
+      "expectedStatusOk": true
+    },
+    {
+      "id": "rng-2",
+      "category": "explicit_range",
+      "specs": {
+        "B0": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient mid-range: ~150 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B4a": {
+          "cct": "3000K throughout",
+          "layers": "Even ambient: perimeter cove or linear plus daylight-matched downlights.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Full-range dimming to 1% and three scenes (day / dinner / late).",
+          "level": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Mixed 24–36° beams with a few visible decorative sources for sparkle.",
+          "cri": "CRI 90+."
+        },
+        "B2": {
+          "cct": "3500K ambient, 4000K on task surfaces",
+          "layers": "Even ambient: perimeter cove or linear plus daylight-matched downlights.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Full-range dimming to 1% and three scenes (day / dinner / late).",
+          "level": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Mixed 24–36° beams with a few visible decorative sources for sparkle.",
+          "cri": "CRI 90+."
+        },
+        "B4b": {
+          "cct": "3000K throughout",
+          "layers": "Even ambient: perimeter cove or linear plus daylight-matched downlights.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B3": {
+          "cct": "3000K throughout",
+          "layers": "Even ambient: perimeter cove or linear plus daylight-matched downlights.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Full-range dimming to 1% and three scenes (day / dinner / late).",
+          "level": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Mixed 24–36° beams with a few visible decorative sources for sparkle.",
+          "cri": "CRI 90+."
+        }
+      },
+      "oracle": {
+        "cct": "3000K throughout",
+        "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+        "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+        "dimming": "Full-range dimming to 1% and three scenes (day / dinner / late).",
+        "level": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)",
+        "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+        "cri": "CRI 90+."
+      },
+      "latentTop2": [
+        "bright_airy",
+        "clean_minimal"
+      ],
+      "ms": 24,
+      "status": "COMPLETE",
+      "qlooAttempts": 7,
+      "qlooRetries": 0,
+      "validation": [],
+      "systemTop2": [
+        "bright_airy",
+        "energetic_social"
+      ],
+      "question": {
+        "asked": false
+      },
+      "evidence": {
+        "lines": 7,
+        "complete": 7,
+        "byBasis": {
+          "constraint": 1,
+          "qloo_evidence": 4,
+          "client_words": 2
+        }
+      },
+      "expectedStatusOk": true
+    },
+    {
+      "id": "rng-3",
+      "category": "explicit_range",
+      "specs": {
+        "B0": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient mid-range: ~400 lux. (Typical 300–500 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B4a": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~500 lux. (Typical 300–500 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B2": {
+          "cct": "3500K ambient, 4000K on task surfaces",
+          "layers": "Even ambient: perimeter cove or linear plus daylight-matched downlights.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~500 lux. (Typical 300–500 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B4b": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~500 lux. (Typical 300–500 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        },
+        "B3": {
+          "cct": "3000K throughout",
+          "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+          "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+          "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+          "level": "Ambient at the upper end: ~500 lux. (Typical 300–500 lux for this room; confirm with a lighting calculation.)",
+          "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+          "cri": "CRI 90+."
+        }
+      },
+      "oracle": {
+        "cct": "3000K throughout",
+        "layers": "Concealed sources: trimless recessed, LED tape in coves and shelving.",
+        "fixtures": "Matte white or black, flush and trimless profiles, no exposed lamps.",
+        "dimming": "Standard 0–10V or phase dimming on ambient circuits.",
+        "level": "Ambient at the upper end: ~500 lux. (Typical 300–500 lux for this room; confirm with a lighting calculation.)",
+        "optics": "Trimless regressed downlights, consistent 36° beams, aligned on a grid.",
+        "cri": "CRI 95+ with R9 > 50, so wood, skin and food read true."
+      },
+      "latentTop2": [
+        "bright_airy",
+        "clean_minimal"
+      ],
+      "ms": 24,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -4929,7 +5314,7 @@
         "energetic_social",
         "bright_airy"
       ],
-      "ms": 33,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -5100,7 +5485,7 @@
         "bright_airy",
         "clean_minimal"
       ],
-      "ms": 33,
+      "ms": 30,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -5196,7 +5581,7 @@
         "low_glow",
         "vintage_character"
       ],
-      "ms": 30,
+      "ms": 21,
       "status": "COMPLETE",
       "qlooAttempts": 7,
       "qlooRetries": 0,
@@ -5280,7 +5665,7 @@
         "industrial_raw",
         "energetic_social"
       ],
-      "ms": 37,
+      "ms": 25,
       "status": "COMPLETE",
       "qlooAttempts": 8,
       "qlooRetries": 0,
@@ -5351,7 +5736,7 @@
           "cri": "CRI 90+."
         }
       },
-      "ms": 1389,
+      "ms": 886,
       "status": "UPSTREAM_UNAVAILABLE",
       "qlooAttempts": 6,
       "qlooRetries": 2,
@@ -5418,7 +5803,7 @@
           "cri": "CRI 90+."
         }
       },
-      "ms": 1374,
+      "ms": 1218,
       "status": "UPSTREAM_UNAVAILABLE",
       "qlooAttempts": 9,
       "qlooRetries": 6,
@@ -5498,7 +5883,7 @@
         "natural_organic",
         "calm_quiet"
       ],
-      "ms": 87,
+      "ms": 76,
       "status": "COMPLETE",
       "qlooAttempts": 9,
       "qlooRetries": 1,
@@ -5582,7 +5967,7 @@
         "refined_luxe",
         "low_glow"
       ],
-      "ms": 2210,
+      "ms": 1314,
       "status": "COMPLETE",
       "qlooAttempts": 12,
       "qlooRetries": 4,
