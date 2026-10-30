@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { answerQuestion } from "@/lib/agent";
+import { isLocked } from "@/lib/review";
 import { publicView } from "@/lib/store";
 import { jsonError, loadOwnedBrief, rateLimited, readJson, saveWithEvent, WRITE_LIMIT } from "@/lib/http";
 
@@ -13,6 +14,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!body.ok) return body.res;
   const answer = body.value.answer;
   if (answer !== "A" && answer !== "B" && answer !== "neither") return jsonError("answer must be A, B or neither.");
+  if (isLocked(r.brief)) return jsonError("This version is approved and locked. Propose a revision instead.", 409);
   try {
     const next = await answerQuestion(r.brief, answer, "designer");
     await saveWithEvent(next, "answered", "designer", { answer });

@@ -3,6 +3,7 @@ import { AgentError, transportForBrief } from "@/lib/agent";
 import { exploreDepth } from "@/lib/depth";
 import { applyDepth } from "@/lib/refine";
 import { jsonError, loadOwnedBrief, rateLimited, readJson, saveWithEvent } from "@/lib/http";
+import { isLocked } from "@/lib/review";
 import { publicView } from "@/lib/store";
 import { QlooError } from "@/lib/qloo/client";
 
@@ -23,6 +24,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!body.ok) return body.res;
   const level = body.value.level;
   if (level !== 0 && level !== 1 && level !== 2) return jsonError("level must be 0, 1 or 2.");
+  if (body.value.apply && isLocked(r.brief)) return jsonError("This version is approved and locked. Propose a revision instead.", 409);
   let brief = r.brief;
   try {
     if (level > 0 && !brief.depth?.some((d) => d.level === level)) {

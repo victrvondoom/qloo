@@ -28,13 +28,12 @@ interface Body {
  * version isn't approved. what_if reruns the agent on a changed brief and proposes a revision. Owner only.
  */
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const op = (await req.clone().json().catch(() => ({})) as Body).op;
-  if (rateLimited(req, op === "what_if" ? "revise" : "challenge", op === "what_if" ? RUN_LIMIT : WRITE_LIMIT)) return jsonError("Too many challenges; slow down.", 429);
-  const r = await loadOwnedBrief((await params).id);
-  if (!r.ok) return r.res;
   const body = await readJson<Body>(req, 6000);
   if (!body.ok) return body.res;
-  const b = body.value;
+  const b = body.value && typeof body.value === "object" ? body.value : ({} as Body);
+  if (rateLimited(req, b.op === "what_if" ? "revise" : "challenge", b.op === "what_if" ? RUN_LIMIT : WRITE_LIMIT)) return jsonError("Too many challenges; slow down.", 429);
+  const r = await loadOwnedBrief((await params).id);
+  if (!r.ok) return r.res;
   try {
     if (b.op === "what_if") {
       if (!b.changes || typeof b.changes !== "object" || !Object.keys(b.changes).length) return jsonError("Say what to change.", 400);

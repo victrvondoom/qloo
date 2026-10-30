@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { allResponses } from "@/lib/study-store";
 
+import { createHash, timingSafeEqual } from "node:crypto";
+
+/** Constant-time comparison (hash both sides so lengths don't leak). */
+function tokenMatches(a: string, b: string): boolean {
+  return timingSafeEqual(createHash("sha256").update(a).digest(), createHash("sha256").update(b).digest());
+}
+
 export const dynamic = "force-dynamic";
 
 /**
@@ -10,7 +17,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const token = process.env.STUDY_ADMIN_TOKEN;
   if (!token) return NextResponse.json({ error: "Export is disabled: set STUDY_ADMIN_TOKEN on the server." }, { status: 404 });
-  if (req.headers.get("authorization") !== `Bearer ${token}`) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  if (!tokenMatches(req.headers.get("authorization") ?? "", `Bearer ${token}`)) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   const rows = await allResponses();
   const format = new URL(req.url).searchParams.get("format");
   if (format === "csv") {
