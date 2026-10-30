@@ -324,6 +324,48 @@ async function main() {
     await page.request.delete(`${BASE}/api/briefs/${id}`).catch(() => {});
   });
 
+  await check("judge tour: eight steps, each runs the real pipeline (words alone, evidence, trace, specs, no-Qloo, challenge, ledger)", async () => {
+    const shot = process.env.TOUR_SHOTS;
+    const snap = async (n) => shot && (await page.screenshot({ path: `${shot}/tour-${n}.png`, fullPage: false }));
+    await page.goto(`${BASE}/lab`);
+    const tour = page.locator("#tour");
+    await tour.getByText("Two clients say").waitFor();
+    await tour.getByRole("button", { name: "Show what their words alone produce" }).click();
+    await tour.getByText(/Identical for both/).waitFor();
+    await snap(1);
+    await tour.getByRole("button", { name: /2\. References/ }).click();
+    await tour.getByText("Khruangbin").waitFor();
+    await tour.getByRole("button", { name: /3\. Evidence/ }).click();
+    await tour.getByRole("button", { name: "Run both agents" }).click();
+    await tour.getByText(/Qloo requests · ledger/).first().waitFor({ timeout: 40_000 });
+    assert((await tour.getByText("FIXTURE · synthetic").count()) >= 2, "fixture label missing in DEMO mode");
+    await snap(3);
+    await tour.getByRole("button", { name: /4\. Reasoning/ }).click();
+    await tour.getByRole("columnheader", { name: "Decision" }).waitFor();
+    assert((await tour.locator("tbody tr").count()) >= 5, "decision trace too short");
+    await tour.getByRole("button", { name: /5\. Specs/ }).click();
+    await tour.getByText(/lines differ/).waitFor();
+    assert((await tour.locator("tr.changed").count()) >= 1, "no differing line shown");
+    await snap(5);
+    await tour.getByRole("button", { name: /6\. Remove Qloo/ }).click();
+    await tour.getByRole("button", { name: "Recompute without Qloo" }).click();
+    await tour.getByRole("columnheader", { name: "Without Qloo" }).waitFor();
+    await tour.getByRole("button", { name: /7\. Challenge/ }).click();
+    await tour.getByRole("button", { name: "Run Jordan with this requirement" }).click();
+    await tour.getByText(/client range .* applied/).first().waitFor({ timeout: 40_000 });
+    await tour.getByRole("columnheader", { name: "Jordan, evidence only" }).waitFor();
+    const text = await tour.locator("tbody").last().innerText();
+    assert(/2700K|3000K/.test(text), `constraint row missing: ${text.slice(0, 200)}`);
+    await snap(7);
+    await tour.getByLabel("What the client wrote").fill("CRI of at least 90 and CRI of at least 97");
+    await tour.getByText(/two different CRI minimums/).waitFor();
+    assert(await tour.getByRole("button", { name: "Run Jordan with this requirement" }).isDisabled(), "conflict should block the run");
+    await tour.getByRole("button", { name: /8\. Verify/ }).click();
+    await tour.getByRole("button", { name: "Verify Maya\u2019s ledger" }).click();
+    await tour.getByText(/Intact: all \d+ entries/).waitFor();
+    await snap(8);
+  });
+
   await check("oversized request body is rejected", async () => {
     const r = await page.request.post(`${BASE}/api/run`, { data: { loves: ["x".repeat(40_000)] } });
     assert(r.status() === 413, `expected 413, got ${r.status()}`);

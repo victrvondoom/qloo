@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { GuidedTour } from "./GuidedTour";
 import { PRESETS } from "./presets";
 import { Timeline } from "./Timeline";
 import { useAgentStream } from "./useAgentStream";
@@ -354,6 +355,7 @@ export function ProofLab() {
         Every control on this page runs the real pipeline. Nothing is pre-recorded. Watch the agent answer, ask, abstain or degrade, then
         check where each line came from.
       </p>
+      <GuidedTour />
       <SameWords />
       <ChangeOne />
       <section className="section">

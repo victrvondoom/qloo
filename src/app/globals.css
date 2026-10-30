@@ -662,3 +662,10 @@ pre.json { white-space: pre-wrap; word-break: break-word; background: var(--card
 .twenty-n { font-family: var(--font-display); font-size: 22px; color: var(--amber-text); font-style: italic; }
 .twenty b { font-family: var(--font-display); font-size: 19px; font-weight: 560; }
 .twenty p { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+
+/* Guided tour (Proof Lab) */
+.tour-steps { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 14px 0 0; padding: 0; }
+.tour-steps .btn[aria-current="step"] { background: var(--ink); color: var(--paper, #fff); border-color: var(--ink); }
+.tour-panel { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); min-height: 220px; }
+.tour-panel h3 { margin-top: 0; }
+@media (max-width: 640px) { .tour-steps .btn { padding: 6px 9px; font-size: 12px; } }
