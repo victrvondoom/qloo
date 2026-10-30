@@ -23,7 +23,7 @@ import { envReport, log } from "./env";
 import { HttpTransport, QlooClient, QlooError, SimulatedOutageTransport, type Params, type Transport } from "./qloo/client";
 import { FixtureTransport } from "./qloo/fixture";
 import { resolveLove } from "./resolve";
-import { cleanCctRange } from "./constraints";
+import { cleanLimits, limitsOf, parseConstraints } from "./constraints";
 import { buildSpec, literalSpec, planQuestion, rankQuestions, specMenu, warmFloor } from "./spec";
 import { decodeWord, lexiconFor, normaliseWord } from "./words";
 import { llmAvailable, llmBaselineSpec, llmMapWord, llmModel, llmNarrative } from "./llm";
@@ -138,7 +138,7 @@ export function cleanInput(raw: Partial<BriefInput>): BriefInput {
     words,
     loves: [...new Set(loves)],
     pinned: Object.keys(pinned).length ? pinned : undefined,
-    cctRange: cleanCctRange(raw.cctRange),
+    ...cleanLimits(raw as Record<string, unknown>),
     challenge: raw.challenge === "upstream_down" ? "upstream_down" : "none",
     project: text(raw.project, 60) || undefined,
     sourceText: typeof raw.sourceText === "string" && raw.sourceText.trim() ? raw.sourceText.replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, " ").trim().slice(0, 4000) : undefined,
@@ -253,6 +253,15 @@ export function validateBrief(b: Pick<Brief, "spec" | "status" | "input" | "data
     const ks = (cct?.value.match(/\d{4}/g) ?? []).map(Number);
     if (cct && ks.some((k) => k < b.input.cctRange!.min || k > b.input.cctRange!.max)) problems.push("cct: outside the range the client wrote down");
   }
+  const c = b.input;
+  if (c.trade !== "lighting") return problems;
+  const line = (id: string) => b.spec.find((l) => l.id === id)?.value ?? "";
+  if (c.criMin && Number(/CRI (\d{2,3})\+/.exec(line("cri"))?.[1] ?? 0) < c.criMin) problems.push("cri: below the minimum the client wrote down");
+  if (c.dimTo) {
+    const floors = [...line("dimming").matchAll(/(\d{1,3})%/g)].map((m) => Number(m[1]));
+    if (floors.length && Math.min(...floors) > c.dimTo) problems.push("dimming: floor above what the client wrote down");
+  }
+  if (c.luxTarget && !new RegExp(`\\b${c.luxTarget} lux`).test(line("level"))) problems.push("level: not the lux target the client wrote down");
   return problems;
 }
 
@@ -269,6 +278,7 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
     const input = cleanInput(rawInput ?? {});
     const problems: string[] = [];
     if (!input.city) problems.push("A city is required: the evidence compares the client's taste with what's typical where they live.");
+    for (const c of parseConstraints(input.sourceText ?? "").conflicts) problems.push(`Requirements that can't both hold: ${c}`);
     if (input.loves.length < 2) problems.push("Give at least two things the client loves (each 2–80 characters).");
     if (input.words.length < 1) problems.push("Give at least one word the client used.");
     if (problems.length) throw new AgentError("FAILED", problems.join(" "));
@@ -300,7 +310,7 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
   });
 
   // The LLM-only baseline (B1) runs alongside the Qloo work; it never sees Qloo data.
-  const menu = specMenu(input.trade, input.room, input.words, input.cctRange);
+  const menu = specMenu(input.trade, input.room, input.words, limitsOf(input));
   const baselinePromise: Promise<LlmBaseline> = useLlm
     ? (llmCalls++,
       llmBaselineSpec({ trade: TRADE_LABEL[input.trade], room: ROOM_LABEL[input.room], words: input.words, loves: input.loves, menu, signal: opts.signal })
@@ -569,7 +579,7 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
 
   // GENERATE_SPEC
   const spec = await run.step("GENERATE_SPEC", `rulebook ${RULEBOOK_VERSION}`, `Drafting the ${TRADE_LABEL[input.trade].toLowerCase()} spec`, {}, async () => {
-    const spec = buildSpec(input.trade, input.room, dims, words, input.words, undefined, { evidenceUsable, evidenceLedger, signalEntityIds: signalIds, cctRange: input.cctRange });
+    const spec = buildSpec(input.trade, input.room, dims, words, input.words, undefined, { evidenceUsable, evidenceLedger, signalEntityIds: signalIds, limits: limitsOf(input) });
     const diffs = spec.filter((l) => l.value !== l.literalValue).length;
     const e = await ledger.append("computation", "Spec drafted from rulebook", {
       rulebookVersion: RULEBOOK_VERSION,
@@ -587,8 +597,8 @@ export async function runBrief(rawInput: Partial<BriefInput>, emit: Emit, opts: 
     if (!evidenceUsable || opts.noQuestion) {
       return { value: undefined, decision: opts.noQuestion ? "disabled (ablation)" : "skipped: no usable evidence", rationale: "Questions are only planned on top of usable evidence.", validation: "n/a" as const };
     }
-    const ranked = rankQuestions(input.trade, input.room, dims, rescore, input.words, input.cctRange);
-    const q = planQuestion(input.trade, input.room, dims, crowd, rescore, input.clientLabel, input.words, input.cctRange);
+    const ranked = rankQuestions(input.trade, input.room, dims, rescore, input.words, limitsOf(input));
+    const q = planQuestion(input.trade, input.room, dims, crowd, rescore, input.clientLabel, input.words, limitsOf(input));
     const e = await ledger.append("decision", q ? "Planned a clarifying question" : "No clarifying question", {
       candidates: ranked.slice(0, 4).map((c) => ({ contrast: [c.a, c.b], pA: +c.pA.toFixed(3), impact: c.impact, expectedChange: +c.expectedChange.toFixed(3), entropyBits: +c.entropyBits.toFixed(3) })),
       chosen: q ? { contrast: [q.dimension, q.versus], optionA: q.optionA, optionB: q.optionB } : null,
@@ -775,5 +785,5 @@ export async function recordOutcome(brief: Brief, rating: number, note?: string)
 /** B0 for the Proof Lab "Without Qloo" control: computed fresh, no Qloo calls. */
 export function computeLiteral(input: BriefInput) {
   const clean = cleanInput(input);
-  return literalSpec(clean.trade, clean.room, clean.words, clean.cctRange).map((l) => ({ id: l.id, category: l.category, value: l.value, constraints: l.constraints ?? [] }));
+  return literalSpec(clean.trade, clean.room, clean.words, limitsOf(clean)).map((l) => ({ id: l.id, category: l.category, value: l.value, constraints: l.constraints ?? [] }));
 }

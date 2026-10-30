@@ -13,6 +13,7 @@
 // taste through that mapping, NOT whether the mapping is good design. See
 // docs/EVALUATION_METHODOLOGY.md.
 
+import { limitsOf } from "../src/lib/constraints";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import path from "node:path";
@@ -83,7 +84,7 @@ function oracleSpec(world: SyntheticWorld, sc: Scenario): SpecMap | undefined {
     const chosen = truth[best.dimension] > 0.05 ? best : lex.find((r) => r.isDictionaryDefault) ?? lex[0];
     v[chosen.dimension] += 0.6;
   }
-  return toMap(runRulebook(input.trade, v, input.room, { warmFloor: warmFloor(input.words), cctRange: input.cctRange }));
+  return toMap(runRulebook(input.trade, v, input.room, { warmFloor: warmFloor(input.words), limits: limitsOf(input) }));
 }
 
 function topDims(scores: Record<DimensionId, number>, k = 2): DimensionId[] {
@@ -137,7 +138,7 @@ async function main() {
     clearQlooCache();
     world.failure = sc.failure ? { ...sc.failure } : { kind: "none" };
     const input = cleanInput(sc.input);
-    const row: Row = { id: sc.id, category: sc.category, specs: { B0: toMap(literalSpec(input.trade, input.room, input.words, input.cctRange)) } };
+    const row: Row = { id: sc.id, category: sc.category, specs: { B0: toMap(literalSpec(input.trade, input.room, input.words, limitsOf(input))) } };
     row.oracle = oracleSpec(world, sc);
     if (sc.intended.length) row.latentTop2 = topDims(world.truth(sc.intended));
 
@@ -167,7 +168,7 @@ async function main() {
         const tags = [...new Map(brief.dimensions.flatMap((d) => d.tasteTags).map((t) => [t.name, t])).values()];
         const dimsNoBase = computeDimensions(brief.crowdVenues, [], tags);
         const wordsNoBase = input.words.map((w) => decodeWord(w, dimsNoBase));
-        row.specs.B4b = toMap(buildSpec(input.trade, input.room, dimsNoBase, wordsNoBase, input.words, undefined, { evidenceUsable: true, evidenceLedger: [0], signalEntityIds: [], cctRange: input.cctRange }));
+        row.specs.B4b = toMap(buildSpec(input.trade, input.room, dimsNoBase, wordsNoBase, input.words, undefined, { evidenceUsable: true, evidenceLedger: [0], signalEntityIds: [], limits: limitsOf(input) }));
       } else {
         row.specs.B2 = row.specs.B0; // no evidence: evidence-only system has nothing to say
         row.specs.B4b = row.specs.B4a;

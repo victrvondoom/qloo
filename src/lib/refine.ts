@@ -9,6 +9,7 @@
 // The raw, unanswered scores live on each depth layer; `brief.dimensions` is
 // always the effective vector the current spec was built from.
 
+import { limitsOf } from "./constraints";
 import { applyClientAnswer } from "./fingerprint";
 import { Ledger } from "./ledger";
 import { buildSpec } from "./spec";
@@ -72,7 +73,7 @@ export function rebuild(brief: Brief, level: DepthLevel, answer: ClarifyingQuest
     evidenceUsable: true,
     evidenceLedger: [...layerEvidence(brief, level), ...extraEvidence],
     signalEntityIds: signalIds(brief),
-    cctRange: brief.input.cctRange,
+    limits: limitsOf(brief.input),
   });
   const changed = spec.filter((l) => brief.spec.find((p) => p.id === l.id)?.value !== l.value);
   return { dims, words, spec, changed };

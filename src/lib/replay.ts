@@ -4,6 +4,7 @@
 // line by line. No Qloo or model calls. If a stored spec was edited, or the
 // rulebook changed since the run, replay names the lines that differ.
 
+import { limitsOf } from "./constraints";
 import { computeDimensions } from "./fingerprint";
 import { verifyLedger } from "./ledger";
 import { effectiveDimensions, rebuild } from "./refine";
@@ -41,7 +42,7 @@ export async function replayBrief(brief: Brief): Promise<ReplayResult> {
   let replayed: { id: string; value: string }[];
   const fallback = brief.status === "INSUFFICIENT_EVIDENCE" || brief.status === "UPSTREAM_UNAVAILABLE";
   if (fallback) {
-    replayed = literalSpec(brief.input.trade, brief.input.room, brief.input.words, brief.input.cctRange).map((l) => ({ id: l.id, value: l.value }));
+    replayed = literalSpec(brief.input.trade, brief.input.room, brief.input.words, limitsOf(brief.input)).map((l) => ({ id: l.id, value: l.value }));
     checks.push({ name: "No personalisation without evidence", ok: brief.spec.every((l) => l.value === l.literalValue), detail: "Fallback briefs must equal the literal reading." });
   } else {
     const base = brief.depth?.find((d) => d.level === 0);

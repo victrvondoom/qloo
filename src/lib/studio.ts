@@ -7,6 +7,7 @@
 //   similarity       cosine over atmosphere scores (for "clients like this one")
 //   mergeDuet        two people, one room: agreement, clashes, compromise
 
+import type { Limits } from "./constraints";
 import { buildDeepBrief } from "./deep/build";
 import { applyClientAnswer } from "./fingerprint";
 import { cctRange, layeringOf, roomVisual, scenesOf } from "./render";
@@ -226,11 +227,14 @@ export function mergeDuet(a: Brief, b: Brief): Duet {
   });
   const words = [...new Set([...a.input.words, ...b.input.words])];
   const decoded = decodeWords({ ...a, input: { ...a.input, words } }, dims);
-  // Both people's written ranges must hold; where they don't overlap neither is silently dropped, so none is applied and the note says so.
+  // Both people's written limits must hold. CCT ranges are intersected; where they don't overlap, none is applied (the conflict is reported).
   const ra = a.input.cctRange;
   const rb = b.input.cctRange;
-  const cctRange = ra && rb ? (Math.max(ra.min, rb.min) <= Math.min(ra.max, rb.max) ? { min: Math.max(ra.min, rb.min), max: Math.min(ra.max, rb.max) } : undefined) : ra ?? rb;
-  const together = buildSpec(a.input.trade, a.input.room, dims, decoded, words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [], cctRange });
+  const cct = ra && rb ? (Math.max(ra.min, rb.min) <= Math.min(ra.max, rb.max) ? { min: Math.max(ra.min, rb.min), max: Math.min(ra.max, rb.max) } : undefined) : ra ?? rb;
+  const mx = (x?: number, y?: number) => (x === undefined ? y : y === undefined ? x : Math.max(x, y));
+  const mn = (x?: number, y?: number) => (x === undefined ? y : y === undefined ? x : Math.min(x, y));
+  const limits: Limits = { cct, criMin: mx(a.input.criMin, b.input.criMin), dimTo: mn(a.input.dimTo, b.input.dimTo), dimmable: a.input.dimmable || b.input.dimmable || undefined, luxTarget: a.input.luxTarget === b.input.luxTarget ? a.input.luxTarget : undefined };
+  const together = buildSpec(a.input.trade, a.input.room, dims, decoded, words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [], limits });
   const specA = buildSpec(a.input.trade, a.input.room, da, decodeWords(a, da), a.input.words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [] });
   const specB = buildSpec(a.input.trade, a.input.room, db, decodeWords({ ...b, input: { ...b.input, trade: a.input.trade, room: a.input.room } }, db), b.input.words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [] });
   const lines = together.map((l) => {

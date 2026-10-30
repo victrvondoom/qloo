@@ -3,7 +3,7 @@
 // so the same evidence always yields the same spec, and every line can name the
 // dimensions that drove it.
 
-import { applyCctRange, rangeLabel, type CctRange } from "../constraints";
+import { applyCctRange, applyCriLimit, applyDimLimit, applyLuxLimit, rangeLabel, type Limits } from "../constraints";
 import type { DimensionId, RoomType, Trade } from "../types";
 
 export type Vector = Record<DimensionId, number>;
@@ -51,8 +51,8 @@ const TASK_ROOMS: RoomType[] = ["kitchen", "home_office", "retail", "bathroom"];
 export interface RuleOptions {
   /** The client used a word that can mean warm light; never spec cooler than 3000K. */
   warmFloor?: boolean;
-  /** The client's own written colour-temperature range; outranks the evidence and the warm floor. */
-  cctRange?: CctRange;
+  /** Numbers the client wrote down; they outrank the evidence and the warm floor. */
+  limits?: Limits;
 }
 
 function lighting(v: Vector, room: RoomType, opts: RuleOptions): RuleLine[] {
@@ -75,13 +75,14 @@ function lighting(v: Vector, room: RoomType, opts: RuleOptions): RuleLine[] {
           : net > -0.6
             ? "3000K ambient, 3500K on task surfaces"
             : "3500K ambient, 4000K on task surfaces";
-  const bounded = opts.cctRange ? applyCctRange(cct, opts.cctRange) : undefined;
+  const range = opts.limits?.cct;
+  const bounded = range ? applyCctRange(cct, range) : undefined;
   lines.push({
     id: "cct",
     category: "Colour temperature",
     value: bounded?.value ?? cct,
     why: bounded && bounded.value !== cct
-      ? `They wrote down ${rangeLabel(opts.cctRange!)}, which outranks what their rooms suggest.`
+      ? `They wrote down ${rangeLabel(range!)}, which outranks what their rooms suggest.`
       : floored
       ? "Their rooms run bright and crisp, but they asked for warm, so it stops at 3000K."
       : net > 0.15
@@ -138,13 +139,16 @@ function lighting(v: Vector, room: RoomType, opts: RuleOptions): RuleLine[] {
   } else {
     dimDrivers.push("low_glow");
   }
+  const dimBound = opts.limits?.dimTo ? applyDimLimit(dimming, opts.limits.dimTo) : undefined;
+  const dimChanged = Boolean(dimBound && dimBound.value !== dimming);
   lines.push({
     id: "dimming",
     category: "Dimming & scenes",
-    value: dimming,
-    why: "How far the room needs to travel between its day and night self.",
+    value: dimBound?.value ?? dimming,
+    why: dimChanged ? `They wrote down a dimming floor of ${opts.limits!.dimTo}%, which outranks what their rooms suggest.` : "How far the room needs to travel between its day and night self.",
     drivers: dimDrivers,
     margin: Math.max(v.low_glow, v.energetic_social, v.calm_quiet) - 0.3,
+    constraints: [...(opts.limits?.dimmable ? ["client requires dimming: every dimming line here dims"] : []), ...(dimBound ? [dimBound.note] : [])],
   });
 
   // 5. Light level
@@ -156,12 +160,14 @@ function lighting(v: Vector, room: RoomType, opts: RuleOptions): RuleLine[] {
       : brightLean < -0.3
         ? `Ambient at the low end: ~${lo} lux; let accent and lamps carry the room.`
         : `Ambient mid-range: ~${Math.round((lo + hi) / 2)} lux.`;
+  const baseLevel = `${level} (Typical ${lo}–${hi} lux for this room; confirm with a lighting calculation.)`;
+  const luxBound = opts.limits?.luxTarget ? applyLuxLimit(baseLevel, opts.limits.luxTarget, `typical for this room ${lo}–${hi} lux`) : undefined;
   lines.push({
     id: "level",
     category: "Light level",
-    value: `${level} (Typical ${lo}–${hi} lux for this room; confirm with a lighting calculation.)`,
-    constraints: [`room-range: ${lo}–${hi} lux for ${room.replace("_", " ")}`],
-    why: "Starting target, not a calculation.",
+    value: luxBound?.value ?? baseLevel,
+    constraints: [`room-range: ${lo}–${hi} lux for ${room.replace("_", " ")}`, ...(luxBound ? [luxBound.note] : [])],
+    why: luxBound ? "A target the client stated, in lux. Not a calculation." : "Starting target, not a calculation.",
     drivers: brightLean >= 0 ? ["bright_airy"] : ["low_glow"],
     margin: Math.abs(brightLean),
   });
@@ -180,13 +186,16 @@ function lighting(v: Vector, room: RoomType, opts: RuleOptions): RuleLine[] {
 
   // 7. Colour rendering
   const cri = Math.max(v.refined_luxe, v.natural_organic) > 0.3;
+  const baseCri = cri ? "CRI 95+ with R9 > 50, so wood, skin and food read true." : "CRI 90+.";
+  const criBound = opts.limits?.criMin ? applyCriLimit(baseCri, opts.limits.criMin) : undefined;
   lines.push({
     id: "cri",
     category: "Colour rendering",
-    value: cri ? "CRI 95+ with R9 > 50, so wood, skin and food read true." : "CRI 90+.",
-    why: cri ? "Their rooms lean on materials that look cheap under poor light." : "Good baseline quality.",
+    value: criBound?.value ?? baseCri,
+    why: criBound && criBound.value !== baseCri ? `They wrote down a minimum of CRI ${opts.limits!.criMin}, which outranks what their rooms suggest.` : cri ? "Their rooms lean on materials that look cheap under poor light." : "Good baseline quality.",
     drivers: [v.refined_luxe >= v.natural_organic ? "refined_luxe" : "natural_organic"],
     margin: Math.abs(Math.max(v.refined_luxe, v.natural_organic) - 0.3),
+    constraints: criBound ? [criBound.note] : [],
   });
 
   return lines;

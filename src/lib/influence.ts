@@ -10,6 +10,7 @@
 // It also yields a robustness figure: lines that survive dropping any single
 // reference don't hang on one band or one show the client happened to mention.
 
+import { limitsOf } from "./constraints";
 import { applyClientAnswer, classifyVenue, computeDimensions, hasText } from "./fingerprint";
 import { Ledger } from "./ledger";
 import { QlooClient, type Params, type Transport } from "./qloo/client";
@@ -32,7 +33,7 @@ export function withAnswer(brief: Brief, dims: DimensionScore[]): DimensionScore
 export function specFor(brief: Brief, dims: DimensionScore[]) {
   const effective = withAnswer(brief, dims);
   const words = decodeWords(brief, effective);
-  return buildSpec(brief.input.trade, brief.input.room, effective, words, brief.input.words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [], cctRange: brief.input.cctRange });
+  return buildSpec(brief.input.trade, brief.input.room, effective, words, brief.input.words, undefined, { evidenceUsable: true, evidenceLedger: [], signalEntityIds: [], limits: limitsOf(brief.input) });
 }
 
 export function scopeParams(brief: Brief): Params {

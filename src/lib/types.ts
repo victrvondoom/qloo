@@ -40,6 +40,14 @@ export interface BriefInput {
   pinned?: Record<string, string>;
   /** A colour-temperature range the client wrote down. A hard constraint: outranks evidence and the warm floor. */
   cctRange?: { min: number; max: number };
+  /** Lowest acceptable CRI (Ra) the client wrote down. */
+  criMin?: number;
+  /** The client's dimming floor, percent of full output. */
+  dimTo?: number;
+  /** The client needs dimming (no level implied). */
+  dimmable?: boolean;
+  /** An illuminance target the client stated, in lux. */
+  luxTarget?: number;
   challenge?: Challenge;
   /** Designer's project / job name, for grouping. */
   project?: string;

@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { EXAMPLES } from "./examples";
 import { RunTheater } from "./RunTheater";
 import { useAgentStream } from "./useAgentStream";
-import { rangeLabel } from "@/lib/constraints";
+import { limitChips } from "@/lib/constraints";
 import { parseIntakeHeuristic, type IntakeDraft } from "@/lib/intake";
 import { ROOM_LABEL, TRADE_LABEL } from "@/lib/rulebooks";
 import type { BriefInput, RoomType, Trade } from "@/lib/types";
@@ -64,6 +64,7 @@ export function Composer({ llm, canRun, initialText = "" }: { llm: boolean; canR
 
   const parsed = useMemo(() => (text.trim().length >= 8 ? parseIntakeHeuristic(text) : undefined), [text]);
   const base = model?.draft ?? parsed;
+  const constraints = base?.constraints;
   const input: BriefInput = {
     clientLabel: over.clientLabel ?? base?.clientLabel ?? "Client",
     city: over.city ?? base?.city ?? "",
@@ -72,12 +73,17 @@ export function Composer({ llm, canRun, initialText = "" }: { llm: boolean; canR
     words: over.words ?? base?.words ?? [],
     loves: over.loves ?? base?.loves ?? [],
     project: over.project,
-    cctRange: base?.cctRange,
+    cctRange: constraints?.limits.cct,
+    criMin: constraints?.limits.criMin,
+    dimTo: constraints?.limits.dimTo,
+    dimmable: constraints?.limits.dimmable,
+    luxTarget: constraints?.limits.luxTarget,
   };
   const problems = [
     ...(input.city ? [] : ["a city"]),
     ...(input.words.length ? [] : ["at least one of their words"]),
     ...(input.loves.length >= 2 ? [] : ["two or more things they love"]),
+    ...(constraints?.conflicts.length ? ["a fix for the conflicting requirements below"] : []),
   ];
   const ready = problems.length === 0 && canRun && !stream.running;
 
@@ -170,12 +176,29 @@ export function Composer({ llm, canRun, initialText = "" }: { llm: boolean; canR
               <label>They love</label>
               <ChipsInput label="Things they love" values={input.loves} onChange={(loves) => setOver({ ...over, loves })} placeholder="Bands, shows, films, brands, places…" />
             </div>
-            {input.cctRange ? (
+            {constraints && (limitChips(constraints.limits).length || constraints.conflicts.length || constraints.notes.length) ? (
               <div className="line">
-                <label>Hard limit</label>
-                <span className="chip">
-                  Light: {rangeLabel(input.cctRange)} <span className="tiny muted">· written in their message; outranks the evidence</span>
-                </span>
+                <label>Hard limits</label>
+                <div className="stack" style={{ gap: 6 }}>
+                  <div className="row tight">
+                    {limitChips(constraints.limits).map((c) => (
+                      <span key={c} className="chip">
+                        {c}
+                      </span>
+                    ))}
+                    {limitChips(constraints.limits).length ? <span className="tiny muted">written in their message; they outrank the evidence</span> : null}
+                  </div>
+                  {constraints.conflicts.map((c) => (
+                    <div key={c} className="err" role="alert">
+                      {c} Ask the client which one they mean, then edit the message.
+                    </div>
+                  ))}
+                  {constraints.notes.map((c) => (
+                    <div key={c} className="tiny muted">
+                      {c}
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : null}
             <div className="line">
