@@ -250,3 +250,23 @@ describe("review board", () => {
     expect(ReviewError).toBeDefined();
   });
 });
+
+describe("clarification optimizer", () => {
+  it("explains the question asked, what each answer changes, and why other contrasts were held back", async () => {
+    const { explainClarification } = await import("@/lib/clarify");
+    const asked = [free, w, lim].map((b) => explainClarification(b));
+    for (const r of asked) {
+      expect(r.candidates.length).toBeGreaterThan(3);
+      expect(r.metric).toMatch(/Not calibrated information gain/);
+      if (r.asked) {
+        expect(r.asked.affected.length).toBeGreaterThanOrEqual(2);
+        expect(r.candidates.filter((c) => c.decision === "asked")).toHaveLength(1);
+        expect(r.asked.ifA.length + r.asked.ifB.length).toBeGreaterThan(0);
+      } else {
+        expect(r.candidates.every((c) => c.decision === "held back")).toBe(true);
+      }
+    }
+    const r = await runRevision(free, { removeEvidence: true });
+    expect(() => explainClarification(r.brief)).not.toThrow();
+  });
+});

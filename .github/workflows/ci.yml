@@ -26,5 +26,6 @@ jobs:
         run: npm run test:e2e
       - name: Benchmark artifacts reproduce
         run: npm run benchmark
+      - run: npm run robustness
       - name: Release audit (live Qloo and public URL are reported BLOCKED / NOT RUN here, not passed)
         run: npm run release:check -- --skip-e2e

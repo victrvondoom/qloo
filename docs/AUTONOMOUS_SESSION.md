@@ -47,6 +47,26 @@ Research: seven competitor repositories read through page fetches only (nothing 
 
 Still blocked, unchanged: live Qloo, deployment, human responses, B1.
 
+## Session 5: decision challenge sprint (start `3717ab7`)
+
+Gap audit (from the code, not marketing): the system could not justify a single line on request; a designer override had no path and no verification; accepted decisions were not locked; sensitivity re-queried Qloo with no request merging; no perturbation testing existed; the clarification choice was opaque.
+
+| Capability | Status | Verified by |
+|---|---|---|
+| Decision Challenge Engine (why, why not, prove, what if) | IMPLEMENTED | `challenge.test.ts` (CCT, CRI, dimming, lux, missing evidence, conflicts, unsupported materials, changed favourites, ambiguity, corrupted evidence), e2e |
+| Repair Engine (propose, then explicit ledgered apply; server re-evaluates) | IMPLEMENTED (only for errors caused by a written limit; otherwise proposes nothing) | `challenge.test.ts`, e2e |
+| Professional Review Board (5-state per-line machine, final human approval, lock, history in export) | IMPLEMENTED | `challenge.test.ts`, e2e |
+| Clarification Optimizer | PARTIAL: the agent already ranked by expected changed lines; added explanation (lines per answer, held-back contrasts, defer) and a fixture measurement (57 usable briefs: naive policy asks 57, optimizer 8). The metric stays a heuristic; dependencies between multiple questions are not modelled because only one question is asked | `clarify-eval`, test, e2e |
+| Qloo Query Optimizer (merge identical in-flight requests, TTL, no-cache switch, stats) | IMPLEMENTED for the client; fixture measurement 42 to 21 transport calls, identical results. Not live latency or cost | `query-budget`, `query-budget.test.ts` |
+| Robustness Lab (9 categories, 116 scenarios, 7 invariants, seeded) | IMPLEMENTED: 116 executed, 0 violations, corruption rejection 100%; verified it fails when the verifier or rulebook is sabotaged | `npm run robustness`, `robustness.test.ts`, `release:check` |
+| Reliability tests (10 concurrent users, long brief, 12 revisions then export, malformed stored project) | IMPLEMENTED | `reliability.test.ts` |
+| Judge walkthrough | IMPLEMENTED: seven steps incl. challenge and approval; responsive checks at 390, 768, 1366, 1920 | e2e |
+| Independent OpenAPI contract check | BLOCKED: the published `openapi-schema.json` is the OpenAPI meta-schema, not the Qloo API | `docs/QLOO_LIVE_VERIFICATION.md` |
+
+Bugs found and fixed along the way: a multi-element selector and a console error from a deliberately invalid review action (validated client-side now); the compiler ignored designer revisions (now honoured, flagged, and re-verified).
+
+Still blocked, unchanged: live Qloo, deployment, human responses, B1.
+
 ## Next
 
 1. Key + network: `npm run verify:qloo-live`; commit the report only if LIVE VERIFIED.

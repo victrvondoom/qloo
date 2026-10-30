@@ -63,6 +63,8 @@ Tastespec is a **cultural-intelligence-powered specification compiler**, not ano
 - **Stress** it: remove one reference at a time and see which lines hang on a single one.
 - **Export** it as a print-ready document (save as PDF), JSON or CSV. A failing specification exports only as a DRAFT.
 
+- **Challenge** any line: *Why this? Why not that? Prove it. Repair it.* computed from the decision record; applying is explicit and ledgered. Review each line, then approve the version (`docs/DECISION_CHALLENGE.md`).
+
 Competitor research and where this differs: `docs/COMPETITOR_INTELLIGENCE_2026.md`, `docs/DIFFERENTIATION_STRATEGY.md`.
 
 ## What the client writes down outranks the evidence

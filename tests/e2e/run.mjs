@@ -176,6 +176,11 @@ async function main() {
 
   await check("specification tab: challenge a line (why, why not, apply, prove, review) from the UI", async () => {
     await page.getByRole("tab", { name: /^Specification/ }).click();
+    await page.getByRole("heading", { name: /One question would settle|No question is worth asking/ }).waitFor();
+    if (await page.getByRole("button", { name: "Defer" }).count()) {
+      await page.getByRole("button", { name: "Defer" }).click();
+      await page.getByText(/Deferred\. The specification stays/).waitFor();
+    }
     const sec = page.locator("section[aria-labelledby=chal-h]");
     await sec.getByRole("button", { name: "Why this?" }).click();
     await sec.getByLabel("Why this").getByText(/Rule: rulebook/).waitFor();
@@ -422,7 +427,7 @@ async function main() {
     assert(await begin.isDisabled(), "Begin should need consent");
     await page.getByLabel(/I have read this and agree/).check();
     await begin.click();
-    await page.getByText(/a fictional client/).waitFor();
+    await page.getByRole("heading", { name: /a fictional client/ }).waitFor();
     const body = await page.locator("main").innerText();
     assert(!/Tastespec|Literal|Qloo mapping|B0|B3/.test(body.replace(/Study|Independent evaluation/g, "")), "system identity leaked to the participant");
     const submit = page.getByRole("button", { name: /Submit/ });
@@ -533,6 +538,25 @@ async function main() {
     const sw = await m.evaluate(() => document.documentElement.scrollWidth);
     assert(sw <= 391, `scrollWidth ${sw}`);
   });
+  for (const w of [390, 768, 1366, 1920]) {
+    await check(`responsive ${w}px: /lab and the specification tab have no horizontal overflow, controls are named and focusable`, async () => {
+      const ctx = await browser.newContext({ viewport: { width: w, height: 900 } });
+      const pg = await ctx.newPage();
+      const errs = [];
+      pg.on("pageerror", (e) => errs.push(String(e)));
+      await pg.goto(`${BASE}/lab`);
+      await pg.locator("#challenge").getByRole("button", { name: "1 · Generate specifications" }).waitFor();
+      const sw = await pg.evaluate(() => document.documentElement.scrollWidth);
+      assert(sw <= w + 1, `scrollWidth ${sw} at ${w}`);
+      const unnamed = await pg.evaluate(() => [...document.querySelectorAll("button, a[href], input, select")].filter((e) => !(e.getAttribute("aria-label") || e.textContent?.trim() || e.labels?.[0]?.textContent?.trim() || e.getAttribute("title") || e.getAttribute("placeholder"))).map((e) => e.outerHTML.slice(0, 80)));
+      assert(unnamed.length === 0, `controls without a name: ${unnamed.join(" | ")}`);
+      await pg.keyboard.press("Tab");
+      await pg.keyboard.press("Tab");
+      assert(await pg.evaluate(() => document.activeElement && document.activeElement !== document.body), "keyboard focus did not move");
+      assert(errs.length === 0, errs.join("\n"));
+      await ctx.close();
+    });
+  }
   await check("keyboard: skip link is first focusable and targets main", async () => {
     await m.goto(BASE);
     await m.keyboard.press("Tab");

@@ -1,0 +1,19 @@
+{
+  "kind": "Query-budget measurement on the FIXTURE transport (counts of requests to a synthetic world; not live Qloo latency, quota or cost)",
+  "generatedAt": "2026-10-30T09:25:13.588Z",
+  "scenario": "one brief, then the evidence sensitivity analysis three times, then two identical concurrent searches",
+  "withoutCache": {
+    "transportCalls": 42,
+    "concurrentDuplicateCalls": 2,
+    "ms": 294
+  },
+  "withCache": {
+    "transportCalls": 21,
+    "concurrentDuplicateCalls": 1,
+    "ms": 243
+  },
+  "callsSaved": 21,
+  "duplicateReduction": 0.5,
+  "resultsIdentical": true,
+  "limitsPreserved": true
+}

@@ -227,7 +227,11 @@ function classify(status: number): QlooErrorKind {
 
 // ---------------------------------------------------------------- client
 
-const responseCache = new Map<string, RawResponse>();
+// Qloo answers keyed by mode and request only. Nothing in a key or an entry identifies a user or an owner; it is
+// per-process memory, bounded in size and age, and holds only what Qloo returned for that exact request.
+const CACHE_TTL_MS = Number(process.env.TASTESPEC_QLOO_CACHE_TTL_MS ?? 6 * 60 * 60 * 1000);
+const responseCache = new Map<string, { res: RawResponse; at: number }>();
+const inflight = new Map<string, Promise<void>>();
 const CACHE_MAX = 300;
 
 export interface ClientOptions {
@@ -239,6 +243,8 @@ export interface ClientOptions {
   /** Injected for tests so backoff doesn't sleep. */
   sleep?: (ms: number) => Promise<void>;
   random?: () => number;
+  /** Set false to bypass the response cache and request de-duplication (used to measure what they save). */
+  cache?: boolean;
 }
 
 export interface CallStats {
@@ -247,6 +253,8 @@ export interface CallStats {
   retries: number;
   failures: number;
   cacheHits: number;
+  /** Requests that waited for an identical request already in flight instead of calling Qloo again. */
+  deduped: number;
   ms: number;
 }
 
@@ -258,7 +266,7 @@ export interface CallResult<T> {
 }
 
 export class QlooClient {
-  readonly stats: CallStats = { requests: 0, attempts: 0, retries: 0, failures: 0, cacheHits: 0, ms: 0 };
+  readonly stats: CallStats = { requests: 0, attempts: 0, retries: 0, failures: 0, cacheHits: 0, deduped: 0, ms: 0 };
   private readonly sleep: (ms: number) => Promise<void>;
   private readonly random: () => number;
 
@@ -281,9 +289,31 @@ export class QlooClient {
 
   private async call(path: string, params: Params, purpose: string): Promise<{ body: unknown; seq: number }> {
     const key = `${this.transport.mode}:${this.transport.note ?? ""}:${path}?${encodeParams(params)}`;
+    const useCache = this.opts.cache !== false;
+    // An identical request already in flight is waited for, then served from the cache it fills (or retried if it failed).
+    const waiting = useCache ? inflight.get(key) : undefined;
+    if (waiting) {
+      await waiting.catch(() => {});
+      this.stats.deduped++;
+    }
+    let release: (() => void) | undefined;
+    if (useCache && !inflight.has(key)) inflight.set(key, new Promise<void>((r) => (release = r)));
+    try {
+      return await this.callOnce(key, path, params, purpose, useCache);
+    } finally {
+      if (release) {
+        inflight.delete(key);
+        release();
+      }
+    }
+  }
+
+  private async callOnce(key: string, path: string, params: Params, purpose: string, useCache: boolean): Promise<{ body: unknown; seq: number }> {
     const started = Date.now();
     this.stats.requests++;
-    let res: RawResponse | undefined = responseCache.get(key);
+    const hit = useCache ? responseCache.get(key) : undefined;
+    if (hit && Date.now() - hit.at > CACHE_TTL_MS) responseCache.delete(key);
+    let res: RawResponse | undefined = hit && Date.now() - hit.at <= CACHE_TTL_MS ? hit.res : undefined;
     const fromCache = Boolean(res);
     let attempts = 0;
     let lastError: QlooError | undefined;
@@ -329,8 +359,8 @@ export class QlooClient {
 
     const ms = Date.now() - started;
     this.stats.ms += ms;
-    if (res && !lastError && !fromCache) {
-      responseCache.set(key, res);
+    if (res && !lastError && !fromCache && useCache) {
+      responseCache.set(key, { res, at: Date.now() });
       if (responseCache.size > CACHE_MAX) responseCache.delete(responseCache.keys().next().value!);
     }
     if (lastError) this.stats.failures++;

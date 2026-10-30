@@ -37,7 +37,7 @@ const built = run("production build", "npm", ["run", "build"], 600_000);
 
 // 2. Files
 add("license file present", existsSync("LICENSE") && /permission is hereby granted|MIT|Apache/i.test(readFileSync("LICENSE", "utf8")) ? "PASS" : "FAIL", "LICENSE");
-const need = ["README.md", "docs/DEPLOYMENT.md", "docs/JUDGE_QUICKSTART.md", "docs/HUMAN_EVALUATION.md", "docs/QLOO_LIVE_VERIFICATION.md", "docs/SUBMISSION.md", "docs/RELEASE_CHECKLIST.md", "docs/AUTONOMOUS_SESSION.md", "docs/COMPETITOR_INTELLIGENCE_2026.md", "docs/DIFFERENTIATION_STRATEGY.md", "docs/SPECIFICATION_COMPILER.md", "docs/SPEC_VERIFICATION.md"];
+const need = ["README.md", "docs/DEPLOYMENT.md", "docs/JUDGE_QUICKSTART.md", "docs/HUMAN_EVALUATION.md", "docs/QLOO_LIVE_VERIFICATION.md", "docs/SUBMISSION.md", "docs/RELEASE_CHECKLIST.md", "docs/AUTONOMOUS_SESSION.md", "docs/COMPETITOR_INTELLIGENCE_2026.md", "docs/DIFFERENTIATION_STRATEGY.md", "docs/SPECIFICATION_COMPILER.md", "docs/SPEC_VERIFICATION.md", "docs/DECISION_CHALLENGE.md"];
 const missing = need.filter((f) => !existsSync(f));
 add("submission documents present", missing.length ? "FAIL" : "PASS", missing.length ? `missing: ${missing.join(", ")}` : `${need.length} files`);
 const deploy = ["Dockerfile", "docker-compose.yml", "vercel.json", ".github/workflows/ci.yml"].filter((f) => !existsSync(f));
@@ -147,6 +147,12 @@ await smoke();
 if (skipE2e) add("end-to-end browser tests", "NOT RUN", "--skip-e2e");
 else if (!built) add("end-to-end browser tests", "NOT RUN", "build failed");
 else run("end-to-end browser tests", "npm", ["run", "test:e2e"], 900_000);
+
+// 6b. Robustness lab
+{
+  const r = spawnSync("npm", ["run", "robustness"], { encoding: "utf8", timeout: 300_000 });
+  add("robustness lab: no invariant violated", r.status === 0 ? "PASS" : "FAIL", (r.stdout + r.stderr).trim().split("\n").slice(-3).join("\n"));
+}
 
 // 7. Qloo, live
 if (!process.env.QLOO_API_KEY) add("Qloo live verification", "BLOCKED", "QLOO_API_KEY is not set. Not run, and not counted as passed. Run `npm run verify:qloo-live` with a key.");

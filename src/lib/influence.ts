@@ -43,7 +43,7 @@ export function scopeParams(brief: Brief): Params {
   return {};
 }
 
-export async function computeInfluence(brief: Brief, transport: Transport, opts: { signal?: AbortSignal; budgetMs?: number } = {}): Promise<{ brief: Brief; influence: InfluenceMap }> {
+export async function computeInfluence(brief: Brief, transport: Transport, opts: { signal?: AbortSignal; budgetMs?: number; cache?: boolean } = {}): Promise<{ brief: Brief; influence: InfluenceMap }> {
   if (brief.status !== "COMPLETE" && brief.status !== "NEEDS_CLARIFICATION") throw new Error("This brief has no usable evidence to attribute.");
   const ids = signalIds(brief);
   if (ids.length < 2) throw new Error("Influence needs at least two references the agent could use.");
@@ -54,7 +54,7 @@ export async function computeInfluence(brief: Brief, transport: Transport, opts:
   const fullSpec = specFor(brief, full);
 
   const ledger = new Ledger(brief.ledger);
-  const qloo = new QlooClient(transport, ledger, { deadline: Date.now() + (opts.budgetMs ?? 45_000), signal: opts.signal, maxCalls: ids.length * 3 + 2 });
+  const qloo = new QlooClient(transport, ledger, { deadline: Date.now() + (opts.budgetMs ?? 45_000), signal: opts.signal, maxCalls: ids.length * 3 + 2, cache: opts.cache });
   const evidence: number[] = [];
   const refs: InfluenceMap["references"] = [];
 

@@ -27,6 +27,10 @@ It runs, in order, and reports each as PASS/FAIL: (1) a minimal `/search` reques
 
 `npm run probe -- Chicago` is the broader exploratory probe (field inventories, vocabulary hit rates, popularity filter behaviour) and writes `reports/qloo-live-probe.json`.
 
+## Independent contract check against Qloo's public repository
+
+Checked 2026-10-30: `github.com/qloo/docs-public` lists `openapi-schema.json` as "the complete OpenAPI 3.1 specification for the Qloo API v2". The file fetched from that path was the OpenAPI 3.1 meta-schema (the schema that validates OpenAPI documents), with no paths, parameters or responses, so **no schema-driven contract test could be built from it** and no discrepancy with the adapter was found or ruled out. The adapter's contract tests continue to follow the hackathon developer guide as read in an earlier session. Status unchanged: CONTRACT TESTED, NOT LIVE VERIFIED. If a real API document is published there, the next step is to generate request and response checks from it.
+
 ## What a live run would not prove
 
 That Qloo's data is good for design (only that the pipeline handles it), that results beat an LLM (B1 needs a model key), or that clients prefer the output (that is the human study).

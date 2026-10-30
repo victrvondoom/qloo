@@ -1,0 +1,1123 @@
+{
+  "kind": "SYNTHETIC robustness run (fixture world, deterministic seeds)",
+  "generatedAt": "2026-10-30T09:27:30.212Z",
+  "seeds": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "summary": {
+    "total": 116,
+    "executed": 116,
+    "notExecuted": 0,
+    "invariantViolations": 0,
+    "failingScenarios": [],
+    "corruptionScenarios": 51,
+    "invalidEvidenceRejectionRate": 1,
+    "byCategory": {
+      "evidence_removal": {
+        "scenarios": 8,
+        "violations": 0
+      },
+      "evidence_corruption": {
+        "scenarios": 52,
+        "violations": 0
+      },
+      "evidence_conflict": {
+        "scenarios": 8,
+        "violations": 0
+      },
+      "entity_ambiguity": {
+        "scenarios": 8,
+        "violations": 0
+      },
+      "constraint_mutation": {
+        "scenarios": 8,
+        "violations": 0
+      },
+      "geographic_shift": {
+        "scenarios": 8,
+        "violations": 0
+      },
+      "irrelevant_text": {
+        "scenarios": 8,
+        "violations": 0
+      },
+      "preference_paraphrase": {
+        "scenarios": 8,
+        "violations": 0
+      },
+      "tool_failure": {
+        "scenarios": 8,
+        "violations": 0
+      }
+    },
+    "latencyMs": {
+      "mean": 59,
+      "p95": 85,
+      "n": 116
+    }
+  },
+  "results": [
+    {
+      "id": "removal-Maya-s1",
+      "category": "evidence_removal",
+      "seed": 1,
+      "executed": true,
+      "ms": 124,
+      "violations": []
+    },
+    {
+      "id": "corruption-Maya-s1-drop_refs",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 50,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "drop_refs"
+    },
+    {
+      "id": "corruption-Maya-s1-foreign_id",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 54,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "foreign_id"
+    },
+    {
+      "id": "corruption-Maya-s1-no_evidence",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 48,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "no_evidence"
+    },
+    {
+      "id": "corruption-Maya-s1-limit_break",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 42,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "limit_break"
+    },
+    {
+      "id": "corruption-Maya-s1-ledger_edit",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 50,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "ledger_edit"
+    },
+    {
+      "id": "corruption-Maya-s1-bad_unit",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 53,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "bad_unit"
+    },
+    {
+      "id": "conflict-Maya-s1",
+      "category": "evidence_conflict",
+      "seed": 1,
+      "executed": true,
+      "ms": 43,
+      "violations": [],
+      "note": "conf-1"
+    },
+    {
+      "id": "ambiguity-Maya-s1",
+      "category": "entity_ambiguity",
+      "seed": 1,
+      "executed": true,
+      "ms": 74,
+      "violations": [],
+      "note": "ambiguous"
+    },
+    {
+      "id": "mutation-Maya-s1",
+      "category": "constraint_mutation",
+      "seed": 1,
+      "executed": true,
+      "ms": 96,
+      "violations": []
+    },
+    {
+      "id": "geo-Maya-s1",
+      "category": "geographic_shift",
+      "seed": 1,
+      "executed": true,
+      "ms": 65,
+      "violations": [],
+      "note": "weak-0:weighted:COMPLETE"
+    },
+    {
+      "id": "irrelevant-Maya-s1",
+      "category": "irrelevant_text",
+      "seed": 1,
+      "executed": true,
+      "ms": 58,
+      "violations": []
+    },
+    {
+      "id": "paraphrase-Maya-s1",
+      "category": "preference_paraphrase",
+      "seed": 1,
+      "executed": true,
+      "ms": 57,
+      "violations": []
+    },
+    {
+      "id": "failure-Maya-s1",
+      "category": "tool_failure",
+      "seed": 1,
+      "executed": true,
+      "ms": 7,
+      "violations": [],
+      "note": "auth"
+    },
+    {
+      "id": "removal-Jordan-s1",
+      "category": "evidence_removal",
+      "seed": 1,
+      "executed": true,
+      "ms": 37,
+      "violations": []
+    },
+    {
+      "id": "corruption-Jordan-s1-drop_refs",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 31,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "drop_refs"
+    },
+    {
+      "id": "corruption-Jordan-s1-foreign_id",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 31,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "foreign_id"
+    },
+    {
+      "id": "corruption-Jordan-s1-no_evidence",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 30,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "no_evidence"
+    },
+    {
+      "id": "corruption-Jordan-s1-limit_break",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 26,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "limit_break"
+    },
+    {
+      "id": "corruption-Jordan-s1-ledger_edit",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 25,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "ledger_edit"
+    },
+    {
+      "id": "corruption-Jordan-s1-bad_unit",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 28,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "bad_unit"
+    },
+    {
+      "id": "conflict-Jordan-s1",
+      "category": "evidence_conflict",
+      "seed": 1,
+      "executed": true,
+      "ms": 29,
+      "violations": [],
+      "note": "conf-3"
+    },
+    {
+      "id": "ambiguity-Jordan-s1",
+      "category": "entity_ambiguity",
+      "seed": 1,
+      "executed": true,
+      "ms": 59,
+      "violations": [],
+      "note": "ambiguous"
+    },
+    {
+      "id": "mutation-Jordan-s1",
+      "category": "constraint_mutation",
+      "seed": 1,
+      "executed": true,
+      "ms": 51,
+      "violations": []
+    },
+    {
+      "id": "geo-Jordan-s1",
+      "category": "geographic_shift",
+      "seed": 1,
+      "executed": true,
+      "ms": 23,
+      "violations": [],
+      "note": "geo-1:city:COMPLETE"
+    },
+    {
+      "id": "irrelevant-Jordan-s1",
+      "category": "irrelevant_text",
+      "seed": 1,
+      "executed": true,
+      "ms": 78,
+      "violations": []
+    },
+    {
+      "id": "paraphrase-Jordan-s1",
+      "category": "preference_paraphrase",
+      "seed": 1,
+      "executed": true,
+      "ms": 72,
+      "violations": []
+    },
+    {
+      "id": "failure-Jordan-s1",
+      "category": "tool_failure",
+      "seed": 1,
+      "executed": true,
+      "ms": 1728,
+      "violations": [],
+      "note": "timeout"
+    },
+    {
+      "id": "payload-s1",
+      "category": "evidence_corruption",
+      "seed": 1,
+      "executed": true,
+      "ms": 31,
+      "violations": [],
+      "corruptionDetected": true
+    },
+    {
+      "id": "removal-Maya-s2",
+      "category": "evidence_removal",
+      "seed": 2,
+      "executed": true,
+      "ms": 52,
+      "violations": []
+    },
+    {
+      "id": "corruption-Maya-s2-drop_refs",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 44,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "drop_refs"
+    },
+    {
+      "id": "corruption-Maya-s2-foreign_id",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 45,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "foreign_id"
+    },
+    {
+      "id": "corruption-Maya-s2-no_evidence",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 44,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "no_evidence"
+    },
+    {
+      "id": "corruption-Maya-s2-limit_break",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 44,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "limit_break"
+    },
+    {
+      "id": "corruption-Maya-s2-ledger_edit",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 36,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "ledger_edit"
+    },
+    {
+      "id": "corruption-Maya-s2-bad_unit",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 27,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "bad_unit"
+    },
+    {
+      "id": "conflict-Maya-s2",
+      "category": "evidence_conflict",
+      "seed": 2,
+      "executed": true,
+      "ms": 32,
+      "violations": [],
+      "note": "conf-2"
+    },
+    {
+      "id": "ambiguity-Maya-s2",
+      "category": "entity_ambiguity",
+      "seed": 2,
+      "executed": true,
+      "ms": 68,
+      "violations": [],
+      "note": "ambiguous"
+    },
+    {
+      "id": "mutation-Maya-s2",
+      "category": "constraint_mutation",
+      "seed": 2,
+      "executed": true,
+      "ms": 54,
+      "violations": []
+    },
+    {
+      "id": "geo-Maya-s2",
+      "category": "geographic_shift",
+      "seed": 2,
+      "executed": true,
+      "ms": 41,
+      "violations": [],
+      "note": "weak-1:weighted:COMPLETE"
+    },
+    {
+      "id": "irrelevant-Maya-s2",
+      "category": "irrelevant_text",
+      "seed": 2,
+      "executed": true,
+      "ms": 70,
+      "violations": []
+    },
+    {
+      "id": "paraphrase-Maya-s2",
+      "category": "preference_paraphrase",
+      "seed": 2,
+      "executed": true,
+      "ms": 67,
+      "violations": []
+    },
+    {
+      "id": "failure-Maya-s2",
+      "category": "tool_failure",
+      "seed": 2,
+      "executed": true,
+      "ms": 3,
+      "violations": [],
+      "note": "malformed"
+    },
+    {
+      "id": "removal-Jordan-s2",
+      "category": "evidence_removal",
+      "seed": 2,
+      "executed": true,
+      "ms": 34,
+      "violations": []
+    },
+    {
+      "id": "corruption-Jordan-s2-drop_refs",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 29,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "drop_refs"
+    },
+    {
+      "id": "corruption-Jordan-s2-foreign_id",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 25,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "foreign_id"
+    },
+    {
+      "id": "corruption-Jordan-s2-no_evidence",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 27,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "no_evidence"
+    },
+    {
+      "id": "corruption-Jordan-s2-limit_break",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 31,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "limit_break"
+    },
+    {
+      "id": "corruption-Jordan-s2-ledger_edit",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 43,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "ledger_edit"
+    },
+    {
+      "id": "corruption-Jordan-s2-bad_unit",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 32,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "bad_unit"
+    },
+    {
+      "id": "conflict-Jordan-s2",
+      "category": "evidence_conflict",
+      "seed": 2,
+      "executed": true,
+      "ms": 32,
+      "violations": [],
+      "note": "conf-1"
+    },
+    {
+      "id": "ambiguity-Jordan-s2",
+      "category": "entity_ambiguity",
+      "seed": 2,
+      "executed": true,
+      "ms": 71,
+      "violations": [],
+      "note": "ambiguous"
+    },
+    {
+      "id": "mutation-Jordan-s2",
+      "category": "constraint_mutation",
+      "seed": 2,
+      "executed": true,
+      "ms": 75,
+      "violations": []
+    },
+    {
+      "id": "geo-Jordan-s2",
+      "category": "geographic_shift",
+      "seed": 2,
+      "executed": true,
+      "ms": 40,
+      "violations": [],
+      "note": "geo-0:city:COMPLETE"
+    },
+    {
+      "id": "irrelevant-Jordan-s2",
+      "category": "irrelevant_text",
+      "seed": 2,
+      "executed": true,
+      "ms": 72,
+      "violations": []
+    },
+    {
+      "id": "paraphrase-Jordan-s2",
+      "category": "preference_paraphrase",
+      "seed": 2,
+      "executed": true,
+      "ms": 73,
+      "violations": []
+    },
+    {
+      "id": "failure-Jordan-s2",
+      "category": "tool_failure",
+      "seed": 2,
+      "executed": true,
+      "ms": 9,
+      "violations": [],
+      "note": "rate"
+    },
+    {
+      "id": "payload-s2",
+      "category": "evidence_corruption",
+      "seed": 2,
+      "executed": true,
+      "ms": 26,
+      "violations": [],
+      "corruptionDetected": true
+    },
+    {
+      "id": "removal-Maya-s3",
+      "category": "evidence_removal",
+      "seed": 3,
+      "executed": true,
+      "ms": 51,
+      "violations": []
+    },
+    {
+      "id": "corruption-Maya-s3-drop_refs",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 44,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "drop_refs"
+    },
+    {
+      "id": "corruption-Maya-s3-foreign_id",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 34,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "foreign_id"
+    },
+    {
+      "id": "corruption-Maya-s3-no_evidence",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 26,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "no_evidence"
+    },
+    {
+      "id": "corruption-Maya-s3-limit_break",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 24,
+      "violations": [],
+      "note": "limit_break: not applicable here"
+    },
+    {
+      "id": "corruption-Maya-s3-ledger_edit",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 31,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "ledger_edit"
+    },
+    {
+      "id": "corruption-Maya-s3-bad_unit",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 28,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "bad_unit"
+    },
+    {
+      "id": "conflict-Maya-s3",
+      "category": "evidence_conflict",
+      "seed": 3,
+      "executed": true,
+      "ms": 28,
+      "violations": [],
+      "note": "conf-0"
+    },
+    {
+      "id": "ambiguity-Maya-s3",
+      "category": "entity_ambiguity",
+      "seed": 3,
+      "executed": true,
+      "ms": 55,
+      "violations": [],
+      "note": "ambiguous"
+    },
+    {
+      "id": "mutation-Maya-s3",
+      "category": "constraint_mutation",
+      "seed": 3,
+      "executed": true,
+      "ms": 51,
+      "violations": []
+    },
+    {
+      "id": "geo-Maya-s3",
+      "category": "geographic_shift",
+      "seed": 3,
+      "executed": true,
+      "ms": 25,
+      "violations": [],
+      "note": "geo-0:city:COMPLETE"
+    },
+    {
+      "id": "irrelevant-Maya-s3",
+      "category": "irrelevant_text",
+      "seed": 3,
+      "executed": true,
+      "ms": 49,
+      "violations": []
+    },
+    {
+      "id": "paraphrase-Maya-s3",
+      "category": "preference_paraphrase",
+      "seed": 3,
+      "executed": true,
+      "ms": 77,
+      "violations": []
+    },
+    {
+      "id": "failure-Maya-s3",
+      "category": "tool_failure",
+      "seed": 3,
+      "executed": true,
+      "ms": 11,
+      "violations": [],
+      "note": "rate"
+    },
+    {
+      "id": "removal-Jordan-s3",
+      "category": "evidence_removal",
+      "seed": 3,
+      "executed": true,
+      "ms": 62,
+      "violations": []
+    },
+    {
+      "id": "corruption-Jordan-s3-drop_refs",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 48,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "drop_refs"
+    },
+    {
+      "id": "corruption-Jordan-s3-foreign_id",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 48,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "foreign_id"
+    },
+    {
+      "id": "corruption-Jordan-s3-no_evidence",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 45,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "no_evidence"
+    },
+    {
+      "id": "corruption-Jordan-s3-limit_break",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 38,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "limit_break"
+    },
+    {
+      "id": "corruption-Jordan-s3-ledger_edit",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 44,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "ledger_edit"
+    },
+    {
+      "id": "corruption-Jordan-s3-bad_unit",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 49,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "bad_unit"
+    },
+    {
+      "id": "conflict-Jordan-s3",
+      "category": "evidence_conflict",
+      "seed": 3,
+      "executed": true,
+      "ms": 47,
+      "violations": [],
+      "note": "conf-1"
+    },
+    {
+      "id": "ambiguity-Jordan-s3",
+      "category": "entity_ambiguity",
+      "seed": 3,
+      "executed": true,
+      "ms": 96,
+      "violations": [],
+      "note": "ambiguous"
+    },
+    {
+      "id": "mutation-Jordan-s3",
+      "category": "constraint_mutation",
+      "seed": 3,
+      "executed": true,
+      "ms": 86,
+      "violations": []
+    },
+    {
+      "id": "geo-Jordan-s3",
+      "category": "geographic_shift",
+      "seed": 3,
+      "executed": true,
+      "ms": 47,
+      "violations": [],
+      "note": "weak-0:weighted:COMPLETE"
+    },
+    {
+      "id": "irrelevant-Jordan-s3",
+      "category": "irrelevant_text",
+      "seed": 3,
+      "executed": true,
+      "ms": 83,
+      "violations": []
+    },
+    {
+      "id": "paraphrase-Jordan-s3",
+      "category": "preference_paraphrase",
+      "seed": 3,
+      "executed": true,
+      "ms": 83,
+      "violations": []
+    },
+    {
+      "id": "failure-Jordan-s3",
+      "category": "tool_failure",
+      "seed": 3,
+      "executed": true,
+      "ms": 6,
+      "violations": [],
+      "note": "auth"
+    },
+    {
+      "id": "payload-s3",
+      "category": "evidence_corruption",
+      "seed": 3,
+      "executed": true,
+      "ms": 33,
+      "violations": [],
+      "corruptionDetected": true
+    },
+    {
+      "id": "removal-Maya-s4",
+      "category": "evidence_removal",
+      "seed": 4,
+      "executed": true,
+      "ms": 63,
+      "violations": []
+    },
+    {
+      "id": "corruption-Maya-s4-drop_refs",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 46,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "drop_refs"
+    },
+    {
+      "id": "corruption-Maya-s4-foreign_id",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 50,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "foreign_id"
+    },
+    {
+      "id": "corruption-Maya-s4-no_evidence",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 53,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "no_evidence"
+    },
+    {
+      "id": "corruption-Maya-s4-limit_break",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 50,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "limit_break"
+    },
+    {
+      "id": "corruption-Maya-s4-ledger_edit",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 47,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "ledger_edit"
+    },
+    {
+      "id": "corruption-Maya-s4-bad_unit",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 45,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "bad_unit"
+    },
+    {
+      "id": "conflict-Maya-s4",
+      "category": "evidence_conflict",
+      "seed": 4,
+      "executed": true,
+      "ms": 48,
+      "violations": [],
+      "note": "conf-1"
+    },
+    {
+      "id": "ambiguity-Maya-s4",
+      "category": "entity_ambiguity",
+      "seed": 4,
+      "executed": true,
+      "ms": 85,
+      "violations": [],
+      "note": "ambiguous"
+    },
+    {
+      "id": "mutation-Maya-s4",
+      "category": "constraint_mutation",
+      "seed": 4,
+      "executed": true,
+      "ms": 79,
+      "violations": []
+    },
+    {
+      "id": "geo-Maya-s4",
+      "category": "geographic_shift",
+      "seed": 4,
+      "executed": true,
+      "ms": 32,
+      "violations": [],
+      "note": "weak-1:weighted:COMPLETE"
+    },
+    {
+      "id": "irrelevant-Maya-s4",
+      "category": "irrelevant_text",
+      "seed": 4,
+      "executed": true,
+      "ms": 56,
+      "violations": []
+    },
+    {
+      "id": "paraphrase-Maya-s4",
+      "category": "preference_paraphrase",
+      "seed": 4,
+      "executed": true,
+      "ms": 52,
+      "violations": []
+    },
+    {
+      "id": "failure-Maya-s4",
+      "category": "tool_failure",
+      "seed": 4,
+      "executed": true,
+      "ms": 4,
+      "violations": [],
+      "note": "malformed"
+    },
+    {
+      "id": "removal-Jordan-s4",
+      "category": "evidence_removal",
+      "seed": 4,
+      "executed": true,
+      "ms": 34,
+      "violations": []
+    },
+    {
+      "id": "corruption-Jordan-s4-drop_refs",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 25,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "drop_refs"
+    },
+    {
+      "id": "corruption-Jordan-s4-foreign_id",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 26,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "foreign_id"
+    },
+    {
+      "id": "corruption-Jordan-s4-no_evidence",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 24,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "no_evidence"
+    },
+    {
+      "id": "corruption-Jordan-s4-limit_break",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 25,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "limit_break"
+    },
+    {
+      "id": "corruption-Jordan-s4-ledger_edit",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 24,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "ledger_edit"
+    },
+    {
+      "id": "corruption-Jordan-s4-bad_unit",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 24,
+      "violations": [],
+      "corruptionDetected": true,
+      "note": "bad_unit"
+    },
+    {
+      "id": "conflict-Jordan-s4",
+      "category": "evidence_conflict",
+      "seed": 4,
+      "executed": true,
+      "ms": 27,
+      "violations": [],
+      "note": "conf-3"
+    },
+    {
+      "id": "ambiguity-Jordan-s4",
+      "category": "entity_ambiguity",
+      "seed": 4,
+      "executed": true,
+      "ms": 51,
+      "violations": [],
+      "note": "ambiguous"
+    },
+    {
+      "id": "mutation-Jordan-s4",
+      "category": "constraint_mutation",
+      "seed": 4,
+      "executed": true,
+      "ms": 46,
+      "violations": []
+    },
+    {
+      "id": "geo-Jordan-s4",
+      "category": "geographic_shift",
+      "seed": 4,
+      "executed": true,
+      "ms": 25,
+      "violations": [],
+      "note": "geo-0:city:COMPLETE"
+    },
+    {
+      "id": "irrelevant-Jordan-s4",
+      "category": "irrelevant_text",
+      "seed": 4,
+      "executed": true,
+      "ms": 45,
+      "violations": []
+    },
+    {
+      "id": "paraphrase-Jordan-s4",
+      "category": "preference_paraphrase",
+      "seed": 4,
+      "executed": true,
+      "ms": 45,
+      "violations": []
+    },
+    {
+      "id": "failure-Jordan-s4",
+      "category": "tool_failure",
+      "seed": 4,
+      "executed": true,
+      "ms": 4,
+      "violations": [],
+      "note": "auth"
+    },
+    {
+      "id": "payload-s4",
+      "category": "evidence_corruption",
+      "seed": 4,
+      "executed": true,
+      "ms": 17,
+      "violations": [],
+      "corruptionDetected": true
+    }
+  ]
+}

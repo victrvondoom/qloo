@@ -18,9 +18,10 @@ Open **Proof Lab** (`/lab`). The first card is *The two-client specification cha
 1. **Generate specifications.** The real agent runs for both. The mode is shown (DEMO fixtures labelled synthetic, or LIVE).
 2. **Evidence.** Per client: Qloo requests, ledger entries, and the atmospheres their taste neighbourhood over-represents against the city baseline.
 3. **Verify requirements.** The real verifier runs: seven checks (constraints, evidence, provenance, consistency, professional review, revision safety, unknowns), typed findings per line, and "not a certificate".
-4. **Change one preference.** Swap one of Maya's references; the agent reruns and a semantic diff shows what changed, what was preserved, why, and that the written limits are unchanged. Accept or reject.
-5. **Remove one cultural signal at a time.** Qloo is asked again without each reference; each line is robust, or hangs on one reference. The written limits must hold in every recomputation.
-6. **Export.** The printable specification (print to PDF), JSON and CSV, with verification status, evidence, assumptions and unknowns.
+4. **Challenge a recommendation.** *Why this?* shows the rule, what the client said, the Qloo requests, the constraints that held, and each alternative with a verdict. *Why not 4000K?* is blocked, and says which limit it breaks. (Details: `docs/DECISION_CHALLENGE.md`.)
+5. **Change one preference.** Swap one of Maya's references; the agent reruns and a semantic diff shows what changed, what was preserved, why, and that the written limits are unchanged. Accept or reject.
+6. **Remove one cultural signal at a time.** Qloo is asked again without each reference; each line is robust, or hangs on one reference. The written limits must hold in every recomputation.
+7. **Approve and export.** *Accept every line and approve* records that a person reviewed this version (not a certification) and locks it. The printable specification (print to PDF), JSON and CSV, with verification status, evidence, assumptions and unknowns.
 
 In a brief, the **Specification** tab does the same for your own briefs, plus revision history and *return to previous version*.
 

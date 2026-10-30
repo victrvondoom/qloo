@@ -1,0 +1,13 @@
+{
+  "kind": "Clarification policy on the SYNTHETIC benchmark clients (fixture world)",
+  "generatedAt": "2026-10-30T09:25:15.948Z",
+  "briefsWithUsableEvidence": 57,
+  "naivePolicyWouldAsk": 57,
+  "optimizerAsked": 8,
+  "questionsAvoided": 49,
+  "unnecessaryQuestionReduction": 0.86,
+  "askedQuestionsAffectingFewerThanTwoLines": 0,
+  "meanLinesAffectedPerAskedQuestion": 3.13,
+  "naivePolicyDefinition": "asks whenever any contrast would change at least some expected number of lines (> 0)",
+  "note": "A decision-impact heuristic, not calibrated information gain. Whether the answers help clients is not measured here."
+}

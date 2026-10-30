@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { postBrief } from "./api";
+import { ClarifyPanel } from "./ClarifyPanel";
 import { LineChallenge } from "./LineChallenge";
 import { DiffView, SensitivityView, StatusBanner, VerificationView } from "./SpecViews";
 import type { CompiledSpec } from "@/lib/compiler";
@@ -183,6 +184,8 @@ export function SpecificationPanel({ brief, canEdit, onBrief }: { brief: Brief; 
           <ul className="small">{spec.unknowns.map((u) => <li key={u}>{u}</li>)}</ul>
         </details>
       </section>
+
+      {canEdit && personal ? <ClarifyPanel brief={brief} onBrief={onBrief} /> : null}
 
       {canEdit ? <LineChallenge brief={brief} spec={spec} states={report.review.states} locked={report.review.locked} onChanged={changed} /> : null}
 
