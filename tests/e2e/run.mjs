@@ -366,6 +366,56 @@ async function main() {
     await snap(8);
   });
 
+  await check("study: consent gate, blinded pair, one answer per case, results say too few, withdrawal removes it (throwaway test database)", async () => {
+    await page.goto(`${BASE}/study/results`);
+    await page.getByText("NO HUMAN DATA COLLECTED").waitFor({ timeout: 8000 }).catch(async () => {
+      throw new Error(`results not empty at start: ${(await page.locator("main").innerText()).slice(0, 200)}`);
+    });
+    await page.goto(`${BASE}/study`);
+    const begin = page.getByRole("button", { name: "Begin" });
+    assert(await begin.isDisabled(), "Begin should need consent");
+    await page.getByLabel(/I have read this and agree/).check();
+    await begin.click();
+    await page.getByText(/a fictional client/).waitFor();
+    const body = await page.locator("main").innerText();
+    assert(!/Tastespec|Literal|Qloo mapping|B0|B3/.test(body.replace(/Study|Independent evaluation/g, "")), "system identity leaked to the participant");
+    const submit = page.getByRole("button", { name: /Submit/ });
+    assert(await submit.isDisabled(), "Submit should need every answer");
+    for (const q of ["reflects", "designer", "clarity", "constraints"]) await page.locator(`input[name="${q}"][value="A"]`).check();
+    await page.locator('input[name="confidence"][value="4"]').check();
+    await submit.click();
+    // Walk the remaining cases quickly, answering "Equal".
+    for (let i = 0; i < 20; i++) {
+      if (await page.getByText("Thank you").isVisible().catch(() => false)) break;
+      const next = page.getByRole("button", { name: /Submit/ });
+      await next.waitFor({ timeout: 10_000 }).catch(() => {});
+      if (!(await next.isVisible().catch(() => false))) continue;
+      for (const q of ["reflects", "designer", "clarity", "constraints"]) await page.locator(`input[name="${q}"][value="equal"]`).check();
+      await page.locator('input[name="confidence"][value="3"]').check();
+      await next.click();
+      await page.waitForTimeout(150);
+    }
+    await page.getByText("Thank you").waitFor({ timeout: 15_000 });
+    await page.getByText(/Your withdraw code is/).waitFor();
+    await page.goto(`${BASE}/study/results`);
+    await page.getByText(/too few to read as a preference/).waitFor();
+    await page.goto(`${BASE}/study`);
+    await page.getByLabel(/I have read this and agree/).check();
+    await page.getByRole("button", { name: "Begin" }).click();
+    await page.getByText("Thank you").waitFor({ timeout: 15_000 });
+    await page.getByText(/already answered/).waitFor();
+    // Fetch from inside the page: the study cookie is httpOnly and Secure, which the page sends but the raw request client does not.
+    await page.getByRole("button", { name: "Delete my responses now" }).click();
+    await page.getByText(/\d+ response\(s\) deleted/).waitFor();
+    const del = { json: async () => ({ note: "deleted through the page button" }) };
+    await page.goto(`${BASE}/study/results`);
+    await page.getByText("NO HUMAN DATA COLLECTED").waitFor({ timeout: 8000 }).catch(async () => {
+      throw new Error(`results not empty after withdrawal (deleted=${JSON.stringify(await del.json())}): ${(await page.locator("main").innerText()).slice(0, 200)}`);
+    });
+    const exp = await page.request.get(`${BASE}/api/study/export`);
+    assert(exp.status() === 404, `export must be off without STUDY_ADMIN_TOKEN, got ${exp.status()}`);
+  });
+
   await check("oversized request body is rejected", async () => {
     const r = await page.request.post(`${BASE}/api/run`, { data: { loves: ["x".repeat(40_000)] } });
     assert(r.status() === 413, `expected 413, got ${r.status()}`);
@@ -388,7 +438,7 @@ async function main() {
 
   const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const m = await mobile.newPage();
-  for (const route of ["/", "/app", "/lab", "/compare", "/projects", "/verify", "/method"]) {
+  for (const route of ["/", "/app", "/lab", "/compare", "/projects", "/verify", "/method", "/study", "/study/results"]) {
     await check(`mobile ${route}: no horizontal overflow`, async () => {
       await m.goto(`${BASE}${route}`);
       const sw = await m.evaluate(() => document.documentElement.scrollWidth);

@@ -18,6 +18,8 @@
     "verify": "npm run typecheck && npm run lint && npm test && npm run build && npm run test:e2e && npm run benchmark",
     "probe": "tsx --tsconfig tsconfig.json scripts/probe-qloo.ts",
     "benchmark": "tsx --tsconfig tsconfig.json benchmarks/run.ts",
+    "study:report": "tsx --tsconfig tsconfig.json scripts/study-report.ts",
+    "study:cases": "tsx --tsconfig tsconfig.json scripts/build-study-cases.ts",
     "film": "node scripts/record-film.mjs"
   },
   "engines": {

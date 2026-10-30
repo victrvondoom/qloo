@@ -1,0 +1,587 @@
+[
+  {
+    "id": "maya-warm-modern",
+    "title": "Maya: warm, modern",
+    "brief": {
+      "clientLabel": "Maya",
+      "city": "Chicago",
+      "room": "Living room",
+      "words": [
+        "warm",
+        "modern"
+      ],
+      "loves": [
+        "Khruangbin",
+        "The Bear (show)",
+        "Wes Anderson (director)",
+        "Ace Hotel (hotel)",
+        "Norah Jones"
+      ],
+      "constraints": []
+    },
+    "dataMode": "fixture",
+    "rulebook": "rulebook-2026.10.28",
+    "candidates": {
+      "B0": [
+        {
+          "category": "Colour temperature",
+          "value": "2700K throughout"
+        },
+        {
+          "category": "Layering",
+          "value": "Lamps and wall-washers first; downlights only over task zones. At least 4 sources at different heights."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Matte white or black, flush and trimless profiles, no exposed lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Full-range dimming to 1% and three scenes (day / dinner / late)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient at the low end: ~100 lux; let accent and lamps carry the room. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Narrow 15–25° accent beams on art and tables; glare shielding on every downlight."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 90+."
+        }
+      ],
+      "B2": [
+        {
+          "category": "Colour temperature",
+          "value": "2200–2700K with dim-to-warm (glows amber as it dims)"
+        },
+        {
+          "category": "Layering",
+          "value": "Lamps and wall-washers first; downlights only over task zones. At least 4 sources at different heights."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Opal or ribbed glass, aged brass, fabric cord, warm filament-style LED lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Full-range dimming to 1% and three scenes (day / dinner / late)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient at the low end: ~100 lux; let accent and lamps carry the room. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Narrow 15–25° accent beams on art and tables; glare shielding on every downlight."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 90+."
+        }
+      ],
+      "B3": [
+        {
+          "category": "Colour temperature",
+          "value": "2200–2700K with dim-to-warm (glows amber as it dims)"
+        },
+        {
+          "category": "Layering",
+          "value": "Lamps and wall-washers first; downlights only over task zones. At least 4 sources at different heights."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Opal or ribbed glass, aged brass, fabric cord, warm filament-style LED lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Full-range dimming to 1% and three scenes (day / dinner / late)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient at the low end: ~100 lux; let accent and lamps carry the room. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Narrow 15–25° accent beams on art and tables; glare shielding on every downlight."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 95+ with R9 > 50, so wood, skin and food read true."
+        }
+      ]
+    },
+    "version": "7e1c212468cd7d47286edb78e187549a1db475e165177e6b8fb6111541dfab9e"
+  },
+  {
+    "id": "jordan-warm-modern",
+    "title": "Jordan: warm, modern",
+    "brief": {
+      "clientLabel": "Jordan",
+      "city": "Chicago",
+      "room": "Living room",
+      "words": [
+        "warm",
+        "modern"
+      ],
+      "loves": [
+        "Fred again..",
+        "Severance (show)",
+        "MUJI (brand)",
+        "Blue Bottle Coffee (brand)",
+        "Kendrick Lamar"
+      ],
+      "constraints": []
+    },
+    "dataMode": "fixture",
+    "rulebook": "rulebook-2026.10.28",
+    "candidates": {
+      "B0": [
+        {
+          "category": "Colour temperature",
+          "value": "2700K throughout"
+        },
+        {
+          "category": "Layering",
+          "value": "Lamps and wall-washers first; downlights only over task zones. At least 4 sources at different heights."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Matte white or black, flush and trimless profiles, no exposed lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Full-range dimming to 1% and three scenes (day / dinner / late)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient at the low end: ~100 lux; let accent and lamps carry the room. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Narrow 15–25° accent beams on art and tables; glare shielding on every downlight."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 90+."
+        }
+      ],
+      "B2": [
+        {
+          "category": "Colour temperature",
+          "value": "3500K ambient, 4000K on task surfaces"
+        },
+        {
+          "category": "Layering",
+          "value": "Concealed sources: trimless recessed, LED tape in coves and shelving."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Matte white or black, flush and trimless profiles, no exposed lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Smooth, flicker-free dimming with warm-dim; two scenes (day / wind-down)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Trimless regressed downlights, consistent 36° beams, aligned on a grid."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 90+."
+        }
+      ],
+      "B3": [
+        {
+          "category": "Colour temperature",
+          "value": "3000K throughout"
+        },
+        {
+          "category": "Layering",
+          "value": "Concealed sources: trimless recessed, LED tape in coves and shelving."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Matte white or black, flush and trimless profiles, no exposed lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Full-range dimming to 1% and three scenes (day / dinner / late)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Trimless regressed downlights, consistent 36° beams, aligned on a grid."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 90+."
+        }
+      ]
+    },
+    "version": "fee79e86b53cc47116baa0be68064ab2ff57ef99dc54379b6bb54465eef7e9fa"
+  },
+  {
+    "id": "jordan-modern-2700-3000",
+    "title": "Jordan: modern, light between 2700K and 3000K",
+    "brief": {
+      "clientLabel": "Jordan",
+      "city": "Chicago",
+      "room": "Living room",
+      "words": [
+        "modern"
+      ],
+      "loves": [
+        "Fred again..",
+        "Severance (show)",
+        "MUJI (brand)",
+        "Blue Bottle Coffee (brand)",
+        "Kendrick Lamar"
+      ],
+      "constraints": [
+        "Light 2700–3000K"
+      ]
+    },
+    "dataMode": "fixture",
+    "rulebook": "rulebook-2026.10.28",
+    "candidates": {
+      "B0": [
+        {
+          "category": "Colour temperature",
+          "value": "3000K throughout"
+        },
+        {
+          "category": "Layering",
+          "value": "Concealed sources: trimless recessed, LED tape in coves and shelving."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Matte white or black, flush and trimless profiles, no exposed lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Standard 0–10V or phase dimming on ambient circuits."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient mid-range: ~150 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Trimless regressed downlights, consistent 36° beams, aligned on a grid."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 90+."
+        }
+      ],
+      "B2": [
+        {
+          "category": "Colour temperature",
+          "value": "3500K ambient, 4000K on task surfaces"
+        },
+        {
+          "category": "Layering",
+          "value": "Concealed sources: trimless recessed, LED tape in coves and shelving."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Matte white or black, flush and trimless profiles, no exposed lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Smooth, flicker-free dimming with warm-dim; two scenes (day / wind-down)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Trimless regressed downlights, consistent 36° beams, aligned on a grid."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 90+."
+        }
+      ],
+      "B3": [
+        {
+          "category": "Colour temperature",
+          "value": "3000K throughout"
+        },
+        {
+          "category": "Layering",
+          "value": "Concealed sources: trimless recessed, LED tape in coves and shelving."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Matte white or black, flush and trimless profiles, no exposed lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Smooth, flicker-free dimming with warm-dim; two scenes (day / wind-down)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Trimless regressed downlights, consistent 36° beams, aligned on a grid."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 90+."
+        }
+      ]
+    },
+    "version": "80abbdc8797d321fb4426a0a0d9fa621d6817e04c3fdabc788ab48de29c64d81"
+  },
+  {
+    "id": "maya-cri-dim",
+    "title": "Maya: warm, modern, CRI 95+, dim to 5%",
+    "brief": {
+      "clientLabel": "Maya",
+      "city": "Chicago",
+      "room": "Living room",
+      "words": [
+        "warm",
+        "modern"
+      ],
+      "loves": [
+        "Khruangbin",
+        "The Bear (show)",
+        "Wes Anderson (director)",
+        "Ace Hotel (hotel)",
+        "Norah Jones"
+      ],
+      "constraints": [
+        "CRI 95+",
+        "Dim to 5% or lower"
+      ]
+    },
+    "dataMode": "fixture",
+    "rulebook": "rulebook-2026.10.28",
+    "candidates": {
+      "B0": [
+        {
+          "category": "Colour temperature",
+          "value": "2700K throughout"
+        },
+        {
+          "category": "Layering",
+          "value": "Lamps and wall-washers first; downlights only over task zones. At least 4 sources at different heights."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Matte white or black, flush and trimless profiles, no exposed lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Full-range dimming to 1% and three scenes (day / dinner / late)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient at the low end: ~100 lux; let accent and lamps carry the room. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Narrow 15–25° accent beams on art and tables; glare shielding on every downlight."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 95+ with R9 > 50. Ask for the manufacturer's R9 and TM-30 values too: CRI alone is a limited measure of colour quality."
+        }
+      ],
+      "B2": [
+        {
+          "category": "Colour temperature",
+          "value": "2200–2700K with dim-to-warm (glows amber as it dims)"
+        },
+        {
+          "category": "Layering",
+          "value": "Lamps and wall-washers first; downlights only over task zones. At least 4 sources at different heights."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Opal or ribbed glass, aged brass, fabric cord, warm filament-style LED lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Full-range dimming to 1% and three scenes (day / dinner / late)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient at the low end: ~100 lux; let accent and lamps carry the room. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Narrow 15–25° accent beams on art and tables; glare shielding on every downlight."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 90+."
+        }
+      ],
+      "B3": [
+        {
+          "category": "Colour temperature",
+          "value": "2200–2700K with dim-to-warm (glows amber as it dims)"
+        },
+        {
+          "category": "Layering",
+          "value": "Lamps and wall-washers first; downlights only over task zones. At least 4 sources at different heights."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Opal or ribbed glass, aged brass, fabric cord, warm filament-style LED lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Full-range dimming to 1% and three scenes (day / dinner / late)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient at the low end: ~100 lux; let accent and lamps carry the room. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Narrow 15–25° accent beams on art and tables; glare shielding on every downlight."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 95+ with R9 > 50, so wood, skin and food read true."
+        }
+      ]
+    },
+    "version": "4b446c23e708629ac0a6555c76ad790b1d88946895b79510cf4e92cf90126c5f"
+  },
+  {
+    "id": "jordan-modern-lux",
+    "title": "Jordan: modern, about 250 lux",
+    "brief": {
+      "clientLabel": "Jordan",
+      "city": "Chicago",
+      "room": "Living room",
+      "words": [
+        "modern"
+      ],
+      "loves": [
+        "Fred again..",
+        "Severance (show)",
+        "MUJI (brand)",
+        "Blue Bottle Coffee (brand)",
+        "Kendrick Lamar"
+      ],
+      "constraints": [
+        "250 lux"
+      ]
+    },
+    "dataMode": "fixture",
+    "rulebook": "rulebook-2026.10.28",
+    "candidates": {
+      "B0": [
+        {
+          "category": "Colour temperature",
+          "value": "3000K ambient, 3500K on task surfaces"
+        },
+        {
+          "category": "Layering",
+          "value": "Concealed sources: trimless recessed, LED tape in coves and shelving."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Matte white or black, flush and trimless profiles, no exposed lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Standard 0–10V or phase dimming on ambient circuits."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient target 250 lux, as stated by the client (typical for this room 100–200 lux). Confirm with a lighting calculation for this room."
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Trimless regressed downlights, consistent 36° beams, aligned on a grid."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 90+."
+        }
+      ],
+      "B2": [
+        {
+          "category": "Colour temperature",
+          "value": "3500K ambient, 4000K on task surfaces"
+        },
+        {
+          "category": "Layering",
+          "value": "Concealed sources: trimless recessed, LED tape in coves and shelving."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Matte white or black, flush and trimless profiles, no exposed lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Smooth, flicker-free dimming with warm-dim; two scenes (day / wind-down)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient at the upper end: ~200 lux. (Typical 100–200 lux for this room; confirm with a lighting calculation.)"
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Trimless regressed downlights, consistent 36° beams, aligned on a grid."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 90+."
+        }
+      ],
+      "B3": [
+        {
+          "category": "Colour temperature",
+          "value": "3500K ambient, 4000K on task surfaces"
+        },
+        {
+          "category": "Layering",
+          "value": "Concealed sources: trimless recessed, LED tape in coves and shelving."
+        },
+        {
+          "category": "Fixture character",
+          "value": "Matte white or black, flush and trimless profiles, no exposed lamps."
+        },
+        {
+          "category": "Dimming & scenes",
+          "value": "Smooth, flicker-free dimming with warm-dim; two scenes (day / wind-down)."
+        },
+        {
+          "category": "Light level",
+          "value": "Ambient target 250 lux, as stated by the client (typical for this room 100–200 lux). Confirm with a lighting calculation for this room."
+        },
+        {
+          "category": "Optics & glare",
+          "value": "Trimless regressed downlights, consistent 36° beams, aligned on a grid."
+        },
+        {
+          "category": "Colour rendering",
+          "value": "CRI 90+."
+        }
+      ]
+    },
+    "version": "738aa9bfbfa2a3e05778f8c9b10c475c90a900dd8119613909a30061ae42cfae"
+  }
+]

@@ -67,6 +67,43 @@ export const MIGRATIONS: { version: number; sql: string }[] = [
       CREATE INDEX IF NOT EXISTS cache_expiry ON cache(expires_at);
     `,
   },
+  {
+    version: 2,
+    // Human preference study. Anonymous by construction: no names, emails or IPs; a participant is a random session hash.
+    sql: `
+      CREATE TABLE IF NOT EXISTS study_assignments (
+        id           TEXT PRIMARY KEY,
+        session_hash TEXT NOT NULL,
+        case_id      TEXT NOT NULL,
+        case_version TEXT NOT NULL,
+        left_system  TEXT NOT NULL,
+        right_system TEXT NOT NULL,
+        created_at   TEXT NOT NULL,
+        used         INTEGER NOT NULL DEFAULT 0
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS study_assign_once ON study_assignments(session_hash, case_id);
+
+      CREATE TABLE IF NOT EXISTS study_responses (
+        id              TEXT PRIMARY KEY,
+        assignment_id   TEXT NOT NULL,
+        session_hash    TEXT NOT NULL,
+        case_id         TEXT NOT NULL,
+        case_version    TEXT NOT NULL,
+        data_mode       TEXT NOT NULL,
+        rulebook        TEXT NOT NULL,
+        left_system     TEXT NOT NULL,
+        right_system    TEXT NOT NULL,
+        reflects        TEXT NOT NULL,
+        designer        TEXT NOT NULL,
+        clarity         TEXT NOT NULL,
+        constraints     TEXT NOT NULL,
+        confidence      INTEGER NOT NULL,
+        consent_version TEXT NOT NULL,
+        created_at      TEXT NOT NULL
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS study_resp_once ON study_responses(session_hash, case_id);
+    `,
+  },
 ];
 
 export async function migrate(db: Db): Promise<number> {

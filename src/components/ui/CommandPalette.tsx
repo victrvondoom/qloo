@@ -15,6 +15,7 @@ const PAGES: Item[] = [
   { label: "Proof Lab", hint: "try to break it", href: "/lab" },
   { label: "Projects", hint: "tracking and 3D taste space", href: "/projects" },
   { label: "Method", hint: "how it works, evaluation", href: "/method" },
+  { label: "Study", hint: "blinded preference study", href: "/study" },
   { label: "Verify a bundle", hint: "re-hash a ledger", href: "/verify" },
   { label: "Home", hint: "landing page", href: "/" },
 ];

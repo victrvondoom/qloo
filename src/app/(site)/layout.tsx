@@ -77,6 +77,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           <div className="small">
             <div className="eyebrow">Proof</div>
             <div><Link href="/lab">Proof Lab</Link></div>
+            <div><Link href="/study">Preference study</Link></div>
             <div><Link href="/method">Method</Link></div>
             <div><Link href="/verify">Verify a bundle</Link></div>
             <div><a href="/api/health">Health</a></div>
