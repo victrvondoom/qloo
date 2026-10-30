@@ -221,3 +221,23 @@ export function applyLuxLimit(value: string, lux: number, typical: string): { va
     note: `client lux target ${lux} applied: the rulebook said "${value.slice(0, 80)}"`,
   };
 }
+
+/** Does a specification line's value respect the client's written limits? Returns what's wrong, or undefined. Shared by validation, verification and sensitivity. */
+export function limitProblem(lineId: string, value: string, l: Limits | undefined): string | undefined {
+  if (!l) return undefined;
+  if (lineId === "cct" && l.cct) {
+    const bad = (value.match(/\d{4}/g) ?? []).map(Number).filter((k) => k < l.cct!.min || k > l.cct!.max);
+    if (bad.length) return `${bad[0]}K is outside the client's range ${rangeLabel(l.cct)}`;
+  }
+  if (lineId === "cri" && l.criMin) {
+    const have = Number(/CRI (\d{2,3})\+/.exec(value)?.[1] ?? 0);
+    if (have < l.criMin) return `CRI ${have || "unstated"} is below the client's minimum of ${l.criMin}`;
+  }
+  if (lineId === "dimming" && l.dimTo) {
+    const floors = [...value.matchAll(/(\d{1,3})%/g)].map((m) => Number(m[1]));
+    if (floors.length && Math.min(...floors) > l.dimTo) return `the dimming floor ${Math.min(...floors)}% is above the client's ${l.dimTo}%`;
+    if (!floors.length) return `the dimming line states no floor, but the client needs ${l.dimTo}% or lower`;
+  }
+  if (lineId === "level" && l.luxTarget && !new RegExp(`\\b${l.luxTarget} lux`).test(value)) return `it is not the client's ${l.luxTarget} lux target`;
+  return undefined;
+}

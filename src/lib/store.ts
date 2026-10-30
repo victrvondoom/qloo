@@ -194,6 +194,7 @@ export const briefs = {
     await db.tx([
       { sql: "DELETE FROM events WHERE brief_id = ?", args: [id] },
       { sql: "DELETE FROM generations WHERE brief_id = ?", args: [id] },
+      { sql: "DELETE FROM revisions WHERE owner_hash = ? AND (root_brief_id = ? OR from_brief_id = ? OR to_brief_id = ?)", args: [ownerHash, id, id, id] },
       { sql: "DELETE FROM briefs WHERE id = ? AND owner_hash = ?", args: [id, ownerHash] },
     ]);
     return true;
@@ -337,4 +338,82 @@ export async function maybePrune(force = false) {
   await db.run("DELETE FROM generations WHERE brief_id NOT IN (SELECT id FROM briefs)");
   await db.run("DELETE FROM cache WHERE expires_at <= ?", [Date.now()]);
   if (db.kind === "sqlite") await db.exec("PRAGMA incremental_vacuum;");
+}
+
+// ---------------------------------------------------------------- revisions
+
+export type RevisionStatus = "proposed" | "accepted" | "rejected" | "reverted";
+
+export interface RevisionRow {
+  id: string;
+  rootBriefId: string;
+  fromBriefId: string;
+  toBriefId: string;
+  createdAt: string;
+  decidedAt?: string;
+  status: RevisionStatus;
+  changes: Record<string, unknown>;
+  fromVersion: string;
+  toVersion: string;
+}
+
+interface RevisionDb {
+  id: string;
+  root_brief_id: string;
+  from_brief_id: string;
+  to_brief_id: string;
+  created_at: string;
+  decided_at: string | null;
+  status: RevisionStatus;
+  changes: string;
+  from_version: string;
+  to_version: string;
+  diff?: Uint8Array;
+}
+
+const toRevision = (r: RevisionDb): RevisionRow => ({ id: r.id, rootBriefId: r.root_brief_id, fromBriefId: r.from_brief_id, toBriefId: r.to_brief_id, createdAt: r.created_at, ...(r.decided_at ? { decidedAt: r.decided_at } : {}), status: r.status, changes: JSON.parse(r.changes), fromVersion: r.from_version, toVersion: r.to_version });
+const REV_COLS = "id, root_brief_id, from_brief_id, to_brief_id, created_at, decided_at, status, changes, from_version, to_version";
+
+/** Revisions of a specification. Always owner-scoped: another visitor never sees them, even with a brief link. */
+export const revisions = {
+  async create(r: { rootBriefId: string; fromBriefId: string; toBriefId: string; ownerHash: string; changes: Record<string, unknown>; diff: unknown; fromVersion: string; toVersion: string }): Promise<RevisionRow> {
+    const db = await getDb();
+    const id = `r-${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
+    const createdAt = new Date().toISOString();
+    await db.run(`INSERT INTO revisions (${REV_COLS.replace(", decided_at", "").replace(", diff", "")}, owner_hash, diff) VALUES (?,?,?,?,?,?,?,?,?,?,?)`, [id, r.rootBriefId, r.fromBriefId, r.toBriefId, createdAt, "proposed", JSON.stringify(r.changes).slice(0, 4000), r.fromVersion, r.toVersion, r.ownerHash, pack(r.diff)]);
+    return { id, rootBriefId: r.rootBriefId, fromBriefId: r.fromBriefId, toBriefId: r.toBriefId, createdAt, status: "proposed", changes: r.changes, fromVersion: r.fromVersion, toVersion: r.toVersion };
+  },
+  async get(id: string, ownerHash: string): Promise<(RevisionRow & { diff: unknown }) | undefined> {
+    if (!/^r-[0-9a-f]{20}$/.test(id) || !HASH_RE.test(ownerHash)) return undefined;
+    const db = await getDb();
+    const row = await db.get<RevisionDb>(`SELECT ${REV_COLS}, diff FROM revisions WHERE id = ? AND owner_hash = ?`, [id, ownerHash]);
+    return row ? { ...toRevision(row), diff: unpack(row.diff!) } : undefined;
+  },
+  async list(rootBriefId: string, ownerHash: string): Promise<RevisionRow[]> {
+    if (!ID_RE.test(rootBriefId) || !HASH_RE.test(ownerHash)) return [];
+    const db = await getDb();
+    return (await db.all<RevisionDb>(`SELECT ${REV_COLS} FROM revisions WHERE root_brief_id = ? AND owner_hash = ? ORDER BY created_at, rowid`, [rootBriefId, ownerHash])).map(toRevision);
+  },
+  /** The revision that produced this brief, if any. */
+  async producing(toBriefId: string, ownerHash: string): Promise<RevisionRow | undefined> {
+    if (!ID_RE.test(toBriefId) || !HASH_RE.test(ownerHash)) return undefined;
+    const db = await getDb();
+    const row = await db.get<RevisionDb>(`SELECT ${REV_COLS} FROM revisions WHERE to_brief_id = ? AND owner_hash = ?`, [toBriefId, ownerHash]);
+    return row ? toRevision(row) : undefined;
+  },
+  async decide(id: string, ownerHash: string, status: Exclude<RevisionStatus, "proposed">): Promise<RevisionRow | undefined> {
+    const cur = await this.get(id, ownerHash);
+    if (!cur) return undefined;
+    const allowed: Record<RevisionStatus, RevisionStatus[]> = { proposed: ["accepted", "rejected"], accepted: ["reverted"], rejected: [], reverted: [] };
+    if (!allowed[cur.status].includes(status)) throw new Error(`A ${cur.status} revision can't become ${status}.`);
+    const db = await getDb();
+    await db.run("UPDATE revisions SET status = ?, decided_at = ? WHERE id = ? AND owner_hash = ?", [status, new Date().toISOString(), id, ownerHash]);
+    return { ...cur, status, decidedAt: new Date().toISOString() };
+  },
+};
+
+/** The brief that is current for a project: the latest accepted revision's result, or the original. */
+export function headOf(rootBriefId: string, list: RevisionRow[]): string {
+  const live = list.filter((r) => r.status === "accepted");
+  return live.length ? live[live.length - 1].toBriefId : rootBriefId;
 }

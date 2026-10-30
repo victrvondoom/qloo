@@ -104,6 +104,29 @@ export const MIGRATIONS: { version: number; sql: string }[] = [
       CREATE UNIQUE INDEX IF NOT EXISTS study_resp_once ON study_responses(session_hash, case_id);
     `,
   },
+  {
+    version: 3,
+    // Revisions of a specification: each one links the brief it started from to the brief it produced.
+    // The brief rows keep their own owner and share rules; this table only records the relationship and the designer's decision.
+    sql: `
+      CREATE TABLE IF NOT EXISTS revisions (
+        id            TEXT PRIMARY KEY,
+        root_brief_id TEXT NOT NULL,
+        from_brief_id TEXT NOT NULL,
+        to_brief_id   TEXT NOT NULL,
+        owner_hash    TEXT NOT NULL,
+        created_at    TEXT NOT NULL,
+        decided_at    TEXT,
+        status        TEXT NOT NULL DEFAULT 'proposed',
+        changes       TEXT NOT NULL,
+        diff          BLOB NOT NULL,
+        from_version  TEXT NOT NULL,
+        to_version    TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS revisions_root ON revisions(root_brief_id, created_at);
+      CREATE INDEX IF NOT EXISTS revisions_owner ON revisions(owner_hash);
+    `,
+  },
 ];
 
 export async function migrate(db: Db): Promise<number> {
